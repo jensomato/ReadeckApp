@@ -1,0 +1,7 @@
+<resources>
+    <string name="app_name">Readeck App</string>
+    <string name="title_activity_bookmark_list">BookmarkListActivity</string>
+    <string name="title_home">Home</string>
+    <string name="title_dashboard">Dashboard</string>
+    <string name="title_notifications">Notifications</string>
+</resources>
