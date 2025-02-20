@@ -38,7 +38,6 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -53,13 +52,20 @@ import de.readeckapp.domain.model.Bookmark
 import timber.log.Timber
 
 @Composable
-fun BookmarkCard(bookmark: Bookmark, onClick: (String) -> Unit) {
+fun BookmarkCard(
+    bookmark: Bookmark,
+    onClickCard: (String) -> Unit,
+    onClickDelete: (String) -> Unit,
+    onClickMarkRead: (String) -> Unit,
+    onClickFavorite: (String) -> Unit,
+    onClickArchive: (String) -> Unit,
+) {
     var expanded by remember { mutableStateOf(false) }
     Card(
         modifier = Modifier
             .fillMaxWidth()
             .padding(8.dp)
-            .clickable { onClick(bookmark.id) },
+            .clickable { onClickCard(bookmark.id) },
         elevation = CardDefaults.cardElevation(defaultElevation = 4.dp)
     ) {
         Column {
@@ -137,7 +143,6 @@ fun BookmarkCard(bookmark: Bookmark, onClick: (String) -> Unit) {
                     ) {
                         IconButton(
                             onClick = {
-                                Timber.d("click")
                                 expanded = true
                             },
                         ) {
@@ -150,7 +155,7 @@ fun BookmarkCard(bookmark: Bookmark, onClick: (String) -> Unit) {
                             DropdownMenuItem(
                                 text = { Text("Favorite") },
                                 onClick = {
-                                    Timber.d("onClickFavorite")
+                                    onClickFavorite(bookmark.id)
                                     expanded = false
                                 },
                                 leadingIcon = {
@@ -163,7 +168,7 @@ fun BookmarkCard(bookmark: Bookmark, onClick: (String) -> Unit) {
                             DropdownMenuItem(
                                 text = { Text("Archive") },
                                 onClick = {
-                                    Timber.d("onClickArchive")
+                                    onClickArchive(bookmark.id)
                                     expanded = false
                                 },
                                 leadingIcon = {
@@ -176,7 +181,7 @@ fun BookmarkCard(bookmark: Bookmark, onClick: (String) -> Unit) {
                             DropdownMenuItem(
                                 text = { Text("Mark Read") },
                                 onClick = {
-                                    Timber.d("onClickMarkRead")
+                                    onClickMarkRead(bookmark.id)
                                     expanded = false
                                 },
                                 leadingIcon = {
@@ -189,7 +194,7 @@ fun BookmarkCard(bookmark: Bookmark, onClick: (String) -> Unit) {
                             DropdownMenuItem(
                                 text = { Text("Delete") },
                                 onClick = {
-                                    Timber.d("onClickDelete")
+                                    onClickDelete(bookmark.id)
                                     expanded = false
                                 },
                                 leadingIcon = {
@@ -254,6 +259,13 @@ fun BookmarkCardPreview() {
         articleContent = ""
     )
     CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
-        BookmarkCard(bookmark = sampleBookmark, onClick = {})
+        BookmarkCard(
+            bookmark = sampleBookmark,
+            onClickCard = {},
+            onClickDelete = {},
+            onClickMarkRead = {},
+            onClickFavorite = {},
+            onClickArchive = {}
+        )
     }
 }
