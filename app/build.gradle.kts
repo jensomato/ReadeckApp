@@ -103,6 +103,8 @@ dependencies {
     implementation(libs.kotlinx.datetime)
     ksp(libs.androidx.room.compiler)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
     implementation(libs.okhttp3.logging.interceptor)
     testImplementation(libs.okhttp3.mockserver)
     implementation(libs.androidx.datastore.preferences)
