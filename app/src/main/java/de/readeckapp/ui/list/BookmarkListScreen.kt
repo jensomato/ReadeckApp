@@ -47,16 +47,20 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val onClickAll = { viewModel.onClickAll() }
-    val onClickUnread: () -> Unit = { viewModel.onClickUnread() }
-    val onClickArchive: () -> Unit = { viewModel.onClickArchive() }
-    val onClickFavorite: () -> Unit = { viewModel.onClickFavorite() }
-    val onClickArticles: () -> Unit = { viewModel.onClickArticles() }
-    val onClickPictures: () -> Unit = { viewModel.onClickPictures() }
-    val onClickVideos: () -> Unit = { viewModel.onClickVideos() }
-    val onClickCollections: () -> Unit = { viewModel.onClickCollections() }
-    val onClickLabels: () -> Unit = { viewModel.onClickLabels() }
+    val onClickFilterUnread: () -> Unit = { viewModel.onClickUnread() }
+    val onClickFilterArchive: () -> Unit = { viewModel.onClickArchive() }
+    val onClickFilterFavorite: () -> Unit = { viewModel.onClickFavorite() }
+    val onClickFilterArticles: () -> Unit = { viewModel.onClickArticles() }
+    val onClickFilterPictures: () -> Unit = { viewModel.onClickPictures() }
+    val onClickFilterVideos: () -> Unit = { viewModel.onClickVideos() }
+    val onClickFilterCollections: () -> Unit = { viewModel.onClickCollections() }
+    val onClickFilterLabels: () -> Unit = { viewModel.onClickLabels() }
     val onClickSettings: () -> Unit = { viewModel.onClickSettings() }
     val onClickBookmark: (String) -> Unit = { bookmarkId -> viewModel.onClickBookmark(bookmarkId) }
+    val onClickDelete: (String) -> Unit = { bookmarkId -> viewModel.onDeleteBookmark(bookmarkId) }
+    val onClickMarkRead: (String) -> Unit = { bookmarkId -> viewModel.onToggleMarkReadBookmark(bookmarkId) }
+    val onClickFavorite: (String) -> Unit = { bookmarkId -> viewModel.onToggleFavoriteBookmark(bookmarkId) }
+    val onClickArchive: (String) -> Unit = { bookmarkId -> viewModel.onToggleArchiveBookmark(bookmarkId) }
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
             when (event) {
@@ -91,44 +95,44 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     NavigationDrawerItem(
                         label = { Text(text = "Unread") },
                         selected = false,
-                        onClick = { onClickUnread() }
+                        onClick = { onClickFilterUnread() }
                     )
                     NavigationDrawerItem(
                         label = { Text(text = "Archive") },
                         selected = false,
-                        onClick = { onClickArchive() }
+                        onClick = { onClickFilterArchive() }
                     )
                     NavigationDrawerItem(
                         label = { Text(text = "Favorites") },
                         selected = false,
-                        onClick = { onClickFavorite() }
+                        onClick = { onClickFilterFavorite() }
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
                         label = { Text(text = "Articles") },
                         selected = false,
-                        onClick = { onClickArticles() }
+                        onClick = { onClickFilterArticles() }
                     )
                     NavigationDrawerItem(
                         label = { Text(text = "Videos") },
                         selected = false,
-                        onClick = { onClickVideos() }
+                        onClick = { onClickFilterVideos() }
                     )
                     NavigationDrawerItem(
                         label = { Text(text = "Pictures") },
                         selected = false,
-                        onClick = { onClickPictures() }
+                        onClick = { onClickFilterPictures() }
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
                         label = { Text(text = "Collections") },
                         selected = false,
-                        onClick = { onClickCollections() }
+                        onClick = { onClickFilterCollections() }
                     )
                     NavigationDrawerItem(
                         label = { Text(text = "Labels") },
                         selected = false,
-                        onClick = { onClickLabels() }
+                        onClick = { onClickFilterLabels() }
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
@@ -159,7 +163,15 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                 }
             }
         ) { padding ->
-            BookmarkListView(Modifier.padding(padding), bookmarks, onClickBookmark)
+            BookmarkListView(
+                modifier = Modifier.padding(padding),
+                bookmarks = bookmarks,
+                onClickBookmark = onClickBookmark,
+                onClickDelete = onClickDelete,
+                onClickArchive = onClickArchive,
+                onClickFavorite = onClickFavorite,
+                onClickMarkRead = onClickMarkRead
+            )
         }
     }
 }
@@ -168,13 +180,21 @@ fun BookmarkListScreen(navHostController: NavHostController) {
 fun BookmarkListView(
     modifier: Modifier = Modifier,
     bookmarks: List<Bookmark>,
-    onClickBookmark: (String) -> Unit
+    onClickBookmark: (String) -> Unit,
+    onClickDelete: (String) -> Unit,
+    onClickMarkRead: (String) -> Unit,
+    onClickFavorite: (String) -> Unit,
+    onClickArchive: (String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         items(bookmarks) { bookmark ->
-            BookmarkCard(bookmark = bookmark) {
-                onClickBookmark(bookmark.id)
-            }
+            BookmarkCard(bookmark = bookmark,
+                onClickCard = onClickBookmark,
+                onClickDelete = onClickDelete,
+                onClickArchive = onClickArchive,
+                onClickFavorite = onClickFavorite,
+                onClickMarkRead = onClickMarkRead
+            )
         }
     }
 }
@@ -219,5 +239,13 @@ fun BookmarkListViewPreview() {
     )
     // Provide a dummy NavHostController for the preview
     val navController = rememberNavController()
-    BookmarkListView(Modifier, bookmarks) {}
+    BookmarkListView(
+        modifier = Modifier,
+        bookmarks = bookmarks,
+        onClickBookmark = {},
+        onClickDelete = {},
+        onClickArchive = {},
+        onClickFavorite = {},
+        onClickMarkRead = {}
+    )
 }

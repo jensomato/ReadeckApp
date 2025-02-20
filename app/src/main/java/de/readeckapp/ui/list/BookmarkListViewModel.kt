@@ -84,6 +84,22 @@ class BookmarkListViewModel @Inject constructor(
         }
     }
 
+    fun onDeleteBookmark(bookmarkId: String) {
+        Timber.d("onDeleteBookmark")
+    }
+
+    fun onToggleMarkReadBookmark(bookmarkId: String) {
+        Timber.d("onToggleMarkReadBookmark")
+    }
+
+    fun onToggleFavoriteBookmark(bookmarkId: String) {
+        Timber.d("onToggleFavoriteBookmark")
+    }
+
+    fun onToggleArchiveBookmark(bookmarkId: String) {
+        Timber.d("onToggleArchiveBookmark")
+    }
+
     sealed class NavigationEvent {
         data object NavigateToSettings: NavigationEvent()
         data class NavigateToBookmarkDetail(val bookmarkId: String): NavigationEvent()
