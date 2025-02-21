@@ -4,4 +4,8 @@
     <string name="title_home">Home</string>
     <string name="title_dashboard">Dashboard</string>
     <string name="title_notifications">Notifications</string>
+    <string name="back">Back</string>
+    <string name="settings_topbar_title">Settings</string>
+    <string name="settings_account_title">Account</string>
+    <string name="settings_account_subtitle_default">Not Logged in</string>
 </resources>
