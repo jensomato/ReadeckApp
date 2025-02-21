@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Readeck App</string>
+    <string name="back">Zurück</string>
+    <string name="settings_topbar_title">Einstellungen</string>
+    <string name="settings_account_title">Konto</string>
+    <string name="settings_account_subtitle_default">Nicht eingeloggt</string>
+</resources>

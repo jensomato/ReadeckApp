@@ -1,67 +1,55 @@
 package de.readeckapp.ui.settings
 
+import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import androidx.compose.runtime.mutableStateOf
 import de.readeckapp.domain.model.Bookmark
-import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsDataStore: SettingsDataStore,
-    private val authenticateUseCase: AuthenticateUseCase
+    private val settingsDataStore: SettingsDataStore
 ) : ViewModel() {
+    private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
+    val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
     val bookmarks = mutableStateOf<List<Bookmark>>(emptyList())
-    private val _uiState = MutableStateFlow(SettingsUiState("", "", ""))
+    private val _uiState = MutableStateFlow(SettingsUiState(username = null))
     val uiState = _uiState.asStateFlow()
 
     init {
         viewModelScope.launch {
             _uiState.value = SettingsUiState(
-                settingsDataStore.urlFlow.value ?: "",
-                settingsDataStore.usernameFlow.value ?: "",
-                "pass"
+                username = settingsDataStore.usernameFlow.value,
             )
-
         }
     }
 
-    fun saveSettings() {
-        viewModelScope.launch {
-            val success = authenticateUseCase.execute(
-                _uiState.value.url,
-                _uiState.value.username,
-                _uiState.value.password
-            )
-            Timber.d("success=$success")
-        }
+    fun onNavigationEventConsumed() {
+        _navigationEvent.update { null } // Reset the event
     }
 
-    fun onUrlChanged(value: String) {
-        _uiState.update { it.copy(url = value) }
+    fun onClickAccount() {
+        _navigationEvent.update { NavigationEvent.NavigateToAccountSettings }
     }
 
-    fun onUsernameChanged(value: String) {
-        _uiState.update { it.copy(username = value) }
+    fun onClickBack() {
+        _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
-    fun onPasswordChanged(value: String) {
-        _uiState.update { it.copy(password = value) }
+    sealed class NavigationEvent {
+        data object NavigateToAccountSettings : NavigationEvent()
+        data object NavigateBack : NavigationEvent()
     }
-
 
 }
 
 data class SettingsUiState(
-    val url: String,
-    val username: String,
-    val password: String
+    val username: String?,
 )
