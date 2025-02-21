@@ -21,6 +21,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -68,10 +69,12 @@ fun SettingScreenView(
     Scaffold(
         topBar = {
             TopAppBar(
+                modifier = Modifier.testTag(SettingsScreenTestTags.TOPBAR),
                 title = { Text(stringResource(R.string.settings_topbar_title)) },
                 navigationIcon = {
                     IconButton(
-                        onClick = onClickBack
+                        onClick = onClickBack,
+                        modifier = Modifier.testTag(SettingsScreenTestTags.BACK_BUTTON)
                     ) {
                         Icon(
                             Icons.AutoMirrored.Filled.ArrowBack,
@@ -92,7 +95,8 @@ fun SettingScreenView(
                 title = stringResource(R.string.settings_account_title),
                 subtitle = settingsUiState.username
                     ?: stringResource(R.string.settings_account_subtitle_default),
-                onClick = onClickAccount
+                onClick = onClickAccount,
+                testTag = SettingsScreenTestTags.SETTINGS_ITEM_ACCOUNT
             )
         }
     }
@@ -103,19 +107,29 @@ fun SettingItem(
     icon: androidx.compose.ui.graphics.vector.ImageVector,
     title: String,
     subtitle: String,
-    onClick: () -> Unit
+    onClick: () -> Unit,
+    testTag: String
 ) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp)
-            .clickable { onClick() },
-        verticalAlignment = Alignment.CenterVertically
+            .clickable { onClick() }
+            .testTag("${SettingsScreenTestTags.SETTINGS_ITEM}.$testTag"),
+        verticalAlignment = Alignment.CenterVertically,
     ) {
         Icon(icon, contentDescription = title, modifier = Modifier.padding(end = 16.dp))
         Column {
-            Text(text = title, style = MaterialTheme.typography.titleMedium)
-            Text(text = subtitle, style = MaterialTheme.typography.bodyMedium)
+            Text(
+                text = title,
+                style = MaterialTheme.typography.titleMedium,
+                modifier = Modifier.testTag("${SettingsScreenTestTags.SETTINGS_ITEM_TITLE}.$testTag")
+            )
+            Text(
+                text = subtitle,
+                style = MaterialTheme.typography.bodyMedium,
+                modifier = Modifier.testTag("${SettingsScreenTestTags.SETTINGS_ITEM_SUBTITLE}.$testTag")
+            )
         }
     }
 }
@@ -139,6 +153,16 @@ fun SettingItemPreview() {
         icon = Icons.Filled.Lock,
         title = "test",
         subtitle = "test1",
-        onClick = {}
+        onClick = {},
+        testTag = "account"
     )
+}
+
+object SettingsScreenTestTags {
+    const val BACK_BUTTON = "SettingsScreenTestTags.BackButton"
+    const val TOPBAR = "SettingsScreenTestTags.TopBar"
+    const val SETTINGS_ITEM = "SettingsScreenTestTags.SettingsItem"
+    const val SETTINGS_ITEM_TITLE = "SettingsScreenTestTags.SettingsItem.Title"
+    const val SETTINGS_ITEM_SUBTITLE = "SettingsScreenTestTags.SettingsItem.Subtitle"
+    const val SETTINGS_ITEM_ACCOUNT = "Account"
 }
