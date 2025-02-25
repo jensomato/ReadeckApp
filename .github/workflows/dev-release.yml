@@ -45,7 +45,6 @@ jobs:
           FILENAME="${ARTIFACT_NAME}-${TIMESTAMP}-${COMMIT_SHA}.apk"
           mv app/build/outputs/apk/release/app-release-unsigned-signed.apk "$FILENAME"
           sha256sum $FILENAME > checksums.txt
-          echo "ARTIFACT_FILENAME=$FILENAME" >> "$GITHUB_ENV"
           echo "ARTIFACT_FILENAME=$FILENAME" >> "$GITHUB_OUTPUT"
       - name: Create release
         uses: ncipollo/release-action@v1.16.0
