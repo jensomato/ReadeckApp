@@ -1,5 +1,5 @@
 plugins {
-//    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -103,6 +103,7 @@ dependencies {
     implementation(libs.kotlin.serialization.json)
     implementation(libs.kotlinx.datetime)
     ksp(libs.androidx.room.compiler)
+    kapt(libs.retrofit.response.type.keeper)
     implementation(libs.coil.compose)
     implementation(libs.coil.network.okhttp)
     implementation(libs.coil.svg)
