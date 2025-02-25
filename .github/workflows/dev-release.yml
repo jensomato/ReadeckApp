@@ -52,6 +52,7 @@ jobs:
           draft: true
           prerelease: true
           name: ReadeckApp latest develop release
+          tag: dev-latest
           artifacts: app/build/outputs/apk/release/${{ steps.rename_artifact.outputs.ARTIFACT_FILENAME }},app/buind/outputs/apk/release/checksums.txt
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive APK
