@@ -34,8 +34,30 @@ jobs:
         env:
           # override default build-tools version (33.0.0) -- optional
           BUILD_TOOLS_VERSION: "35.0.0"
+      - name: Rename APK
+        id: rename_artifact
+        run: |
+          TIMESTAMP=$(date +%Y%m%dT%H%M%S)
+          COMMIT_SHA=$(git rev-parse --short HEAD)
+          ARTIFACT_NAME="readeck-app"
+          FILENAME="${ARTIFACT_NAME}-${TIMESTAMP}-${COMMIT_SHA}.apk"
+          mv app/build/outputs/apk/release/app-release-unsigned-signed.apk "app/build/outputs/apk/release/$FILENAME"
+          cd app/build/outputs/apk/release && sha256sum $FILENAME > checksums.txt
+          echo "ARTIFACT_FILENAME=$FILENAME" >> "$GITHUB_ENV"
+          echo "ARTIFACT_FILENAME=$FILENAME" >> "$GITHUB_OUTPUT"
+      - name: Create release
+        uses: ncipollo/release-action@v1.16.0
+        with:
+          allowUpdates: true
+          draft: true
+          prerelease: true
+          name: ReadeckApp latest develop release
+          artifacts: app/build/outputs/apk/release/${{ steps.rename_artifact.outputs.ARTIFACT_FILENAME }},app/buind/outputs/apk/release/checksums.txt
+          token: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive APK
         uses: actions/upload-artifact@v4
         with:
           name: dev-release
-          path: app/build/outputs/apk/release/*.apk
+          path: |
+            app/build/outputs/apk/release/${{ steps.rename_artifact.outputs.ARTIFACT_FILENAME }}
+            app/build/outputs/apk/release/checksums.txt
