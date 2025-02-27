@@ -8,6 +8,7 @@ import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
@@ -17,6 +18,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import de.readeckapp.R
+import de.readeckapp.domain.usecase.AuthenticationResult
+import kotlinx.coroutines.CoroutineScope
+import timber.log.Timber
 
 @Composable
 fun AccountSettingsScreen(
@@ -25,11 +29,13 @@ fun AccountSettingsScreen(
     val viewModel: AccountSettingsViewModel = hiltViewModel()
     val settingsUiState = viewModel.uiState.collectAsState().value
     val navigationEvent = viewModel.navigationEvent.collectAsState()
-    val onUrlChanged: (String) -> Unit = { url -> viewModel.onUrlChanged(url)}
-    val onUsernameChanged: (String) -> Unit = { username -> viewModel.onUsernameChanged(username)}
-    val onPasswordChanged: (String) -> Unit = { password -> viewModel.onPasswordChanged(password)}
+    val onUrlChanged: (String) -> Unit = { url -> viewModel.onUrlChanged(url) }
+    val onUsernameChanged: (String) -> Unit = { username -> viewModel.onUsernameChanged(username) }
+    val onPasswordChanged: (String) -> Unit = { password -> viewModel.onPasswordChanged(password) }
     val onLoginClicked: () -> Unit = { viewModel.login() }
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val scope = rememberCoroutineScope()
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -41,8 +47,44 @@ fun AccountSettingsScreen(
             viewModel.onNavigationEventConsumed() // Consume the event
         }
     }
+
+    LaunchedEffect(key1 = settingsUiState.authenticationResult) {
+        settingsUiState.authenticationResult?.let { result ->
+            when (result) {
+                is AuthenticationResult.Success -> {
+                    snackbarHostState.showSnackbar(
+                        message = "Success",
+                        duration = SnackbarDuration.Short
+                    )
+                }
+
+                is AuthenticationResult.AuthenticationFailed -> {
+                    snackbarHostState.showSnackbar(
+                        message = result.message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+
+                is AuthenticationResult.NetworkError -> {
+                    snackbarHostState.showSnackbar(
+                        message = result.message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+
+                is AuthenticationResult.GenericError -> {
+                    snackbarHostState.showSnackbar(
+                        message = result.message,
+                        duration = SnackbarDuration.Short
+                    )
+                }
+            }
+        }
+    }
+
     AccountSettingsView(
         modifier = Modifier,
+        snackbarHostState = snackbarHostState,
         settingsUiState = settingsUiState,
         onUrlChanged = onUrlChanged,
         onUsernameChanged = onUsernameChanged,
@@ -56,6 +98,7 @@ fun AccountSettingsScreen(
 @Composable
 fun AccountSettingsView(
     modifier: Modifier = Modifier,
+    snackbarHostState: SnackbarHostState,
     settingsUiState: AccountSettingsUiState,
     onUrlChanged: (String) -> Unit,
     onUsernameChanged: (String) -> Unit,
@@ -63,12 +106,14 @@ fun AccountSettingsView(
     onLoginClicked: () -> Unit,
     onClickBack: () -> Unit
 ) {
+    val keyboardController = LocalSoftwareKeyboardController.current
     Scaffold(
         modifier = modifier,
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.accountsettings_topbar_title)) },
-                        navigationIcon = {
+                navigationIcon = {
                     IconButton(
                         onClick = onClickBack,
                         modifier = Modifier.testTag(AccountSettingsScreenTestTags.BACK_BUTTON)
@@ -92,7 +137,7 @@ fun AccountSettingsView(
         ) {
             OutlinedTextField(
                 value = settingsUiState.url ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_url_placeholder))},
+                placeholder = { Text(stringResource(R.string.account_settings_url_placeholder)) },
                 onValueChange = { onUrlChanged(it) },
                 label = { Text(stringResource(R.string.account_settings_url_label)) },
                 modifier = Modifier.fillMaxWidth(),
@@ -105,7 +150,7 @@ fun AccountSettingsView(
             )
             OutlinedTextField(
                 value = settingsUiState.username ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_username_placeholder))},
+                placeholder = { Text(stringResource(R.string.account_settings_username_placeholder)) },
                 onValueChange = { onUsernameChanged(it) },
                 label = { Text(stringResource(R.string.account_settings_username_label)) },
                 modifier = Modifier.fillMaxWidth(),
@@ -118,7 +163,7 @@ fun AccountSettingsView(
             )
             OutlinedTextField(
                 value = settingsUiState.password ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_password_placeholder))},
+                placeholder = { Text(stringResource(R.string.account_settings_password_placeholder)) },
                 onValueChange = { onPasswordChanged(it) },
                 label = { Text(stringResource(R.string.account_settings_password_label)) },
                 visualTransformation = PasswordVisualTransformation(),
@@ -132,14 +177,16 @@ fun AccountSettingsView(
                 }
             )
             Button(
-                onClick = onLoginClicked,
+                onClick = {
+                    keyboardController?.hide()
+                    onLoginClicked.invoke()
+                },
                 enabled = settingsUiState.loginEnabled
             ) {
                 Text(stringResource(R.string.account_settings_login))
             }
         }
     }
-
 }
 
 @Preview(showBackground = true)
@@ -152,10 +199,12 @@ fun AccountSettingsScreenViewPreview() {
         loginEnabled = true,
         urlError = R.string.account_settings_url_error,
         usernameError = null,
-        passwordError = null
+        passwordError = null,
+        authenticationResult = null
     )
     AccountSettingsView(
         modifier = Modifier,
+        snackbarHostState = SnackbarHostState(),
         settingsUiState = settingsUiState,
         onUrlChanged = {},
         onUsernameChanged = {},

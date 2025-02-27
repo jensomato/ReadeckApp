@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
+import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -22,7 +23,8 @@ class AccountSettingsViewModel @Inject constructor(
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
-    private val _uiState = MutableStateFlow(AccountSettingsUiState("", "", "", false, null, null, null))
+    private val _uiState =
+        MutableStateFlow(AccountSettingsUiState("", "", "", false, null, null, null, null))
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -30,24 +32,27 @@ class AccountSettingsViewModel @Inject constructor(
             _uiState.value = AccountSettingsUiState(
                 url = settingsDataStore.urlFlow.value,
                 username = settingsDataStore.usernameFlow.value,
-                password = null,
+                password = settingsDataStore.passwordFlow.value,
                 loginEnabled = false,
                 urlError = null,
                 usernameError = null,
-                passwordError = null
+                passwordError = null,
+                authenticationResult = null
             )
-
         }
     }
 
     fun login() {
         viewModelScope.launch {
-            val success = authenticateUseCase.execute(
+            val result = authenticateUseCase.execute(
                 _uiState.value.url!!,
                 _uiState.value.username!!,
                 _uiState.value.password!!
             )
-            Timber.d("success=$success")
+            _uiState.update {
+                it.copy(authenticationResult = result)
+            }
+            Timber.d("result=$result")
         }
     }
 
@@ -67,7 +72,8 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 url = value,
                 urlError = urlError,
-                loginEnabled = isValidUrl && !it.username.isNullOrBlank() && !it.password.isNullOrBlank()
+                loginEnabled = isValidUrl && !it.username.isNullOrBlank() && !it.password.isNullOrBlank(),
+                authenticationResult = null // Clear any previous result
             )
         }
     }
@@ -82,7 +88,8 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 username = value,
                 usernameError = usernameError,
-                loginEnabled = !value.isBlank() && !it.url.isNullOrBlank() && !it.password.isNullOrBlank()
+                loginEnabled = !value.isBlank() && !it.url.isNullOrBlank() && !it.password.isNullOrBlank(),
+                authenticationResult = null // Clear any previous result
             )
         }
     }
@@ -97,7 +104,8 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 password = value,
                 passwordError = passwordError,
-                loginEnabled = !value.isBlank() && !it.url.isNullOrBlank() && !it.username.isNullOrBlank()
+                loginEnabled = !value.isBlank() && !it.url.isNullOrBlank() && !it.username.isNullOrBlank(),
+                authenticationResult = null // Clear any previous result
             )
         }
     }
@@ -123,5 +131,6 @@ data class AccountSettingsUiState(
     val loginEnabled: Boolean,
     val urlError: Int?,
     val usernameError: Int?,
-    val passwordError: Int?
+    val passwordError: Int?,
+    val authenticationResult: AuthenticationResult?
 )
