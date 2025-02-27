@@ -1,35 +1,30 @@
 package de.readeckapp.ui.settings
 
-import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsDataStore: SettingsDataStore
+    settingsDataStore: SettingsDataStore
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
-    val bookmarks = mutableStateOf<List<Bookmark>>(emptyList())
-    private val _uiState = MutableStateFlow(SettingsUiState(username = null))
-    val uiState = _uiState.asStateFlow()
-
-    init {
-        viewModelScope.launch {
-            _uiState.value = SettingsUiState(
-                username = settingsDataStore.usernameFlow.value,
-            )
-        }
-    }
+    val uiState: StateFlow<SettingsUiState> =
+        settingsDataStore.usernameFlow.map { SettingsUiState(username = it) }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            SettingsUiState(username = null)
+        )
 
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event

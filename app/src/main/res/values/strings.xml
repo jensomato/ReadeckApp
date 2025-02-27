@@ -8,4 +8,16 @@
     <string name="settings_topbar_title">Settings</string>
     <string name="settings_account_title">Account</string>
     <string name="settings_account_subtitle_default">Not Logged in</string>
+    <string name="accountsettings_topbar_title">Account</string>
+    <string name="account_settings_topbar_title">Readeck URL</string>
+    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
+    <string name="account_settings_url_label">Readeck URL</string>
+    <string name="account_settings_username_placeholder">username</string>
+    <string name="account_settings_username_label">Username</string>
+    <string name="account_settings_password_label">Password</string>
+    <string name="account_settings_password_placeholder">password</string>
+    <string name="account_settings_login">Login</string>
+    <string name="account_settings_url_error">Invalid URL</string>
+    <string name="account_settings_username_error">Username cannot be empty</string>
+    <string name="account_settings_password_error">Password cannot be empty</string>
 </resources>

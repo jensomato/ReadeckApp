@@ -20,10 +20,18 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_USERNAME = stringPreferencesKey("username")
     private val KEY_TOKEN = stringPreferencesKey("token")
     private val KEY_URL = stringPreferencesKey("url")
+    private val KEY_PASSWORD = stringPreferencesKey("password")
 
     override fun saveUsername(username: String) {
         with(encryptedSharedPreferences.edit()) {
             putString(KEY_USERNAME.name, username)
+            apply()
+        }
+    }
+
+    override fun savePassword(password: String) {
+        with(encryptedSharedPreferences.edit()) {
+            putString(KEY_PASSWORD.name, password)
             apply()
         }
     }
@@ -45,6 +53,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)
     override val usernameFlow = getStringFlow(KEY_USERNAME.name, null)
     override val urlFlow = getStringFlow(KEY_URL.name, null)
+    override val passwordFlow = getStringFlow(KEY_PASSWORD.name, null)
 
     private fun getStringFlow(key: String, defaultValue: String? = null): StateFlow<String?> =
         preferenceFlow(key) { encryptedSharedPreferences.getString(key, defaultValue) }
