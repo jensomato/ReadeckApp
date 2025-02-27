@@ -6,12 +6,15 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.take
+import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertNull
 import org.junit.Before
 import org.junit.Test
 
@@ -37,7 +40,9 @@ class SettingsViewModelTest {
 
     @Test
     fun `init should load username from data store`() = runTest {
-        assertEquals("testUser", viewModel.uiState.value.username)
+        val list = viewModel.uiState.take(2).toList()
+        assertNull(list[0].username)
+        assertEquals("testUser", list[1].username)
     }
 
     @Test
