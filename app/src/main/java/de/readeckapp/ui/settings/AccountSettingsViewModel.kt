@@ -13,6 +13,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.net.MalformedURLException
 import java.net.URL
 import javax.inject.Inject
 
@@ -56,13 +57,17 @@ class AccountSettingsViewModel @Inject constructor(
         }
     }
 
-    fun onUrlChanged(value: String) {
-        val isValidUrl = try {
-            URL(value)
+    private fun validateUrl(url: String): Boolean {
+        return try {
+            URL(url)
             true
-        } catch (e: Exception) {
+        } catch (e: MalformedURLException) {
             false
         }
+    }
+
+    fun onUrlChanged(value: String) {
+        val isValidUrl = validateUrl(value)
         val urlError = if (!isValidUrl && value.isNotEmpty()) {
             R.string.account_settings_url_error // Use resource ID
         } else {
@@ -88,7 +93,7 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 username = value,
                 usernameError = usernameError,
-                loginEnabled = !value.isBlank() && !it.url.isNullOrBlank() && !it.password.isNullOrBlank(),
+                loginEnabled = validateUrl(uiState.value.url ?: "") && !value.isBlank() && !it.password.isNullOrBlank(),
                 authenticationResult = null // Clear any previous result
             )
         }
@@ -104,7 +109,7 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 password = value,
                 passwordError = passwordError,
-                loginEnabled = !value.isBlank() && !it.url.isNullOrBlank() && !it.username.isNullOrBlank(),
+                loginEnabled = validateUrl(uiState.value.url ?: "") && !it.username.isNullOrBlank() && !value.isBlank(),
                 authenticationResult = null // Clear any previous result
             )
         }
