@@ -1,0 +1,52 @@
+<html>
+<head>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="utf-8">
+    <style>
+        img {
+            max-width: 100%; /* Make images responsive */
+            height: auto; /* Maintain aspect ratio */
+            display: block;  /* prevents space below image */
+            margin: 0 auto;  /* Center the image */
+        }
+        /* Styles for smaller screens (e.g., phones) */
+        @media (max-width: 600px) {
+            body {
+                font-size: 16px; /* Increase font size on small screens */
+            }
+
+            /* Example:  Adjust the padding */
+            /* Some CSS to prevent over-scrolling if content is bigger than screen width */
+            .container {
+                width: 100%;
+                padding: 10px; /* Adjust padding on smaller screens */
+            }
+        }
+
+        /* Styles for larger screens (e.g., tablets and desktops) */
+        @media (min-width: 601px) {
+            body {
+                font-size: 14px;
+            }
+
+            /* Example: Wider content area */
+            .container {
+                max-width: 800px;  /* Limit width on larger screens */
+                margin: 0 auto; /* Center the container */
+                padding: 20px;
+            }
+
+             /* Example: Reduce image size */
+            img {
+                max-width: 80%; /* Smaller images on larger screens */
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        %s
+    </div>
+</body>
+</html>
