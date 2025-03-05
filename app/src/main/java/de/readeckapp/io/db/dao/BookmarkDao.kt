@@ -37,6 +37,9 @@ interface BookmarkDao {
     @Query("SELECT * FROM bookmarks WHERE id = :id")
     suspend fun getBookmarkById(id: String): BookmarkEntity
 
+    @Query("SELECT * FROM bookmarks WHERE id = :id")
+    fun observeBookmark(id: String): Flow<BookmarkEntity>
+
     @RawQuery(observedEntities = [BookmarkEntity::class])
     fun getBookmarksByFiltersDynamic(query: SupportSQLiteQuery): Flow<List<BookmarkEntity>>
 
