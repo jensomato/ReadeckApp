@@ -13,4 +13,5 @@ interface BookmarkRepository {
 
     suspend fun insertBookmarks(bookmarks: List<Bookmark>)
     suspend fun getBookmarkById(id: String): Bookmark
+    fun observeBookmark(id: String): Flow<Bookmark>
 }

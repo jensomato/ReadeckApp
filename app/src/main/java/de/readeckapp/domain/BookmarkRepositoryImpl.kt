@@ -27,6 +27,10 @@ class BookmarkRepositoryImpl @Inject constructor(
     override suspend fun getBookmarkById(id: String): Bookmark {
         return bookmarkDao.getBookmarkById(id).toDomain()
     }
+
+    override fun observeBookmark(id: String): Flow<Bookmark> {
+        return bookmarkDao.observeBookmark(id).map { it.toDomain() }
+    }
 }
 
 
