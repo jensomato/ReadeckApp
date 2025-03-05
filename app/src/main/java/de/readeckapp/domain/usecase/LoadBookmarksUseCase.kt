@@ -19,6 +19,7 @@ class LoadBookmarksUseCase @Inject constructor(
 ) {
     suspend fun execute(pageSize: Int, offset: Int, updatedSince: Instant?) {
         Timber.d("loadNextPage(pageSize=$pageSize, offset=$offset, updatedSince=$updatedSince")
+        val isFullSync = updatedSince == null
         try {
             val response = readeckApi.getBookmarks(pageSize, offset, updatedSince, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
             if (response.isSuccessful && response.body() != null) {
@@ -29,6 +30,9 @@ class LoadBookmarksUseCase @Inject constructor(
                 Timber.d("currentPage=$currentPage")
                 Timber.d("totalPages=$totalPages")
                 Timber.d("totalCount=$totalCount")
+                if (isFullSync) {
+                    bookmarkRepository.deleteAllBookmarks()
+                }
                 bookmarkRepository.insertBookmarks(bookmarks)
                 bookmarks.forEach {
                     val request = OneTimeWorkRequestBuilder<LoadArticleWorker>().setInputData(
