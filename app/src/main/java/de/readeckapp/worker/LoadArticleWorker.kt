@@ -6,9 +6,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
-import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.LoadArticleUseCase
-import de.readeckapp.io.rest.ReadeckApi
 import timber.log.Timber
 
 @HiltWorker
@@ -21,7 +19,7 @@ class LoadArticleWorker @AssistedInject constructor(
         // TODO: Implement the actual work to load bookmarks
         try {
             Timber.d("Start Work with params=$workerParams")
-            val bookmarkId = workerParams.inputData.getString("bookmarkId")
+            val bookmarkId = workerParams.inputData.getString(PARAM_BOOKMARK_ID)
             Timber.d("bookmarkId=$bookmarkId")
             return if (bookmarkId != null) {
                 loadArticleUseCase.execute(bookmarkId)
@@ -34,5 +32,8 @@ class LoadArticleWorker @AssistedInject constructor(
             // Handle errors (e.g., retry, failure)
             return Result.failure()
         }
+    }
+    companion object {
+        const val PARAM_BOOKMARK_ID = "bookmarkId"
     }
 }

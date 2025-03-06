@@ -53,4 +53,12 @@ interface ReadeckApi {
         data object Ascending: Order("")
         data object Descending: Order("-")
     }
+
+    interface Header {
+        companion object {
+            const val TOTAL_PAGES = "total-pages"
+            const val TOTAL_COUNT = "total-count"
+            const val CURRENT_PAGE = "current-page"
+        }
+    }
 }

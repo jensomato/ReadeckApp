@@ -21,6 +21,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_TOKEN = stringPreferencesKey("token")
     private val KEY_URL = stringPreferencesKey("url")
     private val KEY_PASSWORD = stringPreferencesKey("password")
+    private val KEY_LAST_BOOKMARK_TIMESTAMP = stringPreferencesKey("lastBookmarkTimestamp")
 
     override fun saveUsername(username: String) {
         with(encryptedSharedPreferences.edit()) {
@@ -48,6 +49,16 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
             putString(KEY_URL.name, url)
             apply()
         }
+    }
+    override suspend fun saveLastBookmarkTimestamp(timestamp: String) {
+        with(encryptedSharedPreferences.edit()) {
+            putString(KEY_LAST_BOOKMARK_TIMESTAMP.name, timestamp)
+            apply()
+        }
+    }
+
+    override suspend fun getLastBookmarkTimestamp(): String? {
+        return encryptedSharedPreferences.getString(KEY_LAST_BOOKMARK_TIMESTAMP.name, null)
     }
 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)

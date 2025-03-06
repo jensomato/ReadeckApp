@@ -11,4 +11,6 @@ interface SettingsDataStore {
     fun savePassword(password: String)
     fun saveToken(token: String)
     fun saveUrl(url: String)
+    suspend fun saveLastBookmarkTimestamp(timestamp: String)
+    suspend fun getLastBookmarkTimestamp(): String?
 }
