@@ -1,10 +1,12 @@
 package de.readeckapp.domain.usecase
 
+import android.content.Context
+import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.io.rest.ReadeckApi
-import de.readeckapp.io.rest.auth.AuthInterceptor
 import de.readeckapp.io.rest.auth.TokenManager
 import de.readeckapp.io.rest.model.AuthenticationRequestDto
+import de.readeckapp.worker.LoadBookmarksWorker
 import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
@@ -19,7 +21,8 @@ sealed class AuthenticationResult {
 class AuthenticateUseCase @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
     private val readeckApi: ReadeckApi,
-    private val tokenManager: TokenManager
+    private val tokenManager: TokenManager,
+    @ApplicationContext private val context: Context // Need context to enqueue worker
 ) {
     suspend fun execute(url: String, username: String, password: String): AuthenticationResult {
         settingsDataStore.saveUrl(url)
@@ -35,6 +38,13 @@ class AuthenticateUseCase @Inject constructor(
                         settingsDataStore.saveUsername(username)
                         settingsDataStore.saveUrl(url)
                         settingsDataStore.savePassword(password)
+
+                        // Enqueue the LoadBookmarksWorker for initial sync
+                        LoadBookmarksWorker.enqueue(context, isInitialLoad = true)
+
+                        // Set the initial sync performed flag
+                        settingsDataStore.setInitialSyncPerformed(true)
+
                         return AuthenticationResult.Success
                     } else {
                         return AuthenticationResult.GenericError("Failed to fetch user profile")

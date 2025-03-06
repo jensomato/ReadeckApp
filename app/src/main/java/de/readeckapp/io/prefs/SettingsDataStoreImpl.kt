@@ -2,6 +2,7 @@ package de.readeckapp.io.prefs
 
 import android.content.Context
 import android.content.SharedPreferences
+import androidx.core.content.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -22,43 +23,49 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_URL = stringPreferencesKey("url")
     private val KEY_PASSWORD = stringPreferencesKey("password")
     private val KEY_LAST_BOOKMARK_TIMESTAMP = stringPreferencesKey("lastBookmarkTimestamp")
+    private val KEY_INITIAL_SYNC_PERFORMED = "initial_sync_performed"
 
     override fun saveUsername(username: String) {
-        with(encryptedSharedPreferences.edit()) {
+        encryptedSharedPreferences.edit {
             putString(KEY_USERNAME.name, username)
-            apply()
         }
     }
 
     override fun savePassword(password: String) {
-        with(encryptedSharedPreferences.edit()) {
+        encryptedSharedPreferences.edit {
             putString(KEY_PASSWORD.name, password)
-            apply()
         }
     }
 
     override fun saveToken(token: String) {
-        with(encryptedSharedPreferences.edit()) {
+        encryptedSharedPreferences.edit {
             putString(KEY_TOKEN.name, token)
-            apply()
         }
     }
 
     override fun saveUrl(url: String) {
-        with(encryptedSharedPreferences.edit()) {
+        encryptedSharedPreferences.edit {
             putString(KEY_URL.name, url)
-            apply()
         }
     }
     override suspend fun saveLastBookmarkTimestamp(timestamp: String) {
-        with(encryptedSharedPreferences.edit()) {
+        encryptedSharedPreferences.edit {
             putString(KEY_LAST_BOOKMARK_TIMESTAMP.name, timestamp)
-            apply()
         }
     }
 
     override suspend fun getLastBookmarkTimestamp(): String? {
         return encryptedSharedPreferences.getString(KEY_LAST_BOOKMARK_TIMESTAMP.name, null)
+    }
+
+    override suspend fun setInitialSyncPerformed(performed: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_INITIAL_SYNC_PERFORMED, performed)
+        }
+    }
+
+    override suspend fun isInitialSyncPerformed(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_INITIAL_SYNC_PERFORMED, false)
     }
 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)
