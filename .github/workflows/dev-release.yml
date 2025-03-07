@@ -64,6 +64,7 @@ jobs:
 
             **Thanks for testing!**
           commit: ${{ github.sha }}
+          tag: develop-snapshot
           removeArtifacts: true
           artifacts: "${{ steps.rename_artifact.outputs.ARTIFACT_FILENAME }},checksums.txt"
           token: ${{ secrets.GITHUB_TOKEN }}
