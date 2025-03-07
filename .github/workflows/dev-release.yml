@@ -50,14 +50,9 @@ jobs:
         uses: ncipollo/release-action@v1.16.0
         with:
           allowUpdates: true
-          draft: true
           prerelease: true
           name: ReadeckApp Snapshot Build
           body: |
-            ## Release Notes - Snapshot Build from Develop Branch
-
-            ReadeckApp Snapshot Build
-
             This release represents a snapshot build from the `develop` branch. It is **not intended for production use** and may contain unstable features, bugs, or incomplete functionality. This build is released to allow for early testing of the latest changes.
 
             This build includes all commits merged into the `develop` branch up to ${{ github.sha }}.
@@ -66,6 +61,7 @@ jobs:
           commit: ${{ github.sha }}
           tag: develop-snapshot
           removeArtifacts: true
+          omitDraftDuringUpdate: true
           artifacts: "${{ steps.rename_artifact.outputs.ARTIFACT_FILENAME }},checksums.txt"
           token: ${{ secrets.GITHUB_TOKEN }}
       - name: Archive APK
