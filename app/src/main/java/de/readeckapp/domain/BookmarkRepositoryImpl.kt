@@ -31,6 +31,10 @@ class BookmarkRepositoryImpl @Inject constructor(
     override fun observeBookmark(id: String): Flow<Bookmark> {
         return bookmarkDao.observeBookmark(id).map { it.toDomain() }
     }
+
+    override suspend fun deleteAllBookmarks() {
+        bookmarkDao.deleteAllBookmarks()
+    }
 }
 
 

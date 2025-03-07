@@ -1,108 +1,93 @@
 package de.readeckapp.domain.usecase
 
+import androidx.room.Transaction
+import androidx.work.Data
+import androidx.work.OneTimeWorkRequestBuilder
 import androidx.work.WorkManager
 import de.readeckapp.domain.BookmarkRepository
-import de.readeckapp.io.db.dao.BookmarkDao
+import de.readeckapp.domain.mapper.toDomain
+import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.io.rest.ReadeckApi
+import de.readeckapp.io.rest.model.BookmarkDto
+import de.readeckapp.worker.LoadArticleWorker
+import kotlinx.datetime.Instant
+import kotlinx.datetime.TimeZone
+import kotlinx.datetime.toInstant
+import timber.log.Timber
 import javax.inject.Inject
 
 class LoadBookmarksUseCase @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val readeckApi: ReadeckApi,
-    private val bookmarkDao: BookmarkDao,
-    private val workManager: WorkManager
+    private val workManager: WorkManager,
+    private val settingsDataStore: SettingsDataStore
 ) {
-    suspend fun execute() {
-/*        Timber.d("Start")
-        val pageSize = 10
-        var offset = 0
-        val updatedSince: Instant? = bookmarkDao.getLastUpdatedBookmark()?.updated
-        val response = readeckApi.getBookmarks(pageSize, offset, updatedSince)
 
-
-        // use this flow to persist every bookmarkentity into the db with bookmarkdao
-        val flow = Pager(
-            config = PagingConfig(
-                pageSize = 10, // Adjust as needed
-                prefetchDistance = 5,
-                enablePlaceholders = false
-            ),
-            pagingSourceFactory = { BookmarkPagingSource(readeckApi, updatedSince) }
-        ).flow.map { pagingData ->
-            pagingData.map { it.toDomain().toEntity() }
-        }.collect {
-
-        }.flowOn(Dispatchers.IO)
-
-        flow.map {
-
-        }.retry(retries = 3) { ex -> }.map {
-
-        }
-        flow.collectLatest { pagingData ->
-            pagingData.map { }
-            bookmarkDao.insertBookmarks(pagingData.toList())
-        }*/
+    sealed class UseCaseResult<out DataType : Any> {
+        data class Success<out DataType : Any>(val  dataType: DataType) : UseCaseResult<DataType>()
+        data class Error(val exception: Throwable) : UseCaseResult<Nothing>()
     }
 
-//    suspend fun loadArticle(bookmarkEntity: BookmarkEntity) {
-//        if (bookmarkEntity.hasArticle) {
-//            val response = readeckApi.getArticle(bookmarkEntity.id)
-//            if (response.isSuccessful) {
-//                bookmarkEntity.articleContent = response.body()
-//            }
-//        }
-//
-//    }
-//
-//    suspend fun loadBookmarkPage(pageSize: Int, offset: Int, updatedSince: Instant?) {
-//        val response = readeckApi.getBookmarks(pageSize, offset, updatedSince)
-//        if (response.isSuccessful) {
-//            val bookmarks = response.body()!!
-//            bookmarks.map { it.toDomain() }.map { it.toEntity() }
-//                .map {
-//                    if (it.hasArticle) {
-//                        val r = readeckApi.getArticle(it.id)
-//                        if (r.isSuccessful) {
-//                            val content = r.body()!!
-//                            val bookmark = it.copy(articleContent = content)
-//                            bookmarkRepository.insertBookmarks(listOf(bookmark))
-//                        }
-//                    }
-//                }
-//        }
-//    }
-}
+    @Transaction
+    suspend fun execute(pageSize: Int, initialOffset: Int): UseCaseResult<Unit> {
+        Timber.d("execute(pageSize=$pageSize, initialOffset=$initialOffset")
 
-//class BookmarkPagingSource(
-//    private val readeckApi: ReadeckApi,
-//    private val updatedSince: Instant?
-//) : PagingSource<Int, BookmarkDto>() {
-//    override suspend fun load(params: LoadParams<Int>): LoadResult<Int, BookmarkDto> {
-//        return try {
-//            val offset = params.key ?: 0
-//            val limit = params.loadSize
-//            val response = readeckApi.getBookmarks(limit, offset, updatedSince)
-//            if (response.isSuccessful) {
-//                val bookmarkDtos = response.body() ?: emptyList()
-//                val nextKey = if (bookmarkDtos.size < limit) null else offset + limit
-//                LoadResult.Page(
-//                    data = bookmarkDtos,
-//                    prevKey = if (offset == 0) null else offset - limit,
-//                    nextKey = nextKey
-//                )
-//            } else {
-//                LoadResult.Error(Exception("API error: ${response.code()}"))
-//            }
-//        } catch (e: Exception) {
-//            LoadResult.Error(e)
-//        }
-//    }
-//
-//    override fun getRefreshKey(state: PagingState<Int, BookmarkDto>): Int? {
-//        return state.anchorPosition?.let { anchorPosition ->
-//            val anchorPage = state.closestPageToPosition(anchorPosition)
-//            anchorPage?.prevKey?.plus(1) ?: anchorPage?.nextKey?.minus(1)
-//        }
-//    }
-//}
+        var offset = initialOffset
+        try {
+            val lastLoadedTimestampString = settingsDataStore.getLastBookmarkTimestamp()
+            val lastLoadedTimestamp = lastLoadedTimestampString?.let { Instant.parse(it) }
+            Timber.d("lastLoadedTimestamp=$lastLoadedTimestamp")
+
+            var hasMorePages = true
+            while (hasMorePages) {
+                val response = readeckApi.getBookmarks(pageSize, offset, lastLoadedTimestamp, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+                if (response.isSuccessful && response.body() != null) {
+                    val bookmarks = (response.body() as List<BookmarkDto>).map { it.toDomain() }
+
+                    val totalCountHeader = response.headers()[ReadeckApi.Header.TOTAL_COUNT]
+                    val totalPagesHeader = response.headers()[ReadeckApi.Header.TOTAL_PAGES]
+                    val currentPageHeader = response.headers()[ReadeckApi.Header.CURRENT_PAGE]
+
+                    if (totalCountHeader == null || totalPagesHeader == null || currentPageHeader == null) {
+                        return UseCaseResult.Error(Exception("Missing headers in API response"))
+                    }
+
+                    val totalCount = totalCountHeader.toInt()
+                    val totalPages = totalPagesHeader.toInt()
+                    val currentPage = currentPageHeader.toInt()
+
+                    Timber.d("currentPage=$currentPage")
+                    Timber.d("totalPages=$totalPages")
+                    Timber.d("totalCount=$totalCount")
+
+                    bookmarkRepository.insertBookmarks(bookmarks)
+                    bookmarks.forEach {
+                        val request = OneTimeWorkRequestBuilder<LoadArticleWorker>().setInputData(
+                            Data.Builder().putString(LoadArticleWorker.PARAM_BOOKMARK_ID, it.id).build()
+                        ).build()
+                        workManager.enqueue(request)
+                    }
+
+                    // Find the latest created timestamp in the current page
+                    val latestBookmark = bookmarks.maxByOrNull { it.created }
+                    latestBookmark?.let {
+                        settingsDataStore.saveLastBookmarkTimestamp(it.created.toInstant(TimeZone.UTC).toString())
+                        Timber.d("Saved last bookmark timestamp: ${it.created}")
+                    }
+
+                    if (currentPage < totalPages) {
+                        offset += pageSize
+                    } else {
+                        hasMorePages = false
+                    }
+                } else {
+                    return UseCaseResult.Error(Exception("Unsuccessful response: ${response.code()}"))
+                }
+            }
+            return UseCaseResult.Success(Unit)
+        } catch (e: Exception) {
+            Timber.e("error work=$e", e)
+            return UseCaseResult.Error(e)
+        }
+    }
+}

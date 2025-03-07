@@ -1,13 +1,14 @@
 package de.readeckapp.ui.list
 
+import android.content.Context
 import androidx.compose.runtime.mutableStateOf
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import androidx.work.OneTimeWorkRequestBuilder
-import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -20,8 +21,9 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BookmarkListViewModel @Inject constructor(
-    private val workManager: WorkManager,
-    private val bookmarkRepository: BookmarkRepository
+    private val bookmarkRepository: BookmarkRepository,
+    @ApplicationContext private val context: Context, // Inject Context
+    private val settingsDataStore: SettingsDataStore // Inject SettingsDataStore
 ) : ViewModel() {
     val bookmarks = mutableStateOf<List<Bookmark>>(emptyList())
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null) // Using StateFlow for navigation events
@@ -31,6 +33,11 @@ class BookmarkListViewModel @Inject constructor(
         viewModelScope.launch {
             bookmarkRepository.getAllBookmarks().collectLatest {
                 bookmarks.value = it
+            }
+            // Check if the initial sync has been performed
+            if (!settingsDataStore.isInitialSyncPerformed()) {
+                Timber.d("loadBookmarks")
+                loadBookmarks() // Start incremental sync when the ViewModel is created
             }
         }
     }
@@ -72,11 +79,11 @@ class BookmarkListViewModel @Inject constructor(
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event
     }
+
     fun loadBookmarks() {
         viewModelScope.launch {
             try {
-                val request = OneTimeWorkRequestBuilder<LoadBookmarksWorker>().build()
-                workManager.enqueue(request)
+                LoadBookmarksWorker.enqueue(context) // Enqueue for incremental sync
             } catch (e: Exception) {
                 // Handle errors (e.g., show error message)
                 println("Error loading bookmarks: ${e.message}")
