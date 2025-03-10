@@ -38,8 +38,13 @@ class SettingsViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
+    fun onClickOpenSourceLibraries() {
+        _navigationEvent.update { NavigationEvent.NavigateToOpenSourceLibraries }
+    }
+
     sealed class NavigationEvent {
         data object NavigateToAccountSettings : NavigationEvent()
+        data object NavigateToOpenSourceLibraries : NavigationEvent()
         data object NavigateBack : NavigationEvent()
     }
 

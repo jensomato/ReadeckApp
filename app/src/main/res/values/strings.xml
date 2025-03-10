@@ -7,7 +7,7 @@
     <string name="back">Back</string>
     <string name="settings_topbar_title">Settings</string>
     <string name="settings_account_title">Account</string>
-    <string name="settings_account_subtitle_default">Not Logged in</string>
+    <string name="settings_account_subtitle_default">Not logged in</string>
     <string name="accountsettings_topbar_title">Account</string>
     <string name="account_settings_topbar_title">Readeck URL</string>
     <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
@@ -28,4 +28,6 @@ many{from {author} et. al.}
 other{}
 }
     </string>
+    <string name="settings_open_source_libraries">Open Source Libraries</string>
+    <string name="settings_open_source_libraries_subtitle">View the open source libraries used in this app.</string>
 </resources>

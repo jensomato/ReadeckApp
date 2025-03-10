@@ -54,6 +54,14 @@ class SettingsViewModelTest {
     }
 
     @Test
+    fun `onClickOpenSourceLibraries should navigate to open source libraries screen`() = runTest {
+        viewModel.onClickOpenSourceLibraries()
+        testDispatcher.scheduler.advanceUntilIdle()
+
+        assertEquals(SettingsViewModel.NavigationEvent.NavigateToOpenSourceLibraries, viewModel.navigationEvent.value)
+    }
+
+    @Test
     fun `onClickBack should navigate back`() = runTest {
         viewModel.onClickBack()
         testDispatcher.scheduler.advanceUntilIdle()

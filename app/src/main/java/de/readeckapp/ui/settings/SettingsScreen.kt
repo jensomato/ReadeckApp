@@ -8,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
@@ -38,11 +39,15 @@ fun SettingsScreen(
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickAccount: () -> Unit = { viewModel.onClickAccount() }
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
+    val onClickOpenSourceLibraries: () -> Unit = { viewModel.onClickOpenSourceLibraries() }
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
             when (event) {
                 is SettingsViewModel.NavigationEvent.NavigateToAccountSettings -> {
                     navHostController.navigate("accountSettings")
+                }
+                is SettingsViewModel.NavigationEvent.NavigateToOpenSourceLibraries -> {
+                    navHostController.navigate("openSourceLibraries")
                 }
 
                 is SettingsViewModel.NavigationEvent.NavigateBack -> {
@@ -55,7 +60,8 @@ fun SettingsScreen(
     SettingScreenView(
         settingsUiState = settingsUiState,
         onClickAccount = onClickAccount,
-        onClickBack = onClickBack
+        onClickBack = onClickBack,
+        onClickOpenSourceLibraries = onClickOpenSourceLibraries
     )
 }
 
@@ -65,6 +71,7 @@ fun SettingScreenView(
     settingsUiState: SettingsUiState,
     onClickAccount: () -> Unit,
     onClickBack: () -> Unit,
+    onClickOpenSourceLibraries: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -97,6 +104,13 @@ fun SettingScreenView(
                     ?: stringResource(R.string.settings_account_subtitle_default),
                 onClick = onClickAccount,
                 testTag = SettingsScreenTestTags.SETTINGS_ITEM_ACCOUNT
+            )
+            SettingItem(
+                icon = Icons.Filled.List,
+                title = stringResource(R.string.settings_open_source_libraries),
+                subtitle = stringResource(R.string.settings_open_source_libraries_subtitle),
+                onClick = onClickOpenSourceLibraries,
+                testTag = SettingsScreenTestTags.SETTINGS_ITEM_OPEN_SOURCE
             )
         }
     }
@@ -142,7 +156,8 @@ fun SettingScreenViewPreview() {
             username = "test",
         ),
         onClickAccount = {},
-        onClickBack = {}
+        onClickBack = {},
+        onClickOpenSourceLibraries = {}
     )
 }
 
@@ -165,4 +180,5 @@ object SettingsScreenTestTags {
     const val SETTINGS_ITEM_TITLE = "SettingsScreenTestTags.SettingsItem.Title"
     const val SETTINGS_ITEM_SUBTITLE = "SettingsScreenTestTags.SettingsItem.Subtitle"
     const val SETTINGS_ITEM_ACCOUNT = "Account"
+    const val SETTINGS_ITEM_OPEN_SOURCE = "OpenSource"
 }
