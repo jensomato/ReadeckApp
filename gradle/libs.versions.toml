@@ -34,6 +34,7 @@ tink = "1.8.0"
 workManager = "2.10.0"
 paging = "3.3.0-alpha02"
 uiTestJunit4Android = "1.7.8"
+aboutLibraries = "12.0.0-a04"
 
 [libraries]
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
@@ -91,6 +92,8 @@ androidx-security-crypto = { group = "androidx.security", name = "security-crypt
 google-crypto-tink = { group = "com.google.crypto.tink", name = "tink-android", version.ref = "tink" }
 androidx-work-runtime-ktx = { group = "androidx.work", name = "work-runtime-ktx", version.ref = "workManager" }
 androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtime-ktx", version.ref = "paging" }
+aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
+aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
@@ -101,3 +104,4 @@ kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", versi
 dagger-hilt = { id = "com.google.dagger.hilt.android", version.ref = "daggerHilt" }
 androidx-room = { id = "androidx.room", version.ref = "room" }
 ksp = { id = "com.google.devtools.ksp", version.ref = "ksp" }
+aboutLibraries = { id = "com.mikepenz.aboutlibraries.plugin", version.ref = "aboutLibraries" }

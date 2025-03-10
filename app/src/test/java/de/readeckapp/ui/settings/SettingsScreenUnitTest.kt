@@ -44,7 +44,8 @@ class SettingsScreenUnitTest {
                 SettingScreenView(
                     settingsUiState = SettingsUiState(username = "test"),
                     onClickAccount = {},
-                    onClickBack = {}
+                    onClickBack = {},
+                    onClickOpenSourceLibraries = {}
                 )
             }
         }
@@ -59,7 +60,8 @@ class SettingsScreenUnitTest {
                 SettingScreenView(
                     settingsUiState = SettingsUiState(username = "test"),
                     onClickAccount = {},
-                    onClickBack = {}
+                    onClickBack = {},
+                    onClickOpenSourceLibraries = {}
                 )
             }
         }
@@ -77,7 +79,8 @@ class SettingsScreenUnitTest {
                 SettingScreenView(
                     settingsUiState = SettingsUiState(username = expectedUsername),
                     onClickAccount = {},
-                    onClickBack = {}
+                    onClickBack = {},
+                    onClickOpenSourceLibraries = {}
                 )
             }
         }
@@ -101,7 +104,8 @@ class SettingsScreenUnitTest {
                 SettingScreenView(
                     settingsUiState = SettingsUiState(username = "test"),
                     onClickAccount = { accountClicked = true },
-                    onClickBack = {}
+                    onClickBack = {},
+                    onClickOpenSourceLibraries = {}
                 )
             }
         }
@@ -120,7 +124,8 @@ class SettingsScreenUnitTest {
                 SettingScreenView(
                     settingsUiState = SettingsUiState(username = "test"),
                     onClickAccount = {},
-                    onClickBack = {}
+                    onClickBack = {},
+                    onClickOpenSourceLibraries = {}
                 )
             }
         }
@@ -136,7 +141,8 @@ class SettingsScreenUnitTest {
                 SettingScreenView(
                     settingsUiState = SettingsUiState(username = "test"),
                     onClickAccount = {},
-                    onClickBack = { backClicked = true }
+                    onClickBack = { backClicked = true },
+                    onClickOpenSourceLibraries = {}
                 )
             }
         }
