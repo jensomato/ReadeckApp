@@ -35,11 +35,13 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
+import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
 import kotlinx.coroutines.launch
 
@@ -98,13 +100,13 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                 ) {
                     Spacer(Modifier.height(12.dp))
                     Text(
-                        "Readeck",
+                        stringResource(id = R.string.app_name),
                         modifier = Modifier.padding(16.dp),
                         style = MaterialTheme.typography.titleLarge
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
-                        label = { Text(text = "All") },
+                        label = { Text(text = stringResource(id = R.string.all)) },
                         selected = filterState.value == BookmarkListViewModel.FilterState(),
                         onClick = {
                             onClickAll()
@@ -112,7 +114,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = "Unread") },
+                        label = { Text(text = stringResource(id = R.string.unread)) },
                         selected = filterState.value.unread == true,
                         onClick = {
                             onClickFilterUnread()
@@ -120,7 +122,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = "Archive") },
+                        label = { Text(text = stringResource(id = R.string.archive)) },
                         selected = filterState.value.archived == true,
                         onClick = {
                             onClickFilterArchive()
@@ -128,7 +130,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = "Favorites") },
+                        label = { Text(text = stringResource(id = R.string.favorites)) },
                         selected = filterState.value.favorite == true,
                         onClick = {
                             onClickFilterFavorite()
@@ -137,7 +139,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
-                        label = { Text(text = "Articles") },
+                        label = { Text(text = stringResource(id = R.string.articles)) },
                         selected = filterState.value.type == Bookmark.Type.Article,
                         onClick = {
                             onClickFilterArticles()
@@ -145,7 +147,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = "Videos") },
+                        label = { Text(text = stringResource(id = R.string.videos)) },
                         selected = filterState.value.type == Bookmark.Type.Video,
                         onClick = {
                             onClickFilterVideos()
@@ -153,7 +155,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = "Pictures") },
+                        label = { Text(text = stringResource(id = R.string.pictures)) },
                         selected = filterState.value.type == Bookmark.Type.Picture,
                         onClick = {
                             onClickFilterPictures()
@@ -162,7 +164,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
-                        label = { Text(text = "Settings") },
+                        label = { Text(text = stringResource(id = R.string.settings)) },
                         selected = false,
                         onClick = {
                             onClickSettings()
@@ -176,19 +178,19 @@ fun BookmarkListScreen(navHostController: NavHostController) {
         Scaffold(
             topBar = {
                 TopAppBar(
-                    title = { Text("Bookmarks") },
+                    title = { Text(stringResource(id = R.string.bookmarks)) },
                     navigationIcon = {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } }
                         ) {
-                            Icon(Icons.Filled.Menu, contentDescription = "Localized description")
+                            Icon(Icons.Filled.Menu, contentDescription = stringResource(id = R.string.menu))
                         }
                     }
                 )
             },
             floatingActionButton = {
                 FloatingActionButton(onClick = { viewModel.loadBookmarks() }) {
-                    Icon(Icons.Filled.Refresh, contentDescription = "Refresh Bookmarks")
+                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(id = R.string.refresh_bookmarks))
                 }
             }
         ) { padding ->
@@ -248,7 +250,7 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            Text("An error occurred.")
+            Text(stringResource(id = R.string.an_error_occurred))
         }
     }
 }
@@ -264,7 +266,7 @@ fun EmptyScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            Text("No bookmarks found.")
+            Text(stringResource(id = R.string.no_bookmarks_found))
         }
     }
 }

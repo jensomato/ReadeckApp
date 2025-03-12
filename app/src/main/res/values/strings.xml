@@ -26,4 +26,17 @@ other{}
     </string>
     <string name="settings_open_source_libraries">Open Source Libraries</string>
     <string name="settings_open_source_libraries_subtitle">View the open source libraries used in this app.</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="menu">Menu</string>
+    <string name="refresh_bookmarks">Refresh Bookmarks</string>
+    <string name="all">All</string>
+    <string name="unread">Unread</string>
+    <string name="archive">Archive</string>
+    <string name="favorites">Favorites</string>
+    <string name="articles">Articles</string>
+    <string name="videos">Videos</string>
+    <string name="pictures">Pictures</string>
+    <string name="settings">Settings</string>
+    <string name="an_error_occurred">An error occurred.</string>
+    <string name="no_bookmarks_found">No bookmarks found.</string>
 </resources>
