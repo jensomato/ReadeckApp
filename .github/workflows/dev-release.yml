@@ -46,6 +46,15 @@ jobs:
           mv app/build/outputs/apk/release/app-release-unsigned-signed.apk "$FILENAME"
           sha256sum $FILENAME > checksums.txt
           echo "ARTIFACT_FILENAME=$FILENAME" >> "$GITHUB_OUTPUT"
+      - name: Create or update develop-snapshot
+        uses: joutvhu/create-tag@v1
+        with:
+          tag_name: develop-snapshot
+          tag_sha: ${{ github.sha }}
+          message: develop-snapshot
+          on_tag_exists: update
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - name: Create release
         uses: ncipollo/release-action@v1.16.0
         with:
