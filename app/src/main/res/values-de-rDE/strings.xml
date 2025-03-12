@@ -25,4 +25,19 @@ many{von {author} et. al.}
 other{}
 }
     </string>
+    <string name="settings_open_source_libraries">Open-Source-Bibliotheken</string>
+    <string name="settings_open_source_libraries_subtitle">Zeige die in dieser App verwendeten Open-Source-Bibliotheken an.</string>
+    <string name="bookmarks">Lesezeichen</string>
+    <string name="menu">Menü</string>
+    <string name="refresh_bookmarks">Lesezeichen aktualisieren</string>
+    <string name="all">Alle</string>
+    <string name="unread">Ungelesen</string>
+    <string name="archive">Archiv</string>
+    <string name="favorites">Favoriten</string>
+    <string name="articles">Artikel</string>
+    <string name="videos">Videos</string>
+    <string name="pictures">Bilder</string>
+    <string name="settings">Einstellungen</string>
+    <string name="an_error_occurred">Ein Fehler ist aufgetreten.</string>
+    <string name="no_bookmarks_found">Keine Lesezeichen gefunden.</string>
 </resources>
