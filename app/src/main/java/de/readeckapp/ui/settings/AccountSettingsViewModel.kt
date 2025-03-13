@@ -7,14 +7,13 @@ import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
-import java.net.MalformedURLException
-import java.net.URL
 import javax.inject.Inject
 
 @HiltViewModel
@@ -57,17 +56,8 @@ class AccountSettingsViewModel @Inject constructor(
         }
     }
 
-    private fun validateUrl(url: String): Boolean {
-        return try {
-            URL(url)
-            true
-        } catch (e: MalformedURLException) {
-            false
-        }
-    }
-
     fun onUrlChanged(value: String) {
-        val isValidUrl = validateUrl(value)
+        val isValidUrl = value.isValidUrl()
         val urlError = if (!isValidUrl && value.isNotEmpty()) {
             R.string.account_settings_url_error // Use resource ID
         } else {
@@ -93,7 +83,7 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 username = value,
                 usernameError = usernameError,
-                loginEnabled = validateUrl(uiState.value.url ?: "") && !value.isBlank() && !it.password.isNullOrBlank(),
+                loginEnabled = uiState.value.url.isValidUrl() && !value.isBlank() && !it.password.isNullOrBlank(),
                 authenticationResult = null // Clear any previous result
             )
         }
@@ -109,7 +99,7 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 password = value,
                 passwordError = passwordError,
-                loginEnabled = validateUrl(uiState.value.url ?: "") && !it.username.isNullOrBlank() && !value.isBlank(),
+                loginEnabled = uiState.value.url.isValidUrl() && !it.username.isNullOrBlank() && !value.isBlank(),
                 authenticationResult = null // Clear any previous result
             )
         }
