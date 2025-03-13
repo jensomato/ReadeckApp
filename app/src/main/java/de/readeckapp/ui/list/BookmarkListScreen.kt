@@ -11,8 +11,11 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -24,9 +27,11 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalDrawerSheet
 import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
@@ -38,6 +43,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
@@ -51,6 +57,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val viewModel: BookmarkListViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val uiState = viewModel.uiState.collectAsState().value
+    val createBookmarkUiState = viewModel.createBookmarkUiState.collectAsState().value
 
     // Collect filter states
     val filterState = viewModel.filterState.collectAsState()
@@ -183,14 +190,28 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } }
                         ) {
-                            Icon(Icons.Filled.Menu, contentDescription = stringResource(id = R.string.menu))
+                            Icon(
+                                Icons.Filled.Menu,
+                                contentDescription = stringResource(id = R.string.menu)
+                            )
+                        }
+                    },
+                    actions = {
+                        IconButton(onClick = { viewModel.openCreateBookmarkDialog() }) {
+                            Icon(
+                                imageVector = Icons.Filled.Add,
+                                contentDescription = stringResource(id = R.string.add_bookmark)
+                            )
                         }
                     }
                 )
             },
             floatingActionButton = {
                 FloatingActionButton(onClick = { viewModel.loadBookmarks() }) {
-                    Icon(Icons.Filled.Refresh, contentDescription = stringResource(id = R.string.refresh_bookmarks))
+                    Icon(
+                        Icons.Filled.Refresh,
+                        contentDescription = stringResource(id = R.string.refresh_bookmarks)
+                    )
                 }
             }
         ) { padding ->
@@ -219,9 +240,114 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     ErrorScreen(modifier = Modifier.padding(padding))
                 }
             }
+
+            // Show the CreateBookmarkDialog based on the state
+            when (createBookmarkUiState) {
+                is BookmarkListViewModel.CreateBookmarkUiState.Open -> {
+                    CreateBookmarkDialog(
+                        onDismiss = { viewModel.closeCreateBookmarkDialog() },
+                        title = createBookmarkUiState.title,
+                        url = createBookmarkUiState.url,
+                        urlError = createBookmarkUiState.urlError,
+                        isCreateEnabled = createBookmarkUiState.isCreateEnabled,
+                        onTitleChange = { viewModel.updateCreateBookmarkTitle(it) },
+                        onUrlChange = { viewModel.updateCreateBookmarkUrl(it) },
+                        onCreateBookmark = { viewModel.createBookmark() }
+                    )
+                }
+
+                is BookmarkListViewModel.CreateBookmarkUiState.Loading -> {
+                    // Show a loading indicator
+                    Dialog(onDismissRequest = { viewModel.closeCreateBookmarkDialog() }) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                is BookmarkListViewModel.CreateBookmarkUiState.Success -> {
+                    // Optionally show a success message
+                    LaunchedEffect(key1 = createBookmarkUiState) {
+                        // Dismiss the dialog after a short delay
+                        scope.launch {
+                            kotlinx.coroutines.delay(1000)
+                            viewModel.closeCreateBookmarkDialog()
+                        }
+                    }
+                }
+
+                is BookmarkListViewModel.CreateBookmarkUiState.Error -> {
+                    // Show an error message
+                    AlertDialog(
+                        onDismissRequest = { viewModel.closeCreateBookmarkDialog() },
+                        title = { Text(stringResource(id = R.string.error)) },
+                        text = { Text(createBookmarkUiState.message) },
+                        confirmButton = {
+                            TextButton(onClick = { viewModel.closeCreateBookmarkDialog() }) {
+                                Text(stringResource(id = R.string.ok))
+                            }
+                        }
+                    )
+                }
+
+                is BookmarkListViewModel.CreateBookmarkUiState.Closed -> {
+                    // Do nothing when the dialog is closed
+                }
+            }
         }
     }
 }
+
+@Composable
+fun CreateBookmarkDialog(
+    onDismiss: () -> Unit,
+    title: String,
+    url: String,
+    urlError: Int?,
+    isCreateEnabled: Boolean,
+    onTitleChange: (String) -> Unit,
+    onUrlChange: (String) -> Unit,
+    onCreateBookmark: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        title = { Text(stringResource(id = R.string.add_new_bookmark)) },
+        text = {
+            Column {
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { onTitleChange(it) },
+                    label = { Text(stringResource(id = R.string.title)) }
+                )
+                OutlinedTextField(
+                    value = url,
+                    onValueChange = { onUrlChange(it) },
+                    isError = urlError != null,
+                    label = { Text(stringResource(id = R.string.url)) },
+                    supportingText = {
+                        urlError?.let {
+                            Text(text = stringResource(it))
+                        }
+                    }
+                )
+            }
+        },
+        confirmButton = {
+            Button(
+                onClick = {
+                    onCreateBookmark()
+                },
+                enabled = isCreateEnabled
+            ) {
+                Text(stringResource(id = R.string.create))
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onDismiss) {
+                Text(stringResource(id = R.string.cancel))
+            }
+        }
+    )
+}
+
 
 @Composable
 fun LoadingScreen(modifier: Modifier = Modifier) {

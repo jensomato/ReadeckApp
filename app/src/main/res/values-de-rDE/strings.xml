@@ -40,4 +40,15 @@ other{}
     <string name="settings">Einstellungen</string>
     <string name="an_error_occurred">Ein Fehler ist aufgetreten.</string>
     <string name="no_bookmarks_found">Keine Lesezeichen gefunden.</string>
+    <string name="add_bookmark">Lesezeichen hinzufügen</string>
+    <string name="title">Titel</string>
+    <string name="url">URL</string>
+    <string name="invalid_url">Ungültige URL</string>
+    <string name="save">Speichern</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="create_bookmark_error">Fehler beim Erstellen des Lesezeichens: %1$s</string>
+    <string name="add_new_bookmark">Neues Lesezeichen hinzufügen</string>
+    <string name="create">Erstellen</string>
+    <string name="error">Fehler</string>
+    <string name="ok">OK</string>
 </resources>

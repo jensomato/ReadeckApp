@@ -5,12 +5,15 @@ import de.readeckapp.domain.mapper.toEntity
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.io.db.dao.BookmarkDao
 import de.readeckapp.io.db.model.BookmarkEntity
+import de.readeckapp.io.rest.ReadeckApi
+import de.readeckapp.io.rest.model.CreateBookmarkDto
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class BookmarkRepositoryImpl @Inject constructor(
     private val bookmarkDao: BookmarkDao,
+    private val readeckApi: ReadeckApi
 ) : BookmarkRepository {
     override fun observeBookmarks(
         type: Bookmark.Type?,
@@ -46,5 +49,15 @@ class BookmarkRepositoryImpl @Inject constructor(
 
     override suspend fun deleteAllBookmarks() {
         bookmarkDao.deleteAllBookmarks()
+    }
+
+    override suspend fun createBookmark(title: String, url: String): String {
+        val createBookmarkDto = CreateBookmarkDto(title = title, url = url)
+        val response = readeckApi.createBookmark(createBookmarkDto)
+        if (response.isSuccessful) {
+            return response.headers()[ReadeckApi.Header.BOOKMARK_ID]!!
+        } else {
+            throw Exception("Failed to create bookmark")
+        }
     }
 }

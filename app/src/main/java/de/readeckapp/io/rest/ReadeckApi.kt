@@ -4,6 +4,8 @@ import de.readeckapp.io.rest.model.AuthenticationRequestDto
 import de.readeckapp.io.rest.model.AuthenticationResponseDto
 import de.readeckapp.io.rest.model.BookmarkDto
 import de.readeckapp.io.rest.model.UserProfileDto
+import de.readeckapp.io.rest.model.CreateBookmarkDto // Import the new DTO
+import de.readeckapp.io.rest.model.SuccessMessageDto
 import kotlinx.datetime.Instant
 import retrofit2.Response
 import retrofit2.http.GET
@@ -34,6 +36,11 @@ interface ReadeckApi {
     @GET("bookmarks/{id}/article")
     suspend fun getArticle(@Path("id") id: String): Response<String>
 
+    @POST("bookmarks")
+    suspend fun createBookmark(
+        @Body body: CreateBookmarkDto
+    ): Response<SuccessMessageDto>
+
     data class SortOrder(val sort: Sort, val order: Order = Order.Ascending) {
         override fun toString(): String {
             return "${order.value}${sort.value}"
@@ -59,6 +66,7 @@ interface ReadeckApi {
             const val TOTAL_PAGES = "total-pages"
             const val TOTAL_COUNT = "total-count"
             const val CURRENT_PAGE = "current-page"
+            const val BOOKMARK_ID = "bookmark-id"
         }
     }
 }
