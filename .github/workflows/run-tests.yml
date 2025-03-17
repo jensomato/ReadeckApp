@@ -22,4 +22,4 @@ jobs:
       - name: Setup Android SDK
         uses: android-actions/setup-android@v3
       - name: Run Unit-Tests with Gradle
-        run: ./gradlew testDebugUnitTest
+        run: ./gradlew testGithubReleaseDebugUnitTest
