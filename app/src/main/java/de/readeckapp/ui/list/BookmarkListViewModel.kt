@@ -212,7 +212,6 @@ class BookmarkListViewModel @Inject constructor(
             try {
                 bookmarkRepository.createBookmark(title = title, url = url)
                 _createBookmarkUiState.value = CreateBookmarkUiState.Success
-                closeCreateBookmarkDialog()
             } catch (e: Exception) {
                 _createBookmarkUiState.value =
                     CreateBookmarkUiState.Error(e.message ?: "Unknown error")

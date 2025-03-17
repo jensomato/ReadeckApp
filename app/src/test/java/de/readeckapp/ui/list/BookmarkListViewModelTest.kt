@@ -1,10 +1,12 @@
 package de.readeckapp.ui.list
 
 import android.content.Context
+import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.io.prefs.SettingsDataStore
 import io.mockk.coEvery
+import io.mockk.coVerify
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -15,11 +17,15 @@ import kotlinx.coroutines.flow.flowOf
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
 import kotlinx.coroutines.test.StandardTestDispatcher
+import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
+import kotlinx.coroutines.test.runCurrent
 import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 
@@ -238,5 +244,110 @@ class BookmarkListViewModelTest {
             BookmarkListViewModel.UiState.Success(expectedBookmarks),
             success
         )
+    }
+
+    @Test
+    fun `openCreateBookmarkDialog sets CreateBookmarkUiState to Open`() = runTest {
+        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel.openCreateBookmarkDialog()
+        assertTrue(viewModel.createBookmarkUiState.first() is BookmarkListViewModel.CreateBookmarkUiState.Open)
+    }
+
+    @Test
+    fun `closeCreateBookmarkDialog sets CreateBookmarkUiState to Closed`() = runTest {
+        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel.openCreateBookmarkDialog()
+        viewModel.closeCreateBookmarkDialog()
+        assertTrue(viewModel.createBookmarkUiState.first() is BookmarkListViewModel.CreateBookmarkUiState.Closed)
+    }
+
+    @Test
+    fun `updateCreateBookmarkTitle updates title and enables create button if URL is valid`() =
+        runTest {
+            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+            viewModel.openCreateBookmarkDialog()
+
+            val validUrl = "https://example.com"
+            viewModel.updateCreateBookmarkUrl(validUrl)
+            viewModel.updateCreateBookmarkTitle("Test Title")
+
+            val state = viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
+            assertEquals("Test Title", state.title)
+            assertEquals(validUrl, state.url)
+            assertTrue(state.isCreateEnabled)
+        }
+
+    @Test
+    fun `updateCreateBookmarkUrl updates url and enables create button if title is present`() =
+        runTest {
+            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+            viewModel.openCreateBookmarkDialog()
+
+            viewModel.updateCreateBookmarkTitle("Test Title")
+            val validUrl = "https://example.com"
+            viewModel.updateCreateBookmarkUrl(validUrl)
+
+            val state = viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
+            assertEquals("Test Title", state.title)
+            assertEquals(validUrl, state.url)
+            assertTrue(state.isCreateEnabled)
+        }
+
+    @Test
+    fun `updateCreateBookmarkUrl updates urlError if URL is invalid`() = runTest {
+        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel.openCreateBookmarkDialog()
+
+        val invalidUrl = "invalid-url"
+        viewModel.updateCreateBookmarkUrl(invalidUrl)
+
+        val state = viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
+        assertEquals(R.string.account_settings_url_error, state.urlError)
+        assertFalse(state.isCreateEnabled)
+    }
+
+    @Test
+    fun `createBookmark calls repository and sets state to Success`() = runTest {
+        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel.openCreateBookmarkDialog()
+
+        val title = "Test Title"
+        val url = "https://example.com"
+        coEvery { bookmarkRepository.createBookmark(title, url) } returns "bookmark123"
+
+        viewModel.updateCreateBookmarkTitle(title)
+        viewModel.updateCreateBookmarkUrl(url)
+        viewModel.createBookmark()
+        runCurrent()
+
+        coVerify { bookmarkRepository.createBookmark(title, url) }
+        println("state=${viewModel.createBookmarkUiState.value}")
+        assertTrue(viewModel.createBookmarkUiState.value is BookmarkListViewModel.CreateBookmarkUiState.Success)
+    }
+
+    @Test
+    fun `createBookmark sets state to Error if repository call fails`() = runTest {
+        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel.openCreateBookmarkDialog()
+
+        val title = "Test Title"
+        val url = "https://example.com"
+        val errorMessage = "Failed to create bookmark"
+        coEvery { bookmarkRepository.createBookmark(title, url) } throws Exception(errorMessage)
+
+        viewModel.updateCreateBookmarkTitle(title)
+        viewModel.updateCreateBookmarkUrl(url)
+        viewModel.createBookmark()
+
+        val uiStates = viewModel.createBookmarkUiState.take(2).toList()
+        assertTrue(uiStates[1] is BookmarkListViewModel.CreateBookmarkUiState.Error)
+        assertEquals(errorMessage, (uiStates[1] as BookmarkListViewModel.CreateBookmarkUiState.Error).message)
     }
 }
