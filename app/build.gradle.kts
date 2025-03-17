@@ -23,14 +23,54 @@ android {
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        create("release") {
+            val appKeystoreFile = System.getenv()["KEYSTORE"] ?: "none"
+            val appKeyAlias = System.getenv()["KEY_ALIAS"]
+            val appKeystorePassword = System.getenv()["KEYSTORE_PASSWORD"]
+            val appKeyPassword = System.getenv()["KEY_PASSWORD"]
 
+            keyAlias = appKeyAlias
+            storeFile = file(appKeystoreFile)
+            storePassword = appKeystorePassword
+            keyPassword = appKeyPassword
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
     buildTypes {
         release {
             isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = true
+        }
+    }
+    flavorDimensions += "version"
+    productFlavors {
+        create("githubSnapshot") {
+            dimension = "version"
+            applicationIdSuffix = ".snapshot"
+            versionName = System.getenv()["SNAPSHOT_VERSION_NAME"] ?: "snapshot"
+            versionCode = System.getenv()["SNAPSHOT_VERSION_CODE"]?.toInt() ?: 1
+            signingConfig = signingConfigs.getByName("release")
+        }
+        create("githubRelease") {
+            dimension = "version"
+            applicationIdSuffix = ".release"
+            versionName = System.getenv()["RELEASE_VERSION_NAME"] ?: "0.0.0"
+            versionCode = System.getenv()["RELEASE_VERSION_CODE"]?.toInt() ?: 1
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     buildFeatures {
