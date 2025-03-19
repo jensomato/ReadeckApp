@@ -3,65 +3,53 @@ package de.readeckapp.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import androidx.compose.runtime.mutableStateOf
-import de.readeckapp.domain.model.Bookmark
-import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    private val settingsDataStore: SettingsDataStore,
-    private val authenticateUseCase: AuthenticateUseCase
+    settingsDataStore: SettingsDataStore
 ) : ViewModel() {
-    val bookmarks = mutableStateOf<List<Bookmark>>(emptyList())
-    private val _uiState = MutableStateFlow(SettingsUiState("", "", ""))
-    val uiState = _uiState.asStateFlow()
+    private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
+    val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
+    val uiState: StateFlow<SettingsUiState> =
+        settingsDataStore.usernameFlow.map { SettingsUiState(username = it) }.stateIn(
+            viewModelScope,
+            SharingStarted.WhileSubscribed(5000),
+            SettingsUiState(username = null)
+        )
 
-    init {
-        viewModelScope.launch {
-            _uiState.value = SettingsUiState(
-                settingsDataStore.urlFlow.value ?: "",
-                settingsDataStore.usernameFlow.value ?: "",
-                "pass"
-            )
-
-        }
+    fun onNavigationEventConsumed() {
+        _navigationEvent.update { null } // Reset the event
     }
 
-    fun saveSettings() {
-        viewModelScope.launch {
-            val success = authenticateUseCase.execute(
-                _uiState.value.url,
-                _uiState.value.username,
-                _uiState.value.password
-            )
-            Timber.d("success=$success")
-        }
+    fun onClickAccount() {
+        _navigationEvent.update { NavigationEvent.NavigateToAccountSettings }
     }
 
-    fun onUrlChanged(value: String) {
-        _uiState.update { it.copy(url = value) }
+    fun onClickBack() {
+        _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
-    fun onUsernameChanged(value: String) {
-        _uiState.update { it.copy(username = value) }
+    fun onClickOpenSourceLibraries() {
+        _navigationEvent.update { NavigationEvent.NavigateToOpenSourceLibraries }
     }
 
-    fun onPasswordChanged(value: String) {
-        _uiState.update { it.copy(password = value) }
+    sealed class NavigationEvent {
+        data object NavigateToAccountSettings : NavigationEvent()
+        data object NavigateToOpenSourceLibraries : NavigationEvent()
+        data object NavigateBack : NavigationEvent()
     }
-
 
 }
 
 data class SettingsUiState(
-    val url: String,
-    val username: String,
-    val password: String
+    val username: String?,
 )

@@ -1,5 +1,5 @@
 plugins {
-//    alias(libs.plugins.kotlin.kapt)
+    alias(libs.plugins.kotlin.kapt)
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.android)
     alias(libs.plugins.kotlin.compose)
@@ -7,6 +7,7 @@ plugins {
     alias(libs.plugins.kotlin.serialization)
     alias(libs.plugins.androidx.room)
     alias(libs.plugins.ksp)
+    alias(libs.plugins.aboutLibraries)
 }
 
 android {
@@ -17,19 +18,67 @@ android {
         applicationId = "de.readeckapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1
-        versionName = "1.0"
+        versionCode = 100
+        versionName = "0.1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
+    signingConfigs {
+        create("release") {
+            val appKeystoreFile = System.getenv()["KEYSTORE"] ?: "none"
+            val appKeyAlias = System.getenv()["KEY_ALIAS"]
+            val appKeystorePassword = System.getenv()["KEYSTORE_PASSWORD"]
+            val appKeyPassword = System.getenv()["KEY_PASSWORD"]
 
+            keyAlias = appKeyAlias
+            storeFile = file(appKeystoreFile)
+            storePassword = appKeystorePassword
+            keyPassword = appKeyPassword
+            enableV1Signing = true
+            enableV2Signing = true
+            enableV3Signing = true
+            enableV4Signing = true
+        }
+    }
     buildTypes {
         release {
-            isMinifyEnabled = false
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = false
             proguardFiles(
                 getDefaultProguardFile("proguard-android-optimize.txt"),
                 "proguard-rules.pro"
             )
+        }
+        debug {
+            isMinifyEnabled = true
+            isShrinkResources = true
+            isDebuggable = true
+        }
+        applicationVariants.all {
+            outputs.all {
+                if (outputFile != null && (outputFile.name.endsWith(".apk") || outputFile.name.endsWith(".aab"))) {
+                    val extension = if (outputFile.name.endsWith(".apk")) "apk" else "aab"
+                    val newName = "ReadeckApp-${versionName}.${extension}"
+                    (this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl)?.outputFileName = newName
+                }
+            }
+        }
+    }
+    flavorDimensions += "version"
+    productFlavors {
+        create("githubSnapshot") {
+            dimension = "version"
+            applicationIdSuffix = ".snapshot"
+            versionName = System.getenv()["SNAPSHOT_VERSION_NAME"] ?: "${defaultConfig.versionName}-snapshot"
+            versionCode = System.getenv()["SNAPSHOT_VERSION_CODE"]?.toInt() ?: defaultConfig.versionCode
+            signingConfig = signingConfigs.getByName("release")
+        }
+        create("githubRelease") {
+            dimension = "version"
+            versionName = System.getenv()["RELEASE_VERSION_NAME"] ?: defaultConfig.versionName
+            versionCode = System.getenv()["RELEASE_VERSION_CODE"]?.toInt() ?: defaultConfig.versionCode
+            signingConfig = signingConfigs.getByName("release")
         }
     }
     buildFeatures {
@@ -56,6 +105,21 @@ android {
     }
 }
 
+tasks.register("printVersionName") {
+    doLast {
+        // Get the versionName from defaultConfig
+        val versionName = android.defaultConfig.versionName
+
+        // Check if the outputFormat property is provided, default to 'default' if not
+        val outputFormat = project.findProperty("outputFormat")?.toString() ?: "default"
+        if (outputFormat.contains("plain")) {
+            println(versionName) // Plain output for GitHub Actions
+        } else {
+            println("versionName=$versionName") // Default, more verbose output
+        }
+    }
+}
+
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -66,6 +130,7 @@ dependencies {
     implementation(libs.androidx.ui.tooling.preview)
     implementation(libs.androidx.material3)
     implementation(libs.androidx.junit)
+    implementation(libs.androidx.ui.test.junit4.android)
     // hilt
     ksp(libs.dagger.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
@@ -102,7 +167,10 @@ dependencies {
     implementation(libs.kotlin.serialization.json)
     implementation(libs.kotlinx.datetime)
     ksp(libs.androidx.room.compiler)
+    kapt(libs.retrofit.response.type.keeper)
     implementation(libs.coil.compose)
+    implementation(libs.coil.network.okhttp)
+    implementation(libs.coil.svg)
     implementation(libs.okhttp3.logging.interceptor)
     testImplementation(libs.okhttp3.mockserver)
     implementation(libs.androidx.datastore.preferences)
@@ -111,4 +179,11 @@ dependencies {
     implementation(libs.google.crypto.tink)
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.androidx.hilt.work)
+
+    implementation(libs.aboutlibraries.core)
+    implementation(libs.aboutlibraries.compose.m3)
+}
+
+aboutLibraries {
+    configPath = "config"
 }

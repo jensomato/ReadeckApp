@@ -1,0 +1,10 @@
+{
+  "uniqueId": "sakura.css",
+  "developers": [ { "name": "Mitesh Shah" }],
+  "artifactVersion": "1.5.0",
+  "description": "a minimal css framework/theme",
+  "name": "Sakura.css",
+  "licenses": [
+    "MIT"
+  ]
+}

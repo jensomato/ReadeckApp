@@ -1,7 +1,53 @@
 <resources>
     <string name="app_name">Readeck App</string>
-    <string name="title_activity_bookmark_list">BookmarkListActivity</string>
-    <string name="title_home">Home</string>
-    <string name="title_dashboard">Dashboard</string>
-    <string name="title_notifications">Notifications</string>
+    <string name="back">Back</string>
+    <string name="settings_topbar_title">Settings</string>
+    <string name="settings_account_title">Account</string>
+    <string name="settings_account_subtitle_default">Not logged in</string>
+    <string name="accountsettings_topbar_title">Account</string>
+    <string name="account_settings_topbar_title">Readeck URL</string>
+    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
+    <string name="account_settings_url_label">Readeck URL</string>
+    <string name="account_settings_username_placeholder">username</string>
+    <string name="account_settings_username_label">Username</string>
+    <string name="account_settings_password_label">Password</string>
+    <string name="account_settings_password_placeholder">password</string>
+    <string name="account_settings_login">Login</string>
+    <string name="account_settings_url_error">Invalid URL</string>
+    <string name="account_settings_username_error">Username cannot be empty</string>
+    <string name="account_settings_password_error">Password cannot be empty</string>
+    <string name="authors" translatable="true">
+{count, plural,
+zero{}
+one{from {author}}
+many{from {author} et. al.}
+other{}
+}
+    </string>
+    <string name="settings_open_source_libraries">Open Source Libraries</string>
+    <string name="settings_open_source_libraries_subtitle">View the open source libraries used in this app.</string>
+    <string name="bookmarks">Bookmarks</string>
+    <string name="menu">Menu</string>
+    <string name="refresh_bookmarks">Refresh Bookmarks</string>
+    <string name="all">All</string>
+    <string name="unread">Unread</string>
+    <string name="archive">Archive</string>
+    <string name="favorites">Favorites</string>
+    <string name="articles">Articles</string>
+    <string name="videos">Videos</string>
+    <string name="pictures">Pictures</string>
+    <string name="settings">Settings</string>
+    <string name="an_error_occurred">An error occurred.</string>
+    <string name="no_bookmarks_found">No bookmarks found.</string>
+    <string name="add_bookmark">Add Bookmark</string>
+    <string name="title">Title (Optional)</string>
+    <string name="url">URL</string>
+    <string name="invalid_url">Invalid URL</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="create_bookmark_error">Error creating bookmark: %1$s</string>
+    <string name="add_new_bookmark">Add New Bookmark</string>
+    <string name="create">Create</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
 </resources>

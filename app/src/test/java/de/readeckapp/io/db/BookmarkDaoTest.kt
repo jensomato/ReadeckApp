@@ -10,6 +10,7 @@ import de.readeckapp.io.db.model.ResourceEntity
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
+import kotlinx.datetime.Instant
 import kotlinx.datetime.LocalDate
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.atStartOfDayIn
@@ -17,6 +18,7 @@ import kotlinx.datetime.plus
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
 import org.junit.experimental.runners.Enclosed
@@ -26,7 +28,7 @@ import org.robolectric.RobolectricTestRunner
 
 @RunWith(Enclosed::class)
 class BookmarkDaoTest {
-    internal abstract class BaseTest() {
+    internal abstract class BaseTest {
         lateinit var bookmarkDao: BookmarkDao
         private lateinit var db: ReadeckDatabase
         val testDispatcher = StandardTestDispatcher()
@@ -45,7 +47,7 @@ class BookmarkDaoTest {
             db.close()
         }
 
-        fun generateTestData() = runTest {
+        private fun generateTestData() = runTest {
             val startDate = LocalDate(2025, 1, 1)
             val bookmarkEntities = (0 until 30).map { index ->
                 val currentDate = startDate.plus(index.toLong(), kotlinx.datetime.DateTimeUnit.DAY)
@@ -129,6 +131,24 @@ class BookmarkDaoTest {
             val lastUpdated = bookmarkDao.getLastUpdatedBookmark()
             assertNotNull(lastUpdated)
             assertEquals("test-29", lastUpdated?.id)
+        }
+
+    }
+
+    @RunWith(RobolectricTestRunner::class)
+    internal class GetAllBookmarksIsSortedByCreationDateTest : BaseTest() {
+        @Test
+        fun testGetAllBookmarksIsSortedByCreationDate() = runTest(testDispatcher) {
+            val flow = bookmarkDao.getAllBookmarks()
+            val list = flow.first()
+            assertEquals(30, list.size)
+            var prevDate: Instant? = null
+            list.forEach { bookmark ->
+                prevDate?.let {
+                    assertTrue("wrong sort order", it >= bookmark.created)
+                }
+                prevDate = bookmark.created
+            }
         }
 
     }

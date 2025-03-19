@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources xmlns:tools="http://schemas.android.com/tools">
+    <string name="app_name">Readeck App</string>
+    <string name="back">Zurück</string>
+    <string name="settings_topbar_title">Einstellungen</string>
+    <string name="settings_account_title">Konto</string>
+    <string name="settings_account_subtitle_default">Nicht eingeloggt</string>
+    <string name="accountsettings_topbar_title">Konto</string>
+    <string name="account_settings_topbar_title">Readeck URL</string>
+    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
+    <string name="account_settings_url_label">Readeck URL</string>
+    <string name="account_settings_username_placeholder">Benutzername</string>
+    <string name="account_settings_username_label">Benutzername</string>
+    <string name="account_settings_password_label">Passwort</string>
+    <string name="account_settings_password_placeholder">Passwort</string>
+    <string name="account_settings_login">Einloggen</string>
+    <string name="account_settings_url_error">Ungültige URL</string>
+    <string name="account_settings_username_error">Benutzername darf nicht leer sein</string>
+    <string name="account_settings_password_error">Passwort darf nicht leer sein</string>
+    <string name="authors" translatable="true">
+{count, plural,
+zero{}
+one{von {author}}
+many{von {author} et. al.}
+other{}
+}
+    </string>
+    <string name="settings_open_source_libraries">Open-Source-Bibliotheken</string>
+    <string name="settings_open_source_libraries_subtitle">Zeige die in dieser App verwendeten Open-Source-Bibliotheken an.</string>
+    <string name="bookmarks">Lesezeichen</string>
+    <string name="menu">Menü</string>
+    <string name="refresh_bookmarks">Lesezeichen aktualisieren</string>
+    <string name="all">Alle</string>
+    <string name="unread">Ungelesen</string>
+    <string name="archive">Archiv</string>
+    <string name="favorites">Favoriten</string>
+    <string name="articles">Artikel</string>
+    <string name="videos">Videos</string>
+    <string name="pictures">Bilder</string>
+    <string name="settings">Einstellungen</string>
+    <string name="an_error_occurred">Ein Fehler ist aufgetreten.</string>
+    <string name="no_bookmarks_found">Keine Lesezeichen gefunden.</string>
+    <string name="add_bookmark">Lesezeichen hinzufügen</string>
+    <string name="title">Titel (Optional)</string>
+    <string name="url">URL</string>
+    <string name="invalid_url">Ungültige URL</string>
+    <string name="save">Speichern</string>
+    <string name="cancel">Abbrechen</string>
+    <string name="create_bookmark_error">Fehler beim Erstellen des Lesezeichens: %1$s</string>
+    <string name="add_new_bookmark">Neues Lesezeichen hinzufügen</string>
+    <string name="create">Erstellen</string>
+    <string name="error">Fehler</string>
+    <string name="ok">OK</string>
+</resources>

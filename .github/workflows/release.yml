@@ -1,0 +1,48 @@
+name: Release Build and Deploy
+
+on:
+  push:
+    branches:
+      - 'release/*'
+
+jobs:
+  build-sign-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ github.workspace }}/keystore.jks
+
+      - name: Build and Sign Release APK
+        run: ./gradlew assembleGithubReleaseRelease
+        env: 
+          KEY_ALIAS: ${{ secrets.ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE: ${{ github.workspace }}/keystore.jks
+
+      - name: Get Version Name from Gradle
+        id: get_version
+        run: echo "version=$(./gradlew -q printVersionName -PoutputFormat=plain)" >> $GITHUB_OUTPUT
+
+      - name: Upload APK to GitHub Release Artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: app-release-${{ steps.get_version.outputs.version }}
+          path: app/build/outputs/apk/githubRelease/release/*.apk

@@ -16,7 +16,7 @@ interface BookmarkDao {
     @Query("SELECT * from bookmarks")
     suspend fun getBookmarks(): List<BookmarkEntity>
 
-    @Query("SELECT * from bookmarks")
+    @Query("SELECT * FROM bookmarks ORDER BY created DESC")
     fun getAllBookmarks(): Flow<List<BookmarkEntity>>
 
     @Query("SELECT * from bookmarks WHERE type = 'picture'")
@@ -36,6 +36,12 @@ interface BookmarkDao {
 
     @Query("SELECT * FROM bookmarks WHERE id = :id")
     suspend fun getBookmarkById(id: String): BookmarkEntity
+
+    @Query("SELECT * FROM bookmarks WHERE id = :id")
+    fun observeBookmark(id: String): Flow<BookmarkEntity>
+
+    @Query("DELETE FROM bookmarks")
+    suspend fun deleteAllBookmarks()
 
     @RawQuery(observedEntities = [BookmarkEntity::class])
     fun getBookmarksByFiltersDynamic(query: SupportSQLiteQuery): Flow<List<BookmarkEntity>>
@@ -70,6 +76,7 @@ interface BookmarkDao {
                 append(" AND isMarked = ?")
                 args.add(it)
             }
+            append(" ORDER BY created DESC")
         }.let { SimpleSQLiteQuery(it, args.toTypedArray()) }
         System.out.println("query=${sqlQuery.sql}")
         Timber.d("query=$sqlQuery")
