@@ -1,0 +1,44 @@
+name: Create GitHub Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  create-release:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      - name: Get Version from Tag
+        id: get_version
+        run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT # Extract version from tag
+
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-${{ steps.get_version.outputs.version }} # Match the name used in release.yml
+          path: ./artifacts # Download to a dedicated directory
+
+      - name: Create Release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ github.ref }}
+          release_name: Release v${{ steps.get_version.outputs.version }}
+          draft: true
+          prerelease: true
+
+      - name: Upload Release Asset
+        uses: actions/upload-release-asset@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          upload_url: ${{ steps.create_release.outputs.upload_url }}
+          asset_path: ./artifacts/*.aab  # Path where the artifact was downloaded
+          asset_name: app-release-${{ steps.get_version.outputs.version }}.aab # Use version
+          asset_content_type: application/vnd.android.package-archive
