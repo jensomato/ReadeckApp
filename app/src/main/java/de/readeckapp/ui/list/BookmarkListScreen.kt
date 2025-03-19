@@ -313,11 +313,6 @@ fun CreateBookmarkDialog(
         text = {
             Column {
                 OutlinedTextField(
-                    value = title,
-                    onValueChange = { onTitleChange(it) },
-                    label = { Text(stringResource(id = R.string.title)) }
-                )
-                OutlinedTextField(
                     value = url,
                     onValueChange = { onUrlChange(it) },
                     isError = urlError != null,
@@ -327,6 +322,11 @@ fun CreateBookmarkDialog(
                             Text(text = stringResource(it))
                         }
                     }
+                )
+                OutlinedTextField(
+                    value = title,
+                    onValueChange = { onTitleChange(it) },
+                    label = { Text(stringResource(id = R.string.title)) }
                 )
             }
         },

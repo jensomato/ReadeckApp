@@ -41,7 +41,7 @@ other{}
     <string name="an_error_occurred">Ein Fehler ist aufgetreten.</string>
     <string name="no_bookmarks_found">Keine Lesezeichen gefunden.</string>
     <string name="add_bookmark">Lesezeichen hinzufügen</string>
-    <string name="title">Titel</string>
+    <string name="title">Titel (Optional)</string>
     <string name="url">URL</string>
     <string name="invalid_url">Ungültige URL</string>
     <string name="save">Speichern</string>
