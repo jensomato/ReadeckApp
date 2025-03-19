@@ -39,4 +39,15 @@ other{}
     <string name="settings">Settings</string>
     <string name="an_error_occurred">An error occurred.</string>
     <string name="no_bookmarks_found">No bookmarks found.</string>
+    <string name="add_bookmark">Add Bookmark</string>
+    <string name="title">Title (Optional)</string>
+    <string name="url">URL</string>
+    <string name="invalid_url">Invalid URL</string>
+    <string name="save">Save</string>
+    <string name="cancel">Cancel</string>
+    <string name="create_bookmark_error">Error creating bookmark: %1$s</string>
+    <string name="add_new_bookmark">Add New Bookmark</string>
+    <string name="create">Create</string>
+    <string name="error">Error</string>
+    <string name="ok">OK</string>
 </resources>

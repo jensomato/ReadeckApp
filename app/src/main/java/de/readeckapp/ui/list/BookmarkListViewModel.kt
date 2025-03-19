@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
+import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -33,6 +35,12 @@ class BookmarkListViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState = _uiState.asStateFlow()
+
+    // Add state for the CreateBookmarkDialog
+    private val _createBookmarkUiState =
+        MutableStateFlow<CreateBookmarkUiState>(CreateBookmarkUiState.Closed)
+    val createBookmarkUiState: StateFlow<CreateBookmarkUiState> =
+        _createBookmarkUiState.asStateFlow()
 
     init {
         viewModelScope.launch {
@@ -156,6 +164,61 @@ class BookmarkListViewModel @Inject constructor(
         Timber.d("onToggleArchiveBookmark")
     }
 
+    // Create Bookmark Dialog
+    fun openCreateBookmarkDialog() {
+        _createBookmarkUiState.value = CreateBookmarkUiState.Open(
+            title = "",
+            url = "",
+            urlError = null,
+            isCreateEnabled = false
+        )
+    }
+
+    fun closeCreateBookmarkDialog() {
+        _createBookmarkUiState.value = CreateBookmarkUiState.Closed
+    }
+
+    fun updateCreateBookmarkTitle(title: String) {
+        _createBookmarkUiState.update {
+            (it as? CreateBookmarkUiState.Open)?.copy(
+                title = title,
+                isCreateEnabled = it.url.isValidUrl()
+            ) ?: it
+        }
+    }
+
+    fun updateCreateBookmarkUrl(url: String) {
+        val isValidUrl = url.isValidUrl()
+        val urlError = if (!isValidUrl && url.isNotEmpty()) {
+            R.string.account_settings_url_error // Use resource ID
+        } else {
+            null
+        }
+        _createBookmarkUiState.update {
+            (it as? CreateBookmarkUiState.Open)?.copy(
+                url = url,
+                urlError = urlError,
+                isCreateEnabled = isValidUrl
+            ) ?: it
+        }
+    }
+
+    fun createBookmark() {
+        viewModelScope.launch {
+            val url = (_createBookmarkUiState.value as CreateBookmarkUiState.Open).url
+            val title = (_createBookmarkUiState.value as CreateBookmarkUiState.Open).title
+
+            _createBookmarkUiState.value = CreateBookmarkUiState.Loading
+            try {
+                bookmarkRepository.createBookmark(title = title, url = url)
+                _createBookmarkUiState.value = CreateBookmarkUiState.Success
+            } catch (e: Exception) {
+                _createBookmarkUiState.value =
+                    CreateBookmarkUiState.Error(e.message ?: "Unknown error")
+            }
+        }
+    }
+
     sealed class NavigationEvent {
         data object NavigateToSettings : NavigationEvent()
         data class NavigateToBookmarkDetail(val bookmarkId: String) : NavigationEvent()
@@ -174,4 +237,17 @@ class BookmarkListViewModel @Inject constructor(
         data object Error : UiState()
     }
 
+    sealed class CreateBookmarkUiState {
+        data object Closed : CreateBookmarkUiState()
+        data class Open(
+            val title: String,
+            val url: String,
+            val urlError: Int?,
+            val isCreateEnabled: Boolean
+        ) : CreateBookmarkUiState()
+
+        data object Loading : CreateBookmarkUiState()
+        data object Success : CreateBookmarkUiState()
+        data class Error(val message: String) : CreateBookmarkUiState()
+    }
 }
