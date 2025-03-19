@@ -55,21 +55,29 @@ android {
             isShrinkResources = true
             isDebuggable = true
         }
+        applicationVariants.all {
+            outputs.all {
+                if (outputFile != null && (outputFile.name.endsWith(".apk") || outputFile.name.endsWith(".aab"))) {
+                    val extension = if (outputFile.name.endsWith(".apk")) "apk" else "aab"
+                    val newName = "ReadeckApp-${versionName}.${extension}"
+                    (this as? com.android.build.gradle.internal.api.BaseVariantOutputImpl)?.outputFileName = newName
+                }
+            }
+        }
     }
     flavorDimensions += "version"
     productFlavors {
         create("githubSnapshot") {
             dimension = "version"
             applicationIdSuffix = ".snapshot"
-            versionName = System.getenv()["SNAPSHOT_VERSION_NAME"] ?: "snapshot"
-            versionCode = System.getenv()["SNAPSHOT_VERSION_CODE"]?.toInt() ?: 1
+            versionName = System.getenv()["SNAPSHOT_VERSION_NAME"] ?: "${defaultConfig.versionName}-snapshot"
+            versionCode = System.getenv()["SNAPSHOT_VERSION_CODE"]?.toInt() ?: defaultConfig.versionCode
             signingConfig = signingConfigs.getByName("release")
         }
         create("githubRelease") {
             dimension = "version"
-            applicationIdSuffix = ".release"
-            versionName = System.getenv()["RELEASE_VERSION_NAME"] ?: "0.0.0"
-            versionCode = System.getenv()["RELEASE_VERSION_CODE"]?.toInt() ?: 1
+            versionName = System.getenv()["RELEASE_VERSION_NAME"] ?: defaultConfig.versionName
+            versionCode = System.getenv()["RELEASE_VERSION_CODE"]?.toInt() ?: defaultConfig.versionCode
             signingConfig = signingConfigs.getByName("release")
         }
     }
@@ -93,6 +101,21 @@ android {
     testOptions {
         unitTests {
             isIncludeAndroidResources = true
+        }
+    }
+}
+
+tasks.register("printVersionName") {
+    doLast {
+        // Get the versionName from defaultConfig
+        val versionName = android.defaultConfig.versionName
+
+        // Check if the outputFormat property is provided, default to 'default' if not
+        val outputFormat = project.findProperty("outputFormat")?.toString() ?: "default"
+        if (outputFormat.contains("plain")) {
+            println(versionName) // Plain output for GitHub Actions
+        } else {
+            println("versionName=$versionName") // Default, more verbose output
         }
     }
 }
