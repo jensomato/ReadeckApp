@@ -3,7 +3,7 @@ package de.readeckapp.ui.navigation
 import kotlinx.serialization.Serializable
 
 @Serializable
-object BookmarkListRoute
+data class BookmarkListRoute(val sharedUrl: String? = null)
 
 @Serializable
 data class BookmarkDetailRoute(val bookmarkId: String)

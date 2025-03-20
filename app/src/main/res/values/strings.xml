@@ -50,4 +50,5 @@ other{}
     <string name="create">Create</string>
     <string name="error">Error</string>
     <string name="ok">OK</string>
+    <string name="not_valid_url">Not a valid URL</string>
 </resources>

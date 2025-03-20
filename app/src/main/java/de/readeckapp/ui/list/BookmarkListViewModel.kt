@@ -1,6 +1,7 @@
 package de.readeckapp.ui.list
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -24,7 +25,8 @@ import javax.inject.Inject
 class BookmarkListViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     @ApplicationContext private val context: Context, // Inject Context
-    private val settingsDataStore: SettingsDataStore // Inject SettingsDataStore
+    private val settingsDataStore: SettingsDataStore, // Inject SettingsDataStore
+    savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _navigationEvent =
         MutableStateFlow<NavigationEvent?>(null) // Using StateFlow for navigation events
@@ -43,6 +45,17 @@ class BookmarkListViewModel @Inject constructor(
         _createBookmarkUiState.asStateFlow()
 
     init {
+        val sharedUrl = savedStateHandle.get<String>("sharedUrl")
+
+        if (sharedUrl != null) {
+            _createBookmarkUiState.value = CreateBookmarkUiState.Open(
+                title = "",
+                url = sharedUrl,
+                urlError = null,
+                isCreateEnabled = sharedUrl.isValidUrl()
+            )
+        }
+
         viewModelScope.launch {
             filterState.collectLatest { filterState ->
                 bookmarkRepository.observeBookmarks(
