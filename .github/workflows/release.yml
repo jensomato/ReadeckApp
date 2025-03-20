@@ -1,12 +1,12 @@
-name: Release Build and Deploy
+name: Release Build and Github Release
 
 on:
   push:
-    branches:
-      - 'release/*'
+    tags:
+      - 'v*'
 
 jobs:
-  build-sign-and-deploy:
+  build-and-sign:
     runs-on: ubuntu-latest
 
     steps:
@@ -37,12 +37,42 @@ jobs:
           KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
           KEYSTORE: ${{ github.workspace }}/keystore.jks
 
-      - name: Get Version Name from Gradle
+      - name: Get Version from Tag
         id: get_version
-        run: echo "version=$(./gradlew -q printVersionName -PoutputFormat=plain)" >> $GITHUB_OUTPUT
+        run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
 
       - name: Upload APK to GitHub Release Artifacts
         uses: actions/upload-artifact@v4
         with:
           name: app-release-${{ steps.get_version.outputs.version }}
           path: app/build/outputs/apk/githubRelease/release/*.apk
+
+  create-release:
+    needs: build-and-sign
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Get Version from Tag
+        id: get_version
+        run: echo "version=${GITHUB_REF/refs\/tags\/v/}" >> $GITHUB_OUTPUT
+
+      - name: Download Release Artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-release-${{ steps.get_version.outputs.version }}
+          path: ./artifacts # Download to a dedicated directory
+
+      - name: Create Release
+        id: create_release
+        uses: ncipollo/release-action@v1.16.0
+        with:
+          allowUpdates: false
+          prerelease: true
+          draft: true
+          name: Release v${{ steps.get_version.outputs.version }}
+          tag: ${{ github.ref }}
+          artifacts: "./artifacts/*.apk"
+          token: ${{ secrets.GITHUB_TOKEN }}
