@@ -105,21 +105,6 @@ android {
     }
 }
 
-tasks.register("printVersionName") {
-    doLast {
-        // Get the versionName from defaultConfig
-        val versionName = android.defaultConfig.versionName
-
-        // Check if the outputFormat property is provided, default to 'default' if not
-        val outputFormat = project.findProperty("outputFormat")?.toString() ?: "default"
-        if (outputFormat.contains("plain")) {
-            println(versionName) // Plain output for GitHub Actions
-        } else {
-            println("versionName=$versionName") // Default, more verbose output
-        }
-    }
-}
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
