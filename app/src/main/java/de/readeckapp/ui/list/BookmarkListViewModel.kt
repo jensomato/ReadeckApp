@@ -48,10 +48,15 @@ class BookmarkListViewModel @Inject constructor(
         val sharedUrl = savedStateHandle.get<String>("sharedUrl")
 
         if (sharedUrl != null) {
+            val urlError = if (!sharedUrl.isValidUrl()) {
+                R.string.account_settings_url_error // Use resource ID
+            } else {
+                null
+            }
             _createBookmarkUiState.value = CreateBookmarkUiState.Open(
                 title = "",
                 url = sharedUrl,
-                urlError = null,
+                urlError = urlError,
                 isCreateEnabled = sharedUrl.isValidUrl()
             )
         }
