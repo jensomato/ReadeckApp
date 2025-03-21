@@ -4,12 +4,20 @@ import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import android.os.Bundle
+import androidx.compose.runtime.Composable
+import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
 import de.readeckapp.ui.detail.BookmarkDetailScreen
 import de.readeckapp.ui.list.BookmarkListScreen
+import de.readeckapp.ui.navigation.AccountSettingsRoute
+import de.readeckapp.ui.navigation.BookmarkDetailRoute
+import de.readeckapp.ui.navigation.BookmarkListRoute
+import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
+import de.readeckapp.ui.navigation.SettingsRoute
 import de.readeckapp.ui.settings.AccountSettingsScreen
 import de.readeckapp.ui.settings.OpenSourceLibrariesScreen
 import de.readeckapp.ui.settings.SettingsScreen
@@ -23,23 +31,29 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val navController = rememberNavController()
             ReadeckAppTheme {
-                val navController = rememberNavController()
-                NavHost(navController = navController, startDestination = "bookmarkList") {
-                    composable("bookmarkList") { BookmarkListScreen(navController) }
-                    composable("settings") { SettingsScreen(navController) }
-                    composable("accountSettings") { AccountSettingsScreen(navController) }
-                    composable("bookmarkDetail/{bookmarkId}") { backStackEntry ->
-                        BookmarkDetailScreen(
-                            navController,
-                            backStackEntry.arguments?.getString("bookmarkId")
-                        )
-                    }
-                    composable("openSourceLibraries") {
-                        OpenSourceLibrariesScreen(navHostController = navController)
-                    }
-                }
+                ReadeckNavHost(navController)
             }
+        }
+    }
+}
+
+@Composable
+fun ReadeckNavHost(navController: NavHostController) {
+    NavHost(navController = navController, startDestination = BookmarkListRoute) {
+        composable<BookmarkListRoute> { BookmarkListScreen(navController) }
+        composable<SettingsRoute> { SettingsScreen(navController) }
+        composable<AccountSettingsRoute> { AccountSettingsScreen(navController) }
+        composable<BookmarkDetailRoute> { backStackEntry ->
+            val route = backStackEntry.toRoute<BookmarkDetailRoute>()
+            BookmarkDetailScreen(
+                navController,
+                route.bookmarkId
+            )
+        }
+        composable<OpenSourceLibrariesRoute> {
+            OpenSourceLibrariesScreen(navHostController = navController)
         }
     }
 }
