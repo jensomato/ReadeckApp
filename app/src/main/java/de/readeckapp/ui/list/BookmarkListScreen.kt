@@ -49,6 +49,8 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.ui.navigation.BookmarkDetailRoute
+import de.readeckapp.ui.navigation.SettingsRoute
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,12 +86,12 @@ fun BookmarkListScreen(navHostController: NavHostController) {
         navigationEvent.value?.let { event ->
             when (event) {
                 is BookmarkListViewModel.NavigationEvent.NavigateToSettings -> {
-                    navHostController.navigate("settings")
+                    navHostController.navigate(SettingsRoute)
                     scope.launch { drawerState.close() }
                 }
 
                 is BookmarkListViewModel.NavigationEvent.NavigateToBookmarkDetail -> {
-                    navHostController.navigate("bookmarkDetail/${event.bookmarkId}")
+                    navHostController.navigate(BookmarkDetailRoute(event.bookmarkId))
                 }
             }
             viewModel.onNavigationEventConsumed() // Consume the event

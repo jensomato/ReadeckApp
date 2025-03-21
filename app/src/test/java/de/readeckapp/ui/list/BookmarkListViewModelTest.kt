@@ -1,6 +1,7 @@
 package de.readeckapp.ui.list
 
 import android.content.Context
+import androidx.lifecycle.SavedStateHandle
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
@@ -37,6 +38,7 @@ class BookmarkListViewModelTest {
     private lateinit var settingsDataStore: SettingsDataStore
     private lateinit var context: Context
     private lateinit var viewModel: BookmarkListViewModel
+    private lateinit var savedStateHandle: SavedStateHandle
 
     @Before
     fun setup() {
@@ -44,12 +46,14 @@ class BookmarkListViewModelTest {
         bookmarkRepository = mockk()
         settingsDataStore = mockk()
         context = mockk()
+        savedStateHandle = mockk()
 
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
         every { bookmarkRepository.observeBookmarks(any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
+        every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
     }
 
     @After
@@ -60,7 +64,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `initial uiState is Loading`() {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         assertEquals(BookmarkListViewModel.UiState.Loading, viewModel.uiState.value)
     }
 
@@ -69,7 +73,7 @@ class BookmarkListViewModelTest {
         // TODO: Find a way to properly test WorkManager enqueuing
         //  This requires more setup with Robolectric and testing WorkManager
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         // Just verify that it doesn't throw an exception for now
         viewModel.loadBookmarks()
     }
@@ -77,7 +81,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickAll clears filters`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickAll()
         assertEquals(BookmarkListViewModel.FilterState(), viewModel.filterState.first())
     }
@@ -85,7 +89,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickUnread sets unread filter`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickUnread()
         assertEquals(
             BookmarkListViewModel.FilterState(unread = true),
@@ -96,7 +100,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickArchive sets archived filter`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickArchive()
         assertEquals(
             BookmarkListViewModel.FilterState(archived = true),
@@ -107,7 +111,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickFavorite sets favorite filter`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickFavorite()
         assertEquals(
             BookmarkListViewModel.FilterState(favorite = true),
@@ -118,7 +122,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickArticles sets type filter to Article`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickArticles()
         assertEquals(
             BookmarkListViewModel.FilterState(type = Bookmark.Type.Article),
@@ -129,7 +133,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickPictures sets type filter to Picture`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickPictures()
         assertEquals(
             BookmarkListViewModel.FilterState(type = Bookmark.Type.Picture),
@@ -140,7 +144,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickVideos sets type filter to Video`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickVideos()
         assertEquals(
             BookmarkListViewModel.FilterState(type = Bookmark.Type.Video),
@@ -151,7 +155,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickSettings sets NavigateToSettings navigation event`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickSettings()
         assertEquals(
             BookmarkListViewModel.NavigationEvent.NavigateToSettings,
@@ -162,7 +166,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onClickBookmark sets NavigateToBookmarkDetail navigation event`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         val bookmarkId = "someBookmarkId"
         viewModel.onClickBookmark(bookmarkId)
         assertEquals(
@@ -174,7 +178,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `onNavigationEventConsumed resets navigation event`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.onClickSettings() // Set a navigation event
         viewModel.onNavigationEventConsumed()
         assertEquals(null, viewModel.navigationEvent.first())
@@ -229,7 +233,7 @@ class BookmarkListViewModelTest {
         } returns bookmarkFlow
 
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
 
         viewModel.onClickArticles()
         viewModel.onClickUnread()
@@ -249,7 +253,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `openCreateBookmarkDialog sets CreateBookmarkUiState to Open`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.openCreateBookmarkDialog()
         assertTrue(viewModel.createBookmarkUiState.first() is BookmarkListViewModel.CreateBookmarkUiState.Open)
     }
@@ -257,7 +261,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `closeCreateBookmarkDialog sets CreateBookmarkUiState to Closed`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.openCreateBookmarkDialog()
         viewModel.closeCreateBookmarkDialog()
         assertTrue(viewModel.createBookmarkUiState.first() is BookmarkListViewModel.CreateBookmarkUiState.Closed)
@@ -267,7 +271,7 @@ class BookmarkListViewModelTest {
     fun `updateCreateBookmarkTitle updates title and enables create button if URL is valid`() =
         runTest {
             coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
             viewModel.openCreateBookmarkDialog()
 
             val validUrl = "https://example.com"
@@ -284,7 +288,7 @@ class BookmarkListViewModelTest {
     fun `updateCreateBookmarkUrl updates url and enables create button if title is present`() =
         runTest {
             coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
             viewModel.openCreateBookmarkDialog()
 
             viewModel.updateCreateBookmarkTitle("Test Title")
@@ -300,7 +304,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `updateCreateBookmarkUrl updates urlError if URL is invalid`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.openCreateBookmarkDialog()
 
         val invalidUrl = "invalid-url"
@@ -314,7 +318,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `createBookmark calls repository and sets state to Success`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.openCreateBookmarkDialog()
 
         val title = "Test Title"
@@ -334,7 +338,7 @@ class BookmarkListViewModelTest {
     @Test
     fun `createBookmark sets state to Error if repository call fails`() = runTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore)
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
         viewModel.openCreateBookmarkDialog()
 
         val title = "Test Title"
@@ -350,4 +354,33 @@ class BookmarkListViewModelTest {
         assertTrue(uiStates[1] is BookmarkListViewModel.CreateBookmarkUiState.Error)
         assertEquals(errorMessage, (uiStates[1] as BookmarkListViewModel.CreateBookmarkUiState.Error).message)
     }
+
+    @Test
+    fun `init sets CreateBookmarkUiState to Open with sharedUrl if present and valid`() = runTest {
+        val sharedUrl = "https://example.com"
+        every { savedStateHandle.get<String>("sharedUrl") } returns sharedUrl
+
+        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+        viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
+
+        val state = viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
+        assertEquals(sharedUrl, state.url)
+        assertEquals(null, state.urlError)
+        assertTrue(state.isCreateEnabled)
+    }
+
+    @Test
+    fun `init sets CreateBookmarkUiState to Open with sharedUrl and urlError if present and invalid`() =
+        runTest {
+            val sharedUrl = "invalid-url"
+            every { savedStateHandle.get<String>("sharedUrl") } returns sharedUrl
+
+            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+            viewModel = BookmarkListViewModel(bookmarkRepository, context, settingsDataStore, savedStateHandle)
+
+            val state = viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
+            assertEquals(sharedUrl, state.url)
+            assertEquals(R.string.account_settings_url_error, state.urlError)
+            assertFalse(state.isCreateEnabled)
+        }
 }
