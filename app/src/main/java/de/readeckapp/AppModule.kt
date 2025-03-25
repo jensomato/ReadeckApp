@@ -14,12 +14,15 @@ import dagger.hilt.components.SingletonComponent
 import de.readeckapp.coroutine.ApplicationScope
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.BookmarkRepositoryImpl
+import de.readeckapp.domain.UserRepository
+import de.readeckapp.domain.UserRepositoryImpl
 import de.readeckapp.domain.usecase.LoadArticleUseCase
 import de.readeckapp.io.rest.NetworkModule
 import de.readeckapp.io.rest.ReadeckApi
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
+import kotlinx.serialization.json.Json
 import javax.inject.Singleton
 
 @Module(includes = [NetworkModule::class])
@@ -28,6 +31,9 @@ abstract class AppModule {
 
     @Binds
     abstract fun bindBookmarkRepository(bookmarkRepositoryImpl: BookmarkRepositoryImpl): BookmarkRepository
+
+    @Binds
+    abstract fun bindUserRepository(userRepositoryImpl: UserRepositoryImpl): UserRepository
 
     companion object {
         @Provides
@@ -43,6 +49,15 @@ abstract class AppModule {
         @ApplicationScope
         fun provideApplicationScope(): CoroutineScope {
             return CoroutineScope(Dispatchers.IO + SupervisorJob())
+        }
+
+        @Provides
+        @Singleton
+        fun provideJson(): Json {
+            return Json {
+                ignoreUnknownKeys = true // Handle unknown keys gracefully
+                isLenient = true // Allow lenient parsing
+            }
         }
     }
 }

@@ -1,6 +1,7 @@
 package de.readeckapp.ui.settings
 
-import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.domain.UserRepository
+import de.readeckapp.domain.model.AuthenticationDetails
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -22,15 +23,22 @@ import org.junit.Test
 class SettingsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
-    private lateinit var settingsDataStore: SettingsDataStore
+    private lateinit var userRepository: UserRepository
     private lateinit var viewModel: SettingsViewModel
 
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        settingsDataStore = mockk()
-        coEvery { settingsDataStore.usernameFlow } returns MutableStateFlow("testUser")
-        viewModel = SettingsViewModel(settingsDataStore)
+        userRepository = mockk()
+        coEvery { userRepository.observeAuthenticationDetails() } returns MutableStateFlow(
+            AuthenticationDetails(
+                url = "http://test",
+                username = "testUser",
+                password = "pass",
+                token = "token"
+            )
+        )
+        viewModel = SettingsViewModel(userRepository)
     }
 
     @After

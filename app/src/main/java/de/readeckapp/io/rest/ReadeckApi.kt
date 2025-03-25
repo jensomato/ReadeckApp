@@ -5,7 +5,7 @@ import de.readeckapp.io.rest.model.AuthenticationResponseDto
 import de.readeckapp.io.rest.model.BookmarkDto
 import de.readeckapp.io.rest.model.UserProfileDto
 import de.readeckapp.io.rest.model.CreateBookmarkDto // Import the new DTO
-import de.readeckapp.io.rest.model.SuccessMessageDto
+import de.readeckapp.io.rest.model.StatusMessageDto
 import kotlinx.datetime.Instant
 import retrofit2.Response
 import retrofit2.http.GET
@@ -39,7 +39,7 @@ interface ReadeckApi {
     @POST("bookmarks")
     suspend fun createBookmark(
         @Body body: CreateBookmarkDto
-    ): Response<SuccessMessageDto>
+    ): Response<StatusMessageDto>
 
     data class SortOrder(val sort: Sort, val order: Order = Order.Ascending) {
         override fun toString(): String {
