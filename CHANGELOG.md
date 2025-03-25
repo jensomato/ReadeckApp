@@ -16,6 +16,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix #23: fix error in release workflow
 - Fix #27: Enforce HTTPS and allow cleartext traffic only for ts.net including subdomains.
 - Fix #29, #30: Make login workflow more robust 
+- Fix #18: automatically append /api to base URL if missing in login workflow
 
 ## [0.1.0] - 2025-03-19
 
