@@ -3,7 +3,7 @@ package de.readeckapp.ui.settings
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.domain.UserRepository
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -15,16 +15,15 @@ import javax.inject.Inject
 
 @HiltViewModel
 class SettingsViewModel @Inject constructor(
-    settingsDataStore: SettingsDataStore
+    userRepository: UserRepository
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
-    val uiState: StateFlow<SettingsUiState> =
-        settingsDataStore.usernameFlow.map { SettingsUiState(username = it) }.stateIn(
-            viewModelScope,
-            SharingStarted.WhileSubscribed(5000),
-            SettingsUiState(username = null)
-        )
+    val uiState: StateFlow<SettingsUiState> = userRepository.observeAuthenticationDetails().map { SettingsUiState(username = it?.username) }.stateIn(
+        viewModelScope,
+        SharingStarted.WhileSubscribed(5000),
+        SettingsUiState(username = null)
+    )
 
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event

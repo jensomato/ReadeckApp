@@ -15,4 +15,6 @@ interface SettingsDataStore {
     suspend fun getLastBookmarkTimestamp(): String?
     suspend fun setInitialSyncPerformed(performed: Boolean)
     suspend fun isInitialSyncPerformed(): Boolean
+    suspend fun clearCredentials()
+    suspend fun saveCredentials(url: String, username: String, password: String, token: String)
 }
