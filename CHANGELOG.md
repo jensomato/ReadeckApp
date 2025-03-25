@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.2.0] - 2025-03-25
+
+### Added
+
+- Implemented the ability to receive shared URLs from other apps, automatically opening the create bookmark dialog and pre-populating the URL field. Closes #25
+
+### Fixed
+
+- Fix #23: fix error in release workflow
+- Fix #27: Enforce HTTPS and allow cleartext traffic only for ts.net including subdomains.
+- Fix #29, #30: Make login workflow more robust 
+- Fix #18: automatically append /api to base URL if missing in login workflow
+
 ## [0.1.0] - 2025-03-19
 
 ### Added

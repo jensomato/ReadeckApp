@@ -44,6 +44,11 @@ class AccountSettingsViewModel @Inject constructor(
 
     fun login() {
         viewModelScope.launch {
+            _uiState.value.url!!.also { url ->
+                if (!url.endsWith("/api")) {
+                    _uiState.update { it.copy(url = "$url/api") }
+                }
+            }
             val result = authenticateUseCase.execute(
                 _uiState.value.url!!,
                 _uiState.value.username!!,

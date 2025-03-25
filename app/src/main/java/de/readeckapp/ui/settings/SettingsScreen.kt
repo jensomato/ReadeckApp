@@ -29,6 +29,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import de.readeckapp.R
+import de.readeckapp.ui.navigation.AccountSettingsRoute
+import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
 
 @Composable
 fun SettingsScreen(
@@ -44,10 +46,10 @@ fun SettingsScreen(
         navigationEvent.value?.let { event ->
             when (event) {
                 is SettingsViewModel.NavigationEvent.NavigateToAccountSettings -> {
-                    navHostController.navigate("accountSettings")
+                    navHostController.navigate(AccountSettingsRoute)
                 }
                 is SettingsViewModel.NavigationEvent.NavigateToOpenSourceLibraries -> {
-                    navHostController.navigate("openSourceLibraries")
+                    navHostController.navigate(OpenSourceLibrariesRoute)
                 }
 
                 is SettingsViewModel.NavigationEvent.NavigateBack -> {

@@ -18,8 +18,8 @@ android {
         applicationId = "de.readeckapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 100
-        versionName = "0.1.0"
+        versionCode = 200
+        versionName = "0.2.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
@@ -105,21 +105,6 @@ android {
     }
 }
 
-tasks.register("printVersionName") {
-    doLast {
-        // Get the versionName from defaultConfig
-        val versionName = android.defaultConfig.versionName
-
-        // Check if the outputFormat property is provided, default to 'default' if not
-        val outputFormat = project.findProperty("outputFormat")?.toString() ?: "default"
-        if (outputFormat.contains("plain")) {
-            println(versionName) // Plain output for GitHub Actions
-        } else {
-            println("versionName=$versionName") // Default, more verbose output
-        }
-    }
-}
-
 dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
@@ -152,6 +137,7 @@ dependencies {
     implementation(libs.androidx.lifecycle.viewmodel.ktx)
     implementation(libs.androidx.navigation.fragment.ktx)
     implementation(libs.androidx.navigation.ui.ktx)
+    implementation(libs.androidx.navigation.compose)
     annotationProcessor(libs.androidx.room.compiler)
     testImplementation(libs.junit)
     testImplementation(libs.mockk)

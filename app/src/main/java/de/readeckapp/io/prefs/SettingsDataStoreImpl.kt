@@ -26,24 +26,28 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_INITIAL_SYNC_PERFORMED = "initial_sync_performed"
 
     override fun saveUsername(username: String) {
+        Timber.d("saveUsername")
         encryptedSharedPreferences.edit {
             putString(KEY_USERNAME.name, username)
         }
     }
 
     override fun savePassword(password: String) {
+        Timber.d("savePassword")
         encryptedSharedPreferences.edit {
             putString(KEY_PASSWORD.name, password)
         }
     }
 
     override fun saveToken(token: String) {
+        Timber.d("saveToken")
         encryptedSharedPreferences.edit {
             putString(KEY_TOKEN.name, token)
         }
     }
 
     override fun saveUrl(url: String) {
+        Timber.d("saveUrl")
         encryptedSharedPreferences.edit {
             putString(KEY_URL.name, url)
         }
@@ -72,6 +76,30 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override val usernameFlow = getStringFlow(KEY_USERNAME.name, null)
     override val urlFlow = getStringFlow(KEY_URL.name, null)
     override val passwordFlow = getStringFlow(KEY_PASSWORD.name, null)
+    override suspend fun clearCredentials() {
+        Timber.d("clearCredentials")
+        encryptedSharedPreferences.edit(commit = true) {
+            remove(KEY_USERNAME.name)
+            remove(KEY_PASSWORD.name)
+            remove(KEY_TOKEN.name)
+            remove(KEY_URL.name)
+        }
+    }
+
+    override suspend fun saveCredentials(
+        url: String,
+        username: String,
+        password: String,
+        token: String
+    ) {
+        Timber.d("saveCredentials")
+        encryptedSharedPreferences.edit {
+            putString(KEY_URL.name, url)
+            putString(KEY_USERNAME.name, username)
+            putString(KEY_PASSWORD.name, password)
+            putString(KEY_TOKEN.name, token)
+        }
+    }
 
     private fun getStringFlow(key: String, defaultValue: String? = null): StateFlow<String?> =
         preferenceFlow(key) { encryptedSharedPreferences.getString(key, defaultValue) }
@@ -81,10 +109,9 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         val state = MutableStateFlow(getValue())
 
         val listener = SharedPreferences.OnSharedPreferenceChangeListener { _, changedKey ->
-            Timber.d("pref changed key=$key")
             if (changedKey == key) {  // Only send updates for this specific key
+                Timber.d("pref changed key=$key")
                 val value = getValue()
-                Timber.d("value=$value")
                 state.value = value
             }
         }

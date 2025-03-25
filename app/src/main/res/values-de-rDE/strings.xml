@@ -51,4 +51,5 @@ other{}
     <string name="create">Erstellen</string>
     <string name="error">Fehler</string>
     <string name="ok">OK</string>
+    <string name="not_valid_url">Keine gültige URL</string>
 </resources>

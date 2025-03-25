@@ -4,6 +4,7 @@ import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
 import dagger.hilt.components.SingletonComponent
+import de.readeckapp.BuildConfig
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.io.prefs.SettingsDataStoreImpl
 import de.readeckapp.io.rest.auth.AuthInterceptor
@@ -27,25 +28,32 @@ object NetworkModule {
         authInterceptor: AuthInterceptor,
         baseUrlInterceptor: UrlInterceptor
     ): OkHttpClient {
-        val loggingInterceptor = HttpLoggingInterceptor().apply {
-            level = HttpLoggingInterceptor.Level.BODY
-        }
-        return OkHttpClient.Builder()
+        val builder = OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
             .addInterceptor(baseUrlInterceptor)
-            .addInterceptor(loggingInterceptor)
-            .build()
+
+        if (BuildConfig.DEBUG) {
+            val loggingInterceptor = HttpLoggingInterceptor().apply {
+                level = HttpLoggingInterceptor.Level.BODY
+            }
+            builder.addInterceptor(loggingInterceptor)
+        }
+
+        return builder.build()
     }
 
     @Provides
     @Singleton
-    fun provideRetrofit(okHttpClient: OkHttpClient): Retrofit {
+    fun provideRetrofit(
+        okHttpClient: OkHttpClient,
+        json: Json
+    ): Retrofit {
         val mediaType = "application/json; charset=UTF8".toMediaType()
         return Retrofit.Builder()
             .baseUrl("http://readeck.invalid/")
             .client(okHttpClient)
             .addConverterFactory(ScalarsConverterFactory.create())
-            .addConverterFactory(Json.asConverterFactory(mediaType))
+            .addConverterFactory(json.asConverterFactory(mediaType))
             .build()
     }
 

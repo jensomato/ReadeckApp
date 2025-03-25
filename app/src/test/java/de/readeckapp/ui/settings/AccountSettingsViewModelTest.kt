@@ -10,13 +10,10 @@ import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.collect
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.take
 import kotlinx.coroutines.flow.toList
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.test.StandardTestDispatcher
-import kotlinx.coroutines.test.UnconfinedTestDispatcher
 import kotlinx.coroutines.test.advanceUntilIdle
 import kotlinx.coroutines.test.resetMain
 import kotlinx.coroutines.test.runTest
@@ -28,7 +25,6 @@ import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
-import java.net.URL
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class AccountSettingsViewModelTest {
@@ -132,12 +128,23 @@ class AccountSettingsViewModelTest {
     @Test
     fun `login should call authenticateUseCase with correct parameters`() = runTest {
         coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.Success
+        viewModel.onUrlChanged("https://example.com/api")
+        viewModel.onUsernameChanged("testUser")
+        viewModel.onPasswordChanged("testPassword")
+        viewModel.login()
+        advanceUntilIdle()
+        coVerify { authenticateUseCase.execute("https://example.com/api", "testUser", "testPassword") }
+    }
+
+    @Test
+    fun `login should add api suffix to url and call authenticateUseCase with correct parameters`() = runTest {
+        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.Success
         viewModel.onUrlChanged("https://example.com")
         viewModel.onUsernameChanged("testUser")
         viewModel.onPasswordChanged("testPassword")
         viewModel.login()
         advanceUntilIdle()
-        coVerify { authenticateUseCase.execute("https://example.com", "testUser", "testPassword") }
+        coVerify { authenticateUseCase.execute("https://example.com/api", "testUser", "testPassword") }
     }
 
     @Test
