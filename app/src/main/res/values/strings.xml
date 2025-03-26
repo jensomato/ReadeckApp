@@ -51,4 +51,10 @@ other{}
     <string name="error">Error</string>
     <string name="ok">OK</string>
     <string name="not_valid_url">Not a valid URL</string>
+    <string name="log_view_title">Logs</string>
+    <string name="log_view_send_logs">Send Logs</string>
+    <string name="settings_logs">Logs</string>
+    <string name="settings_logs_subtitle">View and Send Logfiles</string>
+    <string name="log_view_share_title">Send Logs</string>
+    <string name="log_view_no_log_file_found">No log file found</string>
 </resources>
