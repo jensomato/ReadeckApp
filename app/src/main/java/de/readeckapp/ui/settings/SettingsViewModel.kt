@@ -41,10 +41,15 @@ class SettingsViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateToOpenSourceLibraries }
     }
 
+    fun onClickLogs() {
+        _navigationEvent.update { NavigationEvent.NavigateToLogView }
+    }
+
     sealed class NavigationEvent {
         data object NavigateToAccountSettings : NavigationEvent()
         data object NavigateToOpenSourceLibraries : NavigationEvent()
         data object NavigateBack : NavigationEvent()
+        data object NavigateToLogView : NavigationEvent()
     }
 
 }

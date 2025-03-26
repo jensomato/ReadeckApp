@@ -72,7 +72,7 @@ class LoadBookmarksUseCase @Inject constructor(
                     val latestBookmark = bookmarks.maxByOrNull { it.created }
                     latestBookmark?.let {
                         settingsDataStore.saveLastBookmarkTimestamp(it.created.toInstant(TimeZone.UTC).toString())
-                        Timber.d("Saved last bookmark timestamp: ${it.created}")
+                        Timber.i("Saved last bookmark timestamp: ${it.created}")
                     }
 
                     if (currentPage < totalPages) {
@@ -86,7 +86,7 @@ class LoadBookmarksUseCase @Inject constructor(
             }
             return UseCaseResult.Success(Unit)
         } catch (e: Exception) {
-            Timber.e("error work=$e", e)
+            Timber.e(e, "Error loading bookmarks")
             return UseCaseResult.Error(e)
         }
     }

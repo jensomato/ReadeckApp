@@ -10,7 +10,6 @@ class LoadArticleUseCase @Inject constructor(
     private val readeckApi: ReadeckApi,
 ) {
     suspend fun execute(bookmarkId: String) {
-        Timber.d("Start")
         val bookmark = bookmarkRepository.getBookmarkById(bookmarkId)
         if (bookmark.hasArticle) {
             val response = readeckApi.getArticle(bookmarkId)
@@ -20,7 +19,8 @@ class LoadArticleUseCase @Inject constructor(
                 bookmarkRepository.insertBookmarks(listOf(bookmarkToSave))
                 return
             }
+        } else {
+            Timber.i("Bookmark has no article [type=${bookmark.type}]")
         }
-        throw RuntimeException("Article content could not be loaded")
     }
 }
