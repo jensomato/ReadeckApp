@@ -36,7 +36,7 @@ class LoadBookmarksUseCase @Inject constructor(
         try {
             val lastLoadedTimestampString = settingsDataStore.getLastBookmarkTimestamp()
             val lastLoadedTimestamp = lastLoadedTimestampString?.let { Instant.parse(it) }
-            Timber.d("lastLoadedTimestamp=$lastLoadedTimestamp")
+            Timber.i("Loaded last bookmark timestamp: [utc=$lastLoadedTimestamp]")
 
             var hasMorePages = true
             while (hasMorePages) {
@@ -71,8 +71,9 @@ class LoadBookmarksUseCase @Inject constructor(
                     // Find the latest created timestamp in the current page
                     val latestBookmark = bookmarks.maxByOrNull { it.created }
                     latestBookmark?.let {
-                        settingsDataStore.saveLastBookmarkTimestamp(it.created.toInstant(TimeZone.UTC).toString())
-                        Timber.i("Saved last bookmark timestamp: ${it.created}")
+                        val timestamp = it.created.toInstant(TimeZone.currentSystemDefault())
+                        settingsDataStore.saveLastBookmarkTimestamp(timestamp.toString())
+                        Timber.i("Saved last bookmark timestamp: [local=${it.created}, utc=$timestamp]")
                     }
 
                     if (currentPage < totalPages) {
@@ -81,6 +82,7 @@ class LoadBookmarksUseCase @Inject constructor(
                         hasMorePages = false
                     }
                 } else {
+                    Timber.w("Error loading bookmarks: [code=${response.code()}, body=${response.body()}]")
                     return UseCaseResult.Error(Exception("Unsuccessful response: ${response.code()}"))
                 }
             }
