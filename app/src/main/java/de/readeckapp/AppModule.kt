@@ -12,6 +12,7 @@ import dagger.hilt.InstallIn
 import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import de.readeckapp.coroutine.ApplicationScope
+import de.readeckapp.coroutine.IoDispatcher
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.BookmarkRepositoryImpl
 import de.readeckapp.domain.UserRepository
@@ -19,6 +20,7 @@ import de.readeckapp.domain.UserRepositoryImpl
 import de.readeckapp.domain.usecase.LoadArticleUseCase
 import de.readeckapp.io.rest.NetworkModule
 import de.readeckapp.io.rest.ReadeckApi
+import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
@@ -50,6 +52,11 @@ abstract class AppModule {
         fun provideApplicationScope(): CoroutineScope {
             return CoroutineScope(Dispatchers.IO + SupervisorJob())
         }
+
+        @Singleton
+        @Provides
+        @IoDispatcher
+        fun provideIoDispatcher(): CoroutineDispatcher = Dispatchers.IO
 
         @Provides
         @Singleton
