@@ -38,6 +38,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -153,7 +154,7 @@ fun BookmarkCard(
                             onDismissRequest = { expanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Favorite") },
+                                text = { Text(stringResource(R.string.list_card_action_favorite)) },
                                 onClick = {
                                     onClickFavorite(bookmark.id)
                                     expanded = false
@@ -161,12 +162,12 @@ fun BookmarkCard(
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.Favorite,
-                                        contentDescription = "Favorite"
+                                        contentDescription = stringResource(R.string.list_card_action_favorite)
                                     )
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Archive") },
+                                text = { Text(stringResource(R.string.list_card_action_delete)) },
                                 onClick = {
                                     onClickArchive(bookmark.id)
                                     expanded = false
@@ -174,12 +175,12 @@ fun BookmarkCard(
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.DateRange,
-                                        contentDescription = "Archive"
+                                        contentDescription = stringResource(R.string.list_card_action_archive)
                                     )
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Mark Read") },
+                                text = { Text(stringResource(R.string.list_card_action_mark_read)) },
                                 onClick = {
                                     onClickMarkRead(bookmark.id)
                                     expanded = false
@@ -187,12 +188,12 @@ fun BookmarkCard(
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.Check,
-                                        contentDescription = "Mark Read"
+                                        contentDescription = stringResource(R.string.list_card_action_mark_read)
                                     )
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Delete") },
+                                text = { Text(stringResource(R.string.list_card_action_delete)) },
                                 onClick = {
                                     onClickDelete(bookmark.id)
                                     expanded = false
@@ -200,7 +201,7 @@ fun BookmarkCard(
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.Delete,
-                                        contentDescription = "Delete"
+                                        contentDescription = stringResource(R.string.list_card_action_delete)
                                     )
                                 }
                             )
