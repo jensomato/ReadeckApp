@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Implemented the ability to view application logs within the settings screen and share them for troubleshooting purposes.
 
+### Fixed
+
+- Fix #40: Bookmark synchronization issues caused by incorrect timezone handling.
+
 ## [0.2.0] - 2025-03-25
 
 ### Added
