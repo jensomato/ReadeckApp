@@ -9,6 +9,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.usecase.UpdateBookmarkFavoriteStateUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
@@ -23,6 +24,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class BookmarkListViewModel @Inject constructor(
+    private val updateBookmarkFavoriteStateUseCase: UpdateBookmarkFavoriteStateUseCase,
     private val bookmarkRepository: BookmarkRepository,
     @ApplicationContext private val context: Context, // Inject Context
     private val settingsDataStore: SettingsDataStore, // Inject SettingsDataStore
@@ -36,7 +38,7 @@ class BookmarkListViewModel @Inject constructor(
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
-    val uiState = _uiState.asStateFlow()
+    val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     // Add state for the CreateBookmarkDialog
     private val _createBookmarkUiState =
@@ -69,7 +71,7 @@ class BookmarkListViewModel @Inject constructor(
                     archived = filterState.archived,
                     favorite = filterState.favorite
                 ).collectLatest {
-                    _uiState.value = UiState.Success(bookmarks = it)
+                    _uiState.value = UiState.Success(bookmarks = it, updateBookmarkState = null)
                 }
             }
 
@@ -174,8 +176,26 @@ class BookmarkListViewModel @Inject constructor(
         Timber.d("onToggleMarkReadBookmark")
     }
 
-    fun onToggleFavoriteBookmark(bookmarkId: String) {
-        Timber.d("onToggleFavoriteBookmark")
+    fun onToggleFavoriteBookmark(bookmarkId: String, isFavorite: Boolean) {
+        viewModelScope.launch {
+            val state = when (val result = updateBookmarkFavoriteStateUseCase.execute(bookmarkId, isFavorite)) {
+                is UpdateBookmarkFavoriteStateUseCase.Result.Success -> {
+                    UpdateBookmarkState.Success
+                }
+                is UpdateBookmarkFavoriteStateUseCase.Result.GenericError -> {
+                    UpdateBookmarkState.Error(result.message)
+                }
+                is UpdateBookmarkFavoriteStateUseCase.Result.NetworkError -> {
+                    UpdateBookmarkState.Error(result.message)
+                }
+            }
+            _uiState.update {
+                when (it) {
+                    is UiState.Success -> it.copy(updateBookmarkState = state)
+                    else -> it
+                }
+            }
+        }
     }
 
     fun onToggleArchiveBookmark(bookmarkId: String) {
@@ -250,7 +270,7 @@ class BookmarkListViewModel @Inject constructor(
     )
 
     sealed class UiState {
-        data class Success(val bookmarks: List<Bookmark>) : UiState()
+        data class Success(val bookmarks: List<Bookmark>, val updateBookmarkState: UpdateBookmarkState?) : UiState()
         data object Loading : UiState()
         data object Error : UiState()
     }
@@ -267,5 +287,10 @@ class BookmarkListViewModel @Inject constructor(
         data object Loading : CreateBookmarkUiState()
         data object Success : CreateBookmarkUiState()
         data class Error(val message: String) : CreateBookmarkUiState()
+    }
+
+    sealed class UpdateBookmarkState {
+        data object Success : UpdateBookmarkState()
+        data class Error(val message: String) : UpdateBookmarkState()
     }
 }

@@ -59,8 +59,8 @@ other{}
     <string name="log_view_no_log_file_found">No log file found</string>
 
     <!-- Bookmark Card Actions -->
-    <string name="list_card_action_favorite">Favorite</string>
-    <string name="list_card_action_archive">Archive</string>
-    <string name="list_card_action_mark_read">Mark Read</string>
-    <string name="list_card_action_delete">Delete</string>
+    <string name="action_favorite">Favorite</string>
+    <string name="action_archive">Archive</string>
+    <string name="action_mark_read">Mark Read</string>
+    <string name="action_delete">Delete</string>
 </resources>
