@@ -29,6 +29,9 @@ import androidx.compose.material3.ModalNavigationDrawer
 import androidx.compose.material3.NavigationDrawerItem
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
@@ -37,6 +40,7 @@ import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -66,6 +70,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
 
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
+    val snackbarHostState = remember { SnackbarHostState() }
 
     // UI event handlers (pass filter update functions)
     val onClickAll = { viewModel.onClickAll() }
@@ -79,7 +84,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val onClickBookmark: (String) -> Unit = { bookmarkId -> viewModel.onClickBookmark(bookmarkId) }
     val onClickDelete: (String) -> Unit = { bookmarkId -> viewModel.onDeleteBookmark(bookmarkId) }
     val onClickMarkRead: (String) -> Unit = { bookmarkId -> viewModel.onToggleMarkReadBookmark(bookmarkId) }
-    val onClickFavorite: (String) -> Unit = { bookmarkId -> viewModel.onToggleFavoriteBookmark(bookmarkId) }
+    val onClickFavorite: (String, Boolean) -> Unit = { bookmarkId, isFavorite -> viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite) }
     val onClickArchive: (String) -> Unit = { bookmarkId -> viewModel.onToggleArchiveBookmark(bookmarkId) }
 
     LaunchedEffect(key1 = navigationEvent.value) {
@@ -185,6 +190,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
         }
     ) {
         Scaffold(
+            snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
                     title = { Text(stringResource(id = R.string.bookmarks)) },
@@ -219,6 +225,23 @@ fun BookmarkListScreen(navHostController: NavHostController) {
         ) { padding ->
             when (uiState) {
                 is BookmarkListViewModel.UiState.Success -> {
+                    LaunchedEffect(key1 = uiState.updateBookmarkState) {
+                        uiState.updateBookmarkState?.let { result ->
+                            val message = when (result) {
+                                is BookmarkListViewModel.UpdateBookmarkState.Success -> {
+                                    "success"
+                                }
+
+                                is BookmarkListViewModel.UpdateBookmarkState.Error -> {
+                                    result.message
+                                }
+                            }
+                            snackbarHostState.showSnackbar(
+                                message = message,
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }
                     if (uiState.bookmarks.isNotEmpty()) {
                         BookmarkListView(
                             modifier = Modifier.padding(padding),
@@ -406,7 +429,7 @@ fun BookmarkListView(
     onClickBookmark: (String) -> Unit,
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String) -> Unit,
-    onClickFavorite: (String) -> Unit,
+    onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
@@ -487,7 +510,7 @@ fun BookmarkListViewPreview() {
         onClickBookmark = {},
         onClickDelete = {},
         onClickArchive = {},
-        onClickFavorite = {},
+        onClickFavorite = { s: String, b: Boolean -> },
         onClickMarkRead = {}
     )
 }

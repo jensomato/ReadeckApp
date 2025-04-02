@@ -1,12 +1,8 @@
 package de.readeckapp.ui.detail
 
 import android.icu.text.MessageFormat
-import android.util.Base64
 import android.view.View
-import android.webkit.WebResourceRequest
-import android.webkit.WebResourceResponse
 import android.webkit.WebView
-import android.webkit.WebViewClient
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -21,8 +17,9 @@ import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -32,6 +29,9 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -59,17 +59,17 @@ import coil3.compose.AsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
-import timber.log.Timber
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
     val viewModel: BookmarkDetailViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
-    val onClickToggleFavorite: (String) -> Unit = { viewModel.toggleFavorite(it) }
+    val onClickToggleFavorite: (String, Boolean) -> Unit = { id, isFavorite -> viewModel.onToggleFavoriteBookmark(id, isFavorite) }
     val onClickToggleArchive: (String) -> Unit = { viewModel.toggleArchive(it) }
     val onMarkRead: (String) -> Unit = { viewModel.markRead(it) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
+    val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.uiState.collectAsState().value
 
     LaunchedEffect(key1 = navigationEvent.value) {
@@ -85,8 +85,28 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
 
     when (uiState) {
         is BookmarkDetailViewModel.UiState.Success -> {
+            LaunchedEffect(key1 = uiState) {
+                uiState.updateBookmarkState?.let {
+                    when (it) {
+                        is BookmarkDetailViewModel.UpdateBookmarkState.Success -> {
+                            snackbarHostState.showSnackbar(
+                                message = "success",
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                        else -> {
+                            snackbarHostState.showSnackbar(
+                                message = "error",
+                                duration = SnackbarDuration.Long
+                            )
+                        }
+                    }
+                    viewModel.onUpdateBookmarkStateConsumed()
+                }
+            }
             BookmarkDetailScreen(
                 modifier = Modifier,
+                snackbarHostState = snackbarHostState,
                 onClickBack = onClickBack,
                 onClickToggleFavorite = onClickToggleFavorite,
                 onClickToggleArchive = onClickToggleArchive,
@@ -116,14 +136,16 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
 @Composable
 fun BookmarkDetailScreen(
     modifier: Modifier,
+    snackbarHostState: SnackbarHostState,
     onClickBack: () -> Unit,
     uiState: BookmarkDetailViewModel.UiState.Success,
-    onClickToggleFavorite: (String) -> Unit,
+    onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String) -> Unit,
     onMarkRead: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier,
         topBar = {
             TopAppBar(
@@ -256,7 +278,7 @@ fun BookmarkDetailHeader(
 @Composable
 fun BookmarkDetailMenu(
     uiState: BookmarkDetailViewModel.UiState.Success,
-    onClickToggleFavorite: (String) -> Unit,
+    onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String) -> Unit,
     onMarkRead: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
@@ -273,36 +295,41 @@ fun BookmarkDetailMenu(
             onDismissRequest = { expanded = false }
         ) {
             DropdownMenuItem(
-                text = { Text("Favorite") },
+                text = { Text(stringResource(R.string.action_favorite)) },
                 onClick = {
-                    onClickToggleFavorite(uiState.bookmark.bookmarkId)
+                    onClickToggleFavorite(uiState.bookmark.bookmarkId, !uiState.bookmark.isFavorite)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.Favorite, contentDescription = "Favorite") }
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (uiState.bookmark.isFavorite) Icons.Filled.Grade else Icons.Outlined.Grade,
+                        contentDescription = stringResource(R.string.action_favorite)
+                    )
+                }
             )
             DropdownMenuItem(
-                text = { Text("Archive") },
+                text = { Text(stringResource(R.string.action_archive)) },
                 onClick = {
                     onClickToggleArchive(uiState.bookmark.bookmarkId)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = "Archive") }
+                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = stringResource(R.string.action_archive)) }
             )
             DropdownMenuItem(
-                text = { Text("Mark Read") },
+                text = { Text(stringResource(R.string.action_mark_read)) },
                 onClick = {
                     onMarkRead(uiState.bookmark.bookmarkId)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.Check, contentDescription = "Mark Read") }
+                leadingIcon = { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.action_mark_read)) }
             )
             DropdownMenuItem(
-                text = { Text("Delete") },
+                text = { Text(stringResource(R.string.action_delete)) },
                 onClick = {
                     onClickDeleteBookmark(uiState.bookmark.bookmarkId)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = "Delete") }
+                leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete)) }
             )
         }
     }
@@ -313,13 +340,15 @@ fun BookmarkDetailMenu(
 fun BookmarkDetailScreenPreview() {
     BookmarkDetailScreen(
         modifier = Modifier,
+        snackbarHostState = SnackbarHostState(),
         onClickBack = {},
         onClickDeleteBookmark = {},
-        onClickToggleFavorite = {},
+        onClickToggleFavorite = { _, _ -> },
         onMarkRead = {},
         onClickToggleArchive = {},
         uiState = BookmarkDetailViewModel.UiState.Success(
-            sampleBookmark
+            bookmark = sampleBookmark,
+            updateBookmarkState = null
         )
     )
 }
@@ -331,7 +360,8 @@ private fun BookmarkDetailContentPreview() {
         BookmarkDetailContent(
             modifier = Modifier,
             uiState = BookmarkDetailViewModel.UiState.Success(
-                sampleBookmark
+                bookmark = sampleBookmark,
+                updateBookmarkState = null
             )
         )
     }
@@ -343,7 +373,8 @@ private fun BookmarkDetailHeaderPreview() {
     BookmarkDetailHeader(
         modifier = Modifier,
         uiState = BookmarkDetailViewModel.UiState.Success(
-            sampleBookmark
+            bookmark = sampleBookmark,
+            updateBookmarkState = null
         )
     )
 }
@@ -357,5 +388,6 @@ private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     authors = listOf("John Doe"),
     imgSrc = "https://via.placeholder.com/150",
     encodedHtmlContent = "encodedHtmlContent",
-    htmlContent = "htmlContent"
+    htmlContent = "htmlContent",
+    isFavorite = false
 )
