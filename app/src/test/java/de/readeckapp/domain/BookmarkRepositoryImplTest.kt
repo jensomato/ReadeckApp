@@ -69,7 +69,10 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns response
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(
+            bookmarkId = bookmarkId,
+            isFavorite = isFavorite,
+            isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Success)
@@ -88,7 +91,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns errorResponse
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -109,7 +112,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns errorResponse
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -125,7 +128,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } throws IOException("Network error")
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -141,7 +144,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } throws RuntimeException("Unexpected error")
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -161,7 +164,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns errorResponse
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -181,7 +184,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns errorResponse
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -201,7 +204,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns errorResponse
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)
@@ -221,7 +224,7 @@ class BookmarkRepositoryImplTest {
         coEvery { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite)) } returns errorResponse
 
         // Act
-        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite)
+        val result = bookmarkRepositoryImpl.updateBookmark(bookmarkId, isFavorite, isArchived = null)
 
         // Assert
         assertTrue(result is BookmarkRepository.UpdateResult.Error)

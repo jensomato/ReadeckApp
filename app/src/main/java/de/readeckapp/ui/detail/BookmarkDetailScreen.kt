@@ -15,11 +15,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Grade
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -66,7 +67,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val onClickToggleFavorite: (String, Boolean) -> Unit = { id, isFavorite -> viewModel.onToggleFavoriteBookmark(id, isFavorite) }
-    val onClickToggleArchive: (String) -> Unit = { viewModel.toggleArchive(it) }
+    val onClickToggleArchive: (String, Boolean) -> Unit = { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
     val onMarkRead: (String) -> Unit = { viewModel.markRead(it) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -140,7 +141,7 @@ fun BookmarkDetailScreen(
     onClickBack: () -> Unit,
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickToggleFavorite: (String, Boolean) -> Unit,
-    onClickToggleArchive: (String) -> Unit,
+    onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
@@ -279,7 +280,7 @@ fun BookmarkDetailHeader(
 fun BookmarkDetailMenu(
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickToggleFavorite: (String, Boolean) -> Unit,
-    onClickToggleArchive: (String) -> Unit,
+    onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
@@ -310,10 +311,15 @@ fun BookmarkDetailMenu(
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_archive)) },
                 onClick = {
-                    onClickToggleArchive(uiState.bookmark.bookmarkId)
+                    onClickToggleArchive(uiState.bookmark.bookmarkId, !uiState.bookmark.isArchived)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.DateRange, contentDescription = stringResource(R.string.action_archive)) }
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (uiState.bookmark.isArchived) Icons.Filled.Inventory2 else Icons.Outlined.Inventory2,
+                        contentDescription = stringResource(R.string.action_archive)
+                    )
+                }
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_mark_read)) },
@@ -345,7 +351,7 @@ fun BookmarkDetailScreenPreview() {
         onClickDeleteBookmark = {},
         onClickToggleFavorite = { _, _ -> },
         onMarkRead = {},
-        onClickToggleArchive = {},
+        onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
             updateBookmarkState = null
@@ -389,5 +395,6 @@ private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     imgSrc = "https://via.placeholder.com/150",
     encodedHtmlContent = "encodedHtmlContent",
     htmlContent = "htmlContent",
-    isFavorite = false
+    isFavorite = false,
+    isArchived = false
 )

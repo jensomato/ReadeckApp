@@ -75,11 +75,11 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean): BookmarkRepository.UpdateResult {
+    override suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?): BookmarkRepository.UpdateResult {
         return withContext(dispatcher) {
             try {
                 val response =
-                    readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite))
+                    readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite, isArchived = isArchived))
                 if (response.isSuccessful) {
                     Timber.i("Update Bookmark successful")
                     BookmarkRepository.UpdateResult.Success

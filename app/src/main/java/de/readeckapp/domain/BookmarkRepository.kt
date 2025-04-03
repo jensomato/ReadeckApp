@@ -16,7 +16,7 @@ interface BookmarkRepository {
     fun observeBookmark(id: String): Flow<Bookmark>
     suspend fun deleteAllBookmarks()
     suspend fun createBookmark(title: String, url: String): String
-    suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean): UpdateResult
+    suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?): UpdateResult
     sealed class UpdateResult {
         data object Success: UpdateResult()
         data class Error(val errorMessage: String, val code: Int? = null, val ex: Exception? = null): UpdateResult()

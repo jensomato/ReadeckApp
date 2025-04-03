@@ -85,7 +85,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val onClickDelete: (String) -> Unit = { bookmarkId -> viewModel.onDeleteBookmark(bookmarkId) }
     val onClickMarkRead: (String) -> Unit = { bookmarkId -> viewModel.onToggleMarkReadBookmark(bookmarkId) }
     val onClickFavorite: (String, Boolean) -> Unit = { bookmarkId, isFavorite -> viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite) }
-    val onClickArchive: (String) -> Unit = { bookmarkId -> viewModel.onToggleArchiveBookmark(bookmarkId) }
+    val onClickArchive: (String, Boolean) -> Unit = { bookmarkId, isArchived -> viewModel.onToggleArchiveBookmark(bookmarkId, isArchived) }
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -430,7 +430,7 @@ fun BookmarkListView(
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
-    onClickArchive: (String) -> Unit,
+    onClickArchive: (String, Boolean) -> Unit,
 ) {
     LazyColumn(modifier = modifier) {
         items(bookmarks) { bookmark ->
@@ -509,8 +509,8 @@ fun BookmarkListViewPreview() {
         bookmarks = bookmarks,
         onClickBookmark = {},
         onClickDelete = {},
-        onClickArchive = {},
-        onClickFavorite = { s: String, b: Boolean -> },
+        onClickArchive = { _, _ -> },
+        onClickFavorite = { _, _ -> },
         onClickMarkRead = {}
     )
 }
