@@ -15,8 +15,10 @@ import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.Grade
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -60,7 +62,7 @@ fun BookmarkCard(
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
-    onClickArchive: (String) -> Unit,
+    onClickArchive: (String, Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Card(
@@ -168,14 +170,14 @@ fun BookmarkCard(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_delete)) },
+                                text = { Text(stringResource(R.string.action_archive)) },
                                 onClick = {
-                                    onClickArchive(bookmark.id)
+                                    onClickArchive(bookmark.id, !bookmark.isArchived)
                                     expanded = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Filled.DateRange,
+                                        imageVector = if (bookmark.isArchived) Icons.Filled.Inventory2 else Icons.Outlined.Inventory2,
                                         contentDescription = stringResource(R.string.action_archive)
                                     )
                                 }
@@ -267,7 +269,7 @@ fun BookmarkCardPreview() {
             onClickDelete = {},
             onClickMarkRead = {},
             onClickFavorite = { _, _ -> },
-            onClickArchive = {}
+            onClickArchive = { _, _ -> }
         )
     }
 }

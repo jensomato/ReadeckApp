@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Implemented the ability to change the archive state of bookmarks in list and detail screen. Closes #43
 - Implemented the ability to change the favorite state of bookmarks in list and detail screen. Closes #39
 - Implemented the ability to view application logs within the settings screen and share them for troubleshooting purposes.
 
