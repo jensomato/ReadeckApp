@@ -147,6 +147,21 @@ class ReadeckApiTest {
         assertEquals("invalid type", editBookmarkErrorDto.fields?.get("is_marked")?.errors?.get(0))
     }
 
+    @Test
+    fun testGetBookmarks() = runTest {
+        mockWebServer.enqueue(MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .addHeader("Content-Type", "application/json")
+            .setBody(loadJsonFromClasspath("api/bookmarks.json"))
+        )
+
+        val response = readeckApi.getBookmarks(10, 0, null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+
+        assertTrue(response.isSuccessful)
+        assertEquals(200, response.code())
+        assertEquals(2, response.body()?.size)
+    }
+
     private fun loadJsonFromClasspath(resourcePath: String): String {
         val inputStream = this.javaClass.classLoader?.getResourceAsStream(resourcePath)
             ?: throw IllegalArgumentException("Resource not found: $resourcePath")

@@ -15,6 +15,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fix #34: Fix parsing error. Make field `read_progress` optional.
 - Fix #40: Bookmark synchronization issues caused by incorrect timezone handling.
 
 ## [0.2.0] - 2025-03-25

@@ -35,7 +35,7 @@ data class BookmarkDto(
     val isArchived: Boolean,
     val labels: List<String>,
     @SerialName("read_progress")
-    val readProgress: Int,
+    val readProgress: Int? = null,
     val resources: Resources,
     @SerialName("word_count")
     val wordCount: Int? = null,
