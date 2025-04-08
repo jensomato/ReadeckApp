@@ -16,7 +16,11 @@ fun Bookmark.toEntity(): BookmarkEntity = BookmarkEntity(
     href = href,
     created = created.toInstant(TimeZone.currentSystemDefault()),
     updated = updated.toInstant(TimeZone.currentSystemDefault()),
-    state = state,
+    state = when (state) {
+        Bookmark.State.LOADED -> BookmarkEntity.State.LOADED
+        Bookmark.State.ERROR -> BookmarkEntity.State.ERROR
+        Bookmark.State.LOADING -> BookmarkEntity.State.LOADING
+    },
     loaded = loaded,
     url = url,
     title = title,
@@ -64,7 +68,11 @@ fun BookmarkEntity.toDomain(): Bookmark = Bookmark(
     href = href,
     created = created.toLocalDateTime(TimeZone.currentSystemDefault()),
     updated = updated.toLocalDateTime(TimeZone.currentSystemDefault()),
-    state = state,
+    state = when (state) {
+        BookmarkEntity.State.LOADED -> Bookmark.State.LOADED
+        BookmarkEntity.State.ERROR -> Bookmark.State.ERROR
+        BookmarkEntity.State.LOADING -> Bookmark.State.LOADING
+    },
     loaded = loaded,
     url = url,
     title = title,
@@ -113,7 +121,12 @@ fun BookmarkDto.toDomain(): Bookmark = Bookmark(
     href = href,
     created = created.toLocalDateTime(TimeZone.currentSystemDefault()),
     updated = updated.toLocalDateTime(TimeZone.currentSystemDefault()),
-    state = state,
+    state = when (state) {
+        0 -> Bookmark.State.LOADED
+        1 -> Bookmark.State.ERROR
+        2 -> Bookmark.State.LOADING
+        else -> Bookmark.State.ERROR
+    },
     loaded = loaded,
     url = url,
     title = title,

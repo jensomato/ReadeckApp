@@ -473,7 +473,7 @@ fun BookmarkListViewPreview() {
             href = "https://example.com",
             created = kotlinx.datetime.LocalDateTime.parse("2024-01-15T10:00:00"),
             updated = kotlinx.datetime.LocalDateTime.parse("2024-01-16T12:00:00"),
-            state = 1,
+            state = Bookmark.State.LOADED,
             loaded = true,
             url = "https://example.com",
             title = "Sample Bookmark",

@@ -68,6 +68,7 @@ class BookmarkDetailViewModel @Inject constructor(
                 updateBookmarkState = updateState
             )
         } else {
+            Timber.e("Error loading Article [bookmarkId=$bookmarkId, htmlTemplate=${htmlTemplate.isNullOrBlank()}, bookmarkArticle=${bookmark.articleContent?.isNotBlank()}")
             UiState.Error
         }
     }

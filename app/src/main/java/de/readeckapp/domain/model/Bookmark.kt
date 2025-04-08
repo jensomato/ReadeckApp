@@ -7,7 +7,7 @@ data class Bookmark(
     val href: String,
     val created: LocalDateTime,
     val updated: LocalDateTime,
-    val state: Int,
+    val state: State,
     val loaded: Boolean,
     val url: String,
     val title: String,
@@ -50,5 +50,10 @@ data class Bookmark(
         data object Article: Type()
         data object Picture: Type()
         data object Video: Type()
+    }
+    enum class State {
+        LOADED,
+        ERROR,
+        LOADING
     }
 }

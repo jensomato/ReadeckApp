@@ -128,7 +128,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         }
 
         else -> {
-            Text("error")
+            BookmarkDetailErrorScreen()
         }
     }
 
@@ -347,6 +347,16 @@ fun BookmarkDetailMenu(
     }
 }
 
+@Composable
+fun BookmarkDetailErrorScreen() {
+    Box(
+        modifier = Modifier.fillMaxSize(),
+        contentAlignment = Alignment.Center
+    ) {
+        Text(stringResource(R.string.error_no_article_content))
+    }
+}
+
 @Preview(showBackground = true)
 @Composable
 fun BookmarkDetailScreenPreview() {
@@ -376,6 +386,14 @@ private fun BookmarkDetailContentPreview() {
                 updateBookmarkState = null
             )
         )
+    }
+}
+
+@Preview
+@Composable
+private fun BookmarkDetailContentErrorPreview() {
+    Surface {
+        BookmarkDetailErrorScreen()
     }
 }
 

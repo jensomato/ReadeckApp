@@ -50,11 +50,17 @@ interface BookmarkDao {
         type: BookmarkEntity.Type? = null,
         isUnread: Boolean? = null,
         isArchived: Boolean? = null,
-        isFavorite: Boolean? = null
+        isFavorite: Boolean? = null,
+        state: BookmarkEntity.State? = null
     ): Flow<List<BookmarkEntity>> {
         val args = mutableListOf<Any>()
         val sqlQuery = buildString {
             append("SELECT * FROM bookmarks WHERE 1=1")
+
+            state?.let {
+                append(" AND state = ?")
+                args.add(it.value)
+            }
 
             type?.let {
                 append(" AND type = ?")

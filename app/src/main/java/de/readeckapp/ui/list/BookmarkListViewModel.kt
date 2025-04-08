@@ -69,7 +69,8 @@ class BookmarkListViewModel @Inject constructor(
                     type = filterState.type,
                     unread = filterState.unread,
                     archived = filterState.archived,
-                    favorite = filterState.favorite
+                    favorite = filterState.favorite,
+                    state = Bookmark.State.LOADED
                 ).collectLatest {
                     _uiState.value = UiState.Success(bookmarks = it, updateBookmarkState = null)
                 }

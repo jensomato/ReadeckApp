@@ -21,7 +21,7 @@ data class BookmarkEntity(
     val href: String,
     val created: Instant,
     val updated: Instant,
-    val state: Int,
+    val state: State,
     val loaded: Boolean,
     val url: String,
     val title: String,
@@ -61,5 +61,10 @@ data class BookmarkEntity(
         data object Article: Type("article")
         data object Video: Type("video")
         data object Picture: Type("picture")
+    }
+    enum class State(val value: Int) {
+        LOADED(0),
+        ERROR(1),
+        LOADING(2)
     }
 }

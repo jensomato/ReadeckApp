@@ -8,7 +8,8 @@ interface BookmarkRepository {
         type: Bookmark.Type? = null,
         unread: Boolean? = null,
         archived: Boolean? = null,
-        favorite: Boolean? = null
+        favorite: Boolean? = null,
+        state: Bookmark.State? = null
     ): Flow<List<Bookmark>>
 
     suspend fun insertBookmarks(bookmarks: List<Bookmark>)

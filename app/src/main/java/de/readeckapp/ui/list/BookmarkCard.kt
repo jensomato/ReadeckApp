@@ -11,9 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
 import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Inventory2
@@ -230,7 +228,7 @@ fun BookmarkCardPreview() {
         href = "https://example.com",
         created = kotlinx.datetime.LocalDateTime.parse("2024-01-15T10:00:00"), // Use LocalDateTime
         updated = kotlinx.datetime.LocalDateTime.parse("2024-01-16T12:00:00"), // Use LocalDateTime
-        state = 1,
+        state = Bookmark.State.LOADED,
         loaded = true,
         url = "https://example.com",
         title = "Sample Bookmark",

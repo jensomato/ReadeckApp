@@ -63,4 +63,5 @@ other{}
     <string name="action_archive">Archive</string>
     <string name="action_mark_read">Read</string>
     <string name="action_delete">Delete</string>
+    <string name="error_no_article_content">Error, article content not available</string>
 </resources>
