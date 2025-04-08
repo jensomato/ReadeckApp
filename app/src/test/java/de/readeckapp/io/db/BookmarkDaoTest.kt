@@ -59,12 +59,17 @@ class BookmarkDaoTest {
                         BookmarkEntity.Type.Article.value
                     }
                 }
+                val state = when (index) {
+                    9,19,29 -> BookmarkEntity.State.ERROR
+                    8,18,28 -> BookmarkEntity.State.LOADING
+                    else -> BookmarkEntity.State.LOADED
+                }
                 BookmarkEntity(
                     id = "test-$index",
                     href = "http://example.com/$index",
                     created = currentDate.atStartOfDayIn(TimeZone.UTC),
                     updated = currentDate.atStartOfDayIn(TimeZone.UTC),
-                    state = 0,
+                    state = state,
                     loaded = true,
                     url = "http://example.com/$index",
                     title = "Test Bookmark $index",
@@ -151,5 +156,38 @@ class BookmarkDaoTest {
             }
         }
 
+    }
+
+    @RunWith(RobolectricTestRunner::class)
+    internal class GetFilterByStateTest : BaseTest() {
+        @Test
+        fun testGetLoaded() = runTest(testDispatcher) {
+            val flow = bookmarkDao.getBookmarksByFilters(state = BookmarkEntity.State.LOADED)
+            val list = flow.first()
+            assertEquals(24, list.size)
+            list.forEach { bookmark ->
+                assertEquals(BookmarkEntity.State.LOADED, bookmark.state)
+            }
+        }
+
+        @Test
+        fun testGetLoading() = runTest(testDispatcher) {
+            val flow = bookmarkDao.getBookmarksByFilters(state = BookmarkEntity.State.LOADING)
+            val list = flow.first()
+            assertEquals(3, list.size)
+            list.forEach { bookmark ->
+                assertEquals(BookmarkEntity.State.LOADING, bookmark.state)
+            }
+        }
+
+        @Test
+        fun testGetError() = runTest(testDispatcher) {
+            val flow = bookmarkDao.getBookmarksByFilters(state = BookmarkEntity.State.ERROR)
+            val list = flow.first()
+            assertEquals(3, list.size)
+            list.forEach { bookmark ->
+                assertEquals(BookmarkEntity.State.ERROR, bookmark.state)
+            }
+        }
     }
 }

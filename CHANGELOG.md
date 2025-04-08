@@ -19,6 +19,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fix #34: Fix parsing error. Make field `read_progress` optional.
 - Fix #40: Bookmark synchronization issues caused by incorrect timezone handling.
 
+### Changed
+
+- Now only bookmarks that are successfully loaded (`state = 0` in readeck api) are displayed. Bookmarks that are still loading or have encountered an error will not be displayed. 
+
 ## [0.2.0] - 2025-03-25
 
 ### Added

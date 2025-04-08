@@ -53,7 +53,7 @@ class BookmarkListViewModelTest {
 
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
-        every { bookmarkRepository.observeBookmarks(any(), any(), any(), any()) } returns flowOf(
+        every { bookmarkRepository.observeBookmarks(any(), any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
         every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
@@ -268,7 +268,7 @@ class BookmarkListViewModelTest {
                 href = "https://example.com",
                 created = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
                 updated = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
-                state = 0,
+                state = Bookmark.State.LOADED,
                 loaded = true,
                 url = "https://example.com",
                 title = "Test Bookmark",
@@ -303,7 +303,8 @@ class BookmarkListViewModelTest {
                 type = Bookmark.Type.Article,
                 unread = true,
                 archived = null,
-                favorite = null
+                favorite = null,
+                state = Bookmark.State.LOADED
             )
         } returns bookmarkFlow
 
@@ -540,7 +541,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -610,7 +612,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -666,7 +669,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -728,7 +732,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -798,7 +803,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -854,7 +860,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -917,7 +924,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -987,7 +995,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -1043,7 +1052,8 @@ class BookmarkListViewModelTest {
                     type = null,
                     unread = null,
                     archived = null,
-                    favorite = null
+                    favorite = null,
+                    state = Bookmark.State.LOADED
                 )
             } returns bookmarkFlow
 
@@ -1097,7 +1107,7 @@ class BookmarkListViewModelTest {
             href = "https://example.com",
             created = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
             updated = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
-            state = 0,
+            state = Bookmark.State.LOADED,
             loaded = true,
             url = "https://example.com",
             title = "Test Bookmark",

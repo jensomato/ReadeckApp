@@ -33,7 +33,8 @@ class BookmarkRepositoryImpl @Inject constructor(
         type: Bookmark.Type?,
         unread: Boolean?,
         archived: Boolean?,
-        favorite: Boolean?
+        favorite: Boolean?,
+        state: Bookmark.State?
     ): Flow<List<Bookmark>> {
         return bookmarkDao.getBookmarksByFilters(
             type = type?.let {
@@ -45,7 +46,14 @@ class BookmarkRepositoryImpl @Inject constructor(
             },
             isUnread = unread,
             isArchived = archived,
-            isFavorite = favorite
+            isFavorite = favorite,
+            state = state?.let {
+                when (it) {
+                    Bookmark.State.LOADED -> BookmarkEntity.State.LOADED
+                    Bookmark.State.ERROR -> BookmarkEntity.State.ERROR
+                    Bookmark.State.LOADING -> BookmarkEntity.State.LOADING
+                }
+            }
         ).map { bookmarks -> bookmarks.map { it.toDomain() } }
     }
 

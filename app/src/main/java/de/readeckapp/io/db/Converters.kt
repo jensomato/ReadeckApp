@@ -1,8 +1,8 @@
 package de.readeckapp.io.db
 
 import androidx.room.TypeConverter
+import de.readeckapp.io.db.model.BookmarkEntity
 import kotlinx.datetime.Instant
-import kotlinx.datetime.toInstant
 
 class Converters {
     @TypeConverter
@@ -23,5 +23,24 @@ class Converters {
     @TypeConverter
     fun stringListToString(list: List<String>?): String {
         return list?.joinToString(",") ?: ""
+    }
+
+    @TypeConverter
+    fun fromState(state: BookmarkEntity.State): Int {
+        return when (state) {
+            BookmarkEntity.State.LOADED -> BookmarkEntity.State.LOADED.value
+            BookmarkEntity.State.ERROR -> BookmarkEntity.State.ERROR.value
+            BookmarkEntity.State.LOADING -> BookmarkEntity.State.LOADING.value
+        }
+    }
+
+    @TypeConverter
+    fun toState(stateValue: Int): BookmarkEntity.State {
+        return when (stateValue) {
+            BookmarkEntity.State.LOADED.value -> BookmarkEntity.State.LOADED
+            BookmarkEntity.State.ERROR.value -> BookmarkEntity.State.ERROR
+            BookmarkEntity.State.LOADING.value -> BookmarkEntity.State.LOADING
+            else -> BookmarkEntity.State.ERROR
+        }
     }
 }
