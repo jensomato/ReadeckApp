@@ -83,7 +83,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val onClickSettings: () -> Unit = { viewModel.onClickSettings() }
     val onClickBookmark: (String) -> Unit = { bookmarkId -> viewModel.onClickBookmark(bookmarkId) }
     val onClickDelete: (String) -> Unit = { bookmarkId -> viewModel.onDeleteBookmark(bookmarkId) }
-    val onClickMarkRead: (String) -> Unit = { bookmarkId -> viewModel.onToggleMarkReadBookmark(bookmarkId) }
+    val onClickMarkRead: (String, Boolean) -> Unit = { bookmarkId, isRead -> viewModel.onToggleMarkReadBookmark(bookmarkId, isRead) }
     val onClickFavorite: (String, Boolean) -> Unit = { bookmarkId, isFavorite -> viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite) }
     val onClickArchive: (String, Boolean) -> Unit = { bookmarkId, isArchived -> viewModel.onToggleArchiveBookmark(bookmarkId, isArchived) }
 
@@ -428,7 +428,7 @@ fun BookmarkListView(
     bookmarks: List<Bookmark>,
     onClickBookmark: (String) -> Unit,
     onClickDelete: (String) -> Unit,
-    onClickMarkRead: (String) -> Unit,
+    onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
 ) {
@@ -511,6 +511,6 @@ fun BookmarkListViewPreview() {
         onClickDelete = {},
         onClickArchive = { _, _ -> },
         onClickFavorite = { _, _ -> },
-        onClickMarkRead = {}
+        onClickMarkRead = { _, _ -> }
     )
 }

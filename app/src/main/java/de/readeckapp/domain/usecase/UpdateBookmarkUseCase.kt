@@ -14,7 +14,8 @@ class UpdateBookmarkUseCase @Inject constructor(
         return handleResult(bookmarkRepository.updateBookmark(
             bookmarkId = bookmarkId,
             isFavorite = isFavorite,
-            isArchived = null
+            isArchived = null,
+            isRead = null
         ))
     }
 
@@ -22,7 +23,17 @@ class UpdateBookmarkUseCase @Inject constructor(
         return handleResult(bookmarkRepository.updateBookmark(
             bookmarkId = bookmarkId,
             isFavorite = null,
-            isArchived = isArchived
+            isArchived = isArchived,
+            isRead = null
+        ))
+    }
+
+    suspend fun updateIsRead(bookmarkId: String, isRead: Boolean): Result {
+        return handleResult(bookmarkRepository.updateBookmark(
+            bookmarkId = bookmarkId,
+            isFavorite = null,
+            isArchived = null,
+            isRead = isRead
         ))
     }
 

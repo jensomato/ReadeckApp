@@ -902,6 +902,195 @@ class BookmarkListViewModelTest {
 
             coVerify { updateBookmarkUseCase.updateIsArchived(bookmarkId, isArchived) }
         }
+
+
+    @Test
+    fun `onToggleMarkReadBookmark updates UiState with UpdateBookmarkState Success`() =
+        runTest {
+            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+            val bookmarkId = "123"
+            val isRead = true
+
+            val bookmarkFlow = MutableStateFlow(bookmarks)
+            coEvery {
+                bookmarkRepository.observeBookmarks(
+                    type = null,
+                    unread = null,
+                    archived = null,
+                    favorite = null
+                )
+            } returns bookmarkFlow
+
+            coEvery {
+                updateBookmarkUseCase.updateIsRead(
+                    bookmarkId,
+                    isRead
+                )
+            } returns UpdateBookmarkUseCase.Result.Success
+
+            viewModel = BookmarkListViewModel(
+                updateBookmarkUseCase,
+                bookmarkRepository,
+                context,
+                settingsDataStore,
+                savedStateHandle
+            )
+
+            val uiStates = viewModel.uiState.take(2).toList()
+            val loadingState = uiStates[0]
+            val successState = uiStates[1]
+            // Assert initial state
+            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            // Assert success state
+            assertEquals(
+                BookmarkListViewModel.UiState.Success(
+                    bookmarks,
+                    null
+                ),
+                successState
+            )
+
+            viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
+            advanceUntilIdle()
+
+            val updateState = viewModel.uiState.value
+
+            assertEquals(
+                BookmarkListViewModel.UiState.Success(
+                    bookmarks,
+                    BookmarkListViewModel.UpdateBookmarkState.Success
+                ),
+                updateState
+            )
+
+            coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
+        }
+
+    @Test
+    fun `onToggleMarkReadBookmark updates UiState with UpdateBookmarkState Error on GenericError`() =
+        runTest {
+            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+            val bookmarkId = "123"
+            val isRead = true
+            val errorMessage = "Generic Error"
+
+            coEvery {
+                updateBookmarkUseCase.updateIsRead(
+                    bookmarkId,
+                    isRead
+                )
+            } returns UpdateBookmarkUseCase.Result.GenericError(errorMessage)
+
+            val bookmarkFlow = MutableStateFlow(bookmarks)
+            coEvery {
+                bookmarkRepository.observeBookmarks(
+                    type = null,
+                    unread = null,
+                    archived = null,
+                    favorite = null
+                )
+            } returns bookmarkFlow
+
+            viewModel = BookmarkListViewModel(
+                updateBookmarkUseCase,
+                bookmarkRepository,
+                context,
+                settingsDataStore,
+                savedStateHandle
+            )
+
+            val uiStates = viewModel.uiState.take(2).toList()
+            val loadingState = uiStates[0]
+            val successState = uiStates[1]
+            // Assert initial state
+            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            // Assert success state
+            assertEquals(
+                BookmarkListViewModel.UiState.Success(
+                    bookmarks,
+                    null
+                ),
+                successState
+            )
+
+            viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
+            advanceUntilIdle()
+
+            val errorState = viewModel.uiState.value
+
+            assertEquals(
+                BookmarkListViewModel.UiState.Success(
+                    bookmarks,
+                    BookmarkListViewModel.UpdateBookmarkState.Error(errorMessage)
+                ),
+                errorState
+            )
+
+            coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
+        }
+
+    @Test
+    fun `onToggleMarkReadBookmark updates UiState with UpdateBookmarkState Error on NetworkError`() =
+        runTest {
+            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
+            val bookmarkId = "123"
+            val isRead = true
+            val errorMessage = "Network Error"
+
+            val bookmarkFlow = MutableStateFlow(bookmarks)
+            coEvery {
+                bookmarkRepository.observeBookmarks(
+                    type = null,
+                    unread = null,
+                    archived = null,
+                    favorite = null
+                )
+            } returns bookmarkFlow
+
+            coEvery {
+                updateBookmarkUseCase.updateIsRead(
+                    bookmarkId,
+                    isRead
+                )
+            } returns UpdateBookmarkUseCase.Result.NetworkError(errorMessage)
+
+            viewModel = BookmarkListViewModel(
+                updateBookmarkUseCase,
+                bookmarkRepository,
+                context,
+                settingsDataStore,
+                savedStateHandle
+            )
+
+            val uiStates = viewModel.uiState.take(2).toList()
+            val loadingState = uiStates[0]
+            val successState = uiStates[1]
+            // Assert initial state
+            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            // Assert success state
+            assertEquals(
+                BookmarkListViewModel.UiState.Success(
+                    bookmarks,
+                    null
+                ),
+                successState
+            )
+
+            viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
+            advanceUntilIdle()
+
+            val errorState = viewModel.uiState.value
+
+            assertEquals(
+                BookmarkListViewModel.UiState.Success(
+                    bookmarks,
+                    BookmarkListViewModel.UpdateBookmarkState.Error(errorMessage)
+                ),
+                errorState
+            )
+
+            coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
+        }
     private val bookmarks = listOf(
         Bookmark(
             id = "1",
