@@ -61,6 +61,6 @@ other{}
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorite</string>
     <string name="action_archive">Archive</string>
-    <string name="action_mark_read">Mark Read</string>
+    <string name="action_mark_read">Read</string>
     <string name="action_delete">Delete</string>
 </resources>

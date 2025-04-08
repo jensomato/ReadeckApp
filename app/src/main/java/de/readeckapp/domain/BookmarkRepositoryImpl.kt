@@ -75,11 +75,18 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?): BookmarkRepository.UpdateResult {
+    override suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): BookmarkRepository.UpdateResult {
         return withContext(dispatcher) {
             try {
                 val response =
-                    readeckApi.editBookmark(bookmarkId, EditBookmarkDto(isMarked = isFavorite, isArchived = isArchived))
+                    readeckApi.editBookmark(
+                        id = bookmarkId,
+                        body = EditBookmarkDto(
+                            isMarked = isFavorite,
+                            isArchived = isArchived,
+                            readProgress = isRead?.let { if (it) 100 else 0 }
+                        )
+                    )
                 if (response.isSuccessful) {
                     Timber.i("Update Bookmark successful")
                     BookmarkRepository.UpdateResult.Success
@@ -126,7 +133,7 @@ class BookmarkRepositoryImpl @Inject constructor(
                 }
             } catch (e: IOException) {
                 Timber.e(e, "Network error while Update Bookmark: ${e.message}")
-                BookmarkRepository.UpdateResult.Error("Network error: ${e.message}", ex = e)
+                BookmarkRepository.UpdateResult.NetworkError("Network error: ${e.message}", ex = e)
             } catch (e: Exception) {
                 Timber.e(e, "Unexpected error while Update Bookmark: ${e.message}")
                 BookmarkRepository.UpdateResult.Error("An unexpected error occurred: ${e.message}", ex = e)

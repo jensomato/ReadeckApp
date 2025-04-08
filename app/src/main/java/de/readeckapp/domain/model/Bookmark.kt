@@ -35,6 +35,9 @@ data class Bookmark(
     val props: Resource,
     val thumbnail: ImageResource
 ) {
+    fun isRead(): Boolean {
+        return readProgress == 100
+    }
     data class Resource(
         val src: String
     )

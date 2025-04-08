@@ -12,11 +12,13 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.DateRange
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Card
@@ -60,7 +62,7 @@ fun BookmarkCard(
     bookmark: Bookmark,
     onClickCard: (String) -> Unit,
     onClickDelete: (String) -> Unit,
-    onClickMarkRead: (String) -> Unit,
+    onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
 ) {
@@ -185,12 +187,12 @@ fun BookmarkCard(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_mark_read)) },
                                 onClick = {
-                                    onClickMarkRead(bookmark.id)
+                                    onClickMarkRead(bookmark.id, !bookmark.isRead())
                                     expanded = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Filled.Check,
+                                        imageVector = if (bookmark.isRead()) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
                                         contentDescription = stringResource(R.string.action_mark_read)
                                     )
                                 }
@@ -267,7 +269,7 @@ fun BookmarkCardPreview() {
             bookmark = sampleBookmark,
             onClickCard = {},
             onClickDelete = {},
-            onClickMarkRead = {},
+            onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
             onClickArchive = { _, _ -> }
         )

@@ -14,11 +14,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.CircularProgressIndicator
@@ -66,9 +67,9 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
     val viewModel: BookmarkDetailViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
-    val onClickToggleFavorite: (String, Boolean) -> Unit = { id, isFavorite -> viewModel.onToggleFavoriteBookmark(id, isFavorite) }
+    val onClickToggleFavorite: (String, Boolean) -> Unit = { id, isFavorite -> viewModel.onToggleFavorite(id, isFavorite) }
     val onClickToggleArchive: (String, Boolean) -> Unit = { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
-    val onMarkRead: (String) -> Unit = { viewModel.markRead(it) }
+    val onMarkRead: (String, Boolean) -> Unit = { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.uiState.collectAsState().value
@@ -142,7 +143,7 @@ fun BookmarkDetailScreen(
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
-    onMarkRead: (String) -> Unit,
+    onMarkRead: (String, Boolean) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     Scaffold(
@@ -281,7 +282,7 @@ fun BookmarkDetailMenu(
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
-    onMarkRead: (String) -> Unit,
+    onMarkRead: (String, Boolean) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
@@ -324,10 +325,15 @@ fun BookmarkDetailMenu(
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_mark_read)) },
                 onClick = {
-                    onMarkRead(uiState.bookmark.bookmarkId)
+                    onMarkRead(uiState.bookmark.bookmarkId, !uiState.bookmark.isRead)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.Check, contentDescription = stringResource(R.string.action_mark_read)) }
+                leadingIcon = {
+                    Icon(
+                        imageVector = if (uiState.bookmark.isRead) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                        contentDescription = stringResource(R.string.action_mark_read)
+                    )
+                }
             )
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_delete)) },
@@ -350,7 +356,7 @@ fun BookmarkDetailScreenPreview() {
         onClickBack = {},
         onClickDeleteBookmark = {},
         onClickToggleFavorite = { _, _ -> },
-        onMarkRead = {},
+        onMarkRead = { _, _ -> },
         onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
@@ -396,5 +402,6 @@ private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     encodedHtmlContent = "encodedHtmlContent",
     htmlContent = "htmlContent",
     isFavorite = false,
-    isArchived = false
+    isArchived = false,
+    isRead = false
 )

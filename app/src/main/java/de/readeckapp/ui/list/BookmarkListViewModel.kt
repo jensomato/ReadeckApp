@@ -172,59 +172,43 @@ class BookmarkListViewModel @Inject constructor(
         Timber.d("onDeleteBookmark")
     }
 
-    fun onToggleMarkReadBookmark(bookmarkId: String) {
-        Timber.d("onToggleMarkReadBookmark")
+    fun onToggleMarkReadBookmark(bookmarkId: String, isRead: Boolean) {
+        updateBookmark(bookmarkId) {
+            updateBookmarkUseCase.updateIsRead(
+                bookmarkId = bookmarkId,
+                isRead = isRead
+            )
+        }
     }
 
     fun onToggleFavoriteBookmark(bookmarkId: String, isFavorite: Boolean) {
-        viewModelScope.launch {
-            val state =
-                when (val result = updateBookmarkUseCase.updateIsFavorite(
-                    bookmarkId = bookmarkId,
-                    isFavorite = isFavorite
-                )) {
-                    is UpdateBookmarkUseCase.Result.Success -> {
-                        UpdateBookmarkState.Success
-                    }
-
-                    is UpdateBookmarkUseCase.Result.GenericError -> {
-                        UpdateBookmarkState.Error(result.message)
-                    }
-
-                    is UpdateBookmarkUseCase.Result.NetworkError -> {
-                        UpdateBookmarkState.Error(result.message)
-                    }
-                }
-            _uiState.update {
-                when (it) {
-                    is UiState.Success -> it.copy(updateBookmarkState = state)
-                    else -> it
-                }
-            }
+        updateBookmark(bookmarkId) {
+            updateBookmarkUseCase.updateIsFavorite(
+                bookmarkId = bookmarkId,
+                isFavorite = isFavorite
+            )
         }
     }
 
     fun onToggleArchiveBookmark(bookmarkId: String, isArchived: Boolean) {
-        viewModelScope.launch {
-            val state = when (val result = updateBookmarkUseCase.updateIsArchived(
+        updateBookmark(bookmarkId) {
+            updateBookmarkUseCase.updateIsArchived(
                 bookmarkId = bookmarkId,
                 isArchived = isArchived
-            )) {
-                is UpdateBookmarkUseCase.Result.Success -> {
-                    UpdateBookmarkState.Success
-                }
+            )
+        }
+    }
 
-                is UpdateBookmarkUseCase.Result.GenericError -> {
-                    UpdateBookmarkState.Error(result.message)
-                }
-
-                is UpdateBookmarkUseCase.Result.NetworkError -> {
-                    UpdateBookmarkState.Error(result.message)
-                }
+    private fun updateBookmark(bookmarkId: String, update: suspend () -> UpdateBookmarkUseCase.Result) {
+        viewModelScope.launch {
+            val state = when (val result = update()) {
+                is UpdateBookmarkUseCase.Result.Success -> UpdateBookmarkState.Success
+                is UpdateBookmarkUseCase.Result.GenericError -> UpdateBookmarkState.Error(result.message)
+                is UpdateBookmarkUseCase.Result.NetworkError -> UpdateBookmarkState.Error(result.message)
             }
             _uiState.update {
                 when (it) {
-                    is UiState.Success -> it.copy(updateBookmarkState = state)
+                     is UiState.Success -> it.copy(updateBookmarkState = state)
                     else -> it
                 }
             }
