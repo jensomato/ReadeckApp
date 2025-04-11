@@ -170,11 +170,13 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     fun onDeleteBookmark(bookmarkId: String) {
-        Timber.d("onDeleteBookmark")
+        updateBookmark {
+            updateBookmarkUseCase.deleteBookmark(bookmarkId)
+        }
     }
 
     fun onToggleMarkReadBookmark(bookmarkId: String, isRead: Boolean) {
-        updateBookmark(bookmarkId) {
+        updateBookmark {
             updateBookmarkUseCase.updateIsRead(
                 bookmarkId = bookmarkId,
                 isRead = isRead
@@ -183,7 +185,7 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     fun onToggleFavoriteBookmark(bookmarkId: String, isFavorite: Boolean) {
-        updateBookmark(bookmarkId) {
+        updateBookmark {
             updateBookmarkUseCase.updateIsFavorite(
                 bookmarkId = bookmarkId,
                 isFavorite = isFavorite
@@ -192,7 +194,7 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     fun onToggleArchiveBookmark(bookmarkId: String, isArchived: Boolean) {
-        updateBookmark(bookmarkId) {
+        updateBookmark {
             updateBookmarkUseCase.updateIsArchived(
                 bookmarkId = bookmarkId,
                 isArchived = isArchived
@@ -200,7 +202,7 @@ class BookmarkListViewModel @Inject constructor(
         }
     }
 
-    private fun updateBookmark(bookmarkId: String, update: suspend () -> UpdateBookmarkUseCase.Result) {
+    private fun updateBookmark(update: suspend () -> UpdateBookmarkUseCase.Result) {
         viewModelScope.launch {
             val state = when (val result = update()) {
                 is UpdateBookmarkUseCase.Result.Success -> UpdateBookmarkState.Success

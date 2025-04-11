@@ -15,6 +15,7 @@ import retrofit2.http.GET
 import retrofit2.http.POST
 import retrofit2.http.PATCH
 import retrofit2.http.Query
+import retrofit2.http.DELETE
 import retrofit2.http.Body
 import retrofit2.http.Headers
 import retrofit2.http.Path
@@ -45,11 +46,16 @@ interface ReadeckApi {
         @Body body: CreateBookmarkDto
     ): Response<StatusMessageDto>
 
+    @Headers("Accept: application/json")
     @PATCH("bookmarks/{id}")
     suspend fun editBookmark(
         @Path("id") id: String,
         @Body body: EditBookmarkDto
     ): Response<EditBookmarkResponseDto>
+
+    @Headers("Accept: application/json")
+    @DELETE("bookmarks/{id}")
+    suspend fun deleteBookmark(@Path("id") id: String): Response<Unit>
 
     data class SortOrder(val sort: Sort, val order: Order = Order.Ascending) {
         override fun toString(): String {

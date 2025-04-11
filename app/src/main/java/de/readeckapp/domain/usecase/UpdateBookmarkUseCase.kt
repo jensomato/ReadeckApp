@@ -37,6 +37,10 @@ class UpdateBookmarkUseCase @Inject constructor(
         ))
     }
 
+    suspend fun deleteBookmark(bookmarkId: String): Result {
+        return handleResult(bookmarkRepository.deleteBookmark(bookmarkId))
+    }
+
     private fun handleResult(result: BookmarkRepository.UpdateResult): Result {
         return when(result) {
             is BookmarkRepository.UpdateResult.Success -> {

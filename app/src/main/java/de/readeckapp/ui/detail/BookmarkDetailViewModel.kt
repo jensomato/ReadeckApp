@@ -47,7 +47,7 @@ class BookmarkDetailViewModel @Inject constructor(
         htmlTemplate,
         updateState
     ) { bookmark, htmlTemplate, updateState ->
-        if (htmlTemplate != null && bookmark.articleContent != null) {
+        if (htmlTemplate != null && bookmark?.articleContent != null) {
             val content = htmlTemplate.replace("%s", bookmark.articleContent)
             val encodedHtml =
                 Base64.withPadding(Base64.PaddingOption.ABSENT).encode(content.toByteArray())
@@ -68,7 +68,7 @@ class BookmarkDetailViewModel @Inject constructor(
                 updateBookmarkState = updateState
             )
         } else {
-            Timber.e("Error loading Article [bookmarkId=$bookmarkId, htmlTemplate=${htmlTemplate.isNullOrBlank()}, bookmarkArticle=${bookmark.articleContent?.isNotBlank()}")
+            Timber.e("Error loading Article [bookmarkId=$bookmarkId, htmlTemplate=${htmlTemplate.isNullOrBlank()}, bookmarkArticle=${bookmark?.articleContent?.isNotBlank()}")
             UiState.Error
         }
     }
@@ -120,9 +120,19 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
 
-    fun deleteBookmark(bookmarkId: String) =
-        // TODO: Implement delete functionality
-        Timber.d("Deleting bookmark $bookmarkId")
+    fun deleteBookmark(bookmarkId: String) {
+        viewModelScope.launch {
+            val state = when (val result = updateBookmarkUseCase.deleteBookmark(bookmarkId)) {
+                is UpdateBookmarkUseCase.Result.Success -> UpdateBookmarkState.Success
+                is UpdateBookmarkUseCase.Result.GenericError -> UpdateBookmarkState.Error(result.message)
+                is UpdateBookmarkUseCase.Result.NetworkError -> UpdateBookmarkState.Error(result.message)
+            }
+            if (state is UpdateBookmarkState.Success) {
+                _navigationEvent.update { NavigationEvent.NavigateBack }
+            }
+            updateState.value = state
+        }
+    }
 
     fun onClickBack() {
         _navigationEvent.update { NavigationEvent.NavigateBack }
