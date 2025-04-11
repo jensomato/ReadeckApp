@@ -51,4 +51,18 @@ other{}
     <string name="error">Error</string>
     <string name="ok">OK</string>
     <string name="not_valid_url">Not a valid URL</string>
+    <string name="log_view_title">Logs</string>
+    <string name="log_view_send_logs">Send Logs</string>
+    <string name="settings_logs">Logs</string>
+    <string name="settings_logs_subtitle">View and Send Logfiles</string>
+    <string name="log_view_share_title">Send Logs</string>
+    <string name="log_view_no_log_file_found">No log file found</string>
+
+    <!-- Bookmark Card Actions -->
+    <string name="action_favorite">Favorite</string>
+    <string name="action_archive">Archive</string>
+    <string name="action_mark_read">Read</string>
+    <string name="action_delete">Delete</string>
+    <string name="error_no_article_content">Error, article content not available</string>
+    <string name="update_successful">Update successful</string>
 </resources>

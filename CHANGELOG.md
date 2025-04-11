@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-04-11
+
+### Added
+
+- Implemented the ability to delete bookmarks in list and detail screen. Closes #44
+- Implemented the ability to change the read state of bookmarks in list and detail screen. Closes #47
+- Implemented the ability to change the archive state of bookmarks in list and detail screen. Closes #43
+- Implemented the ability to change the favorite state of bookmarks in list and detail screen. Closes #39
+- Implemented the ability to view application logs within the settings screen and share them for troubleshooting purposes.
+
+### Fixed
+
+- Fix #34: Fix parsing error. Make field `read_progress` optional.
+- Fix #40: Bookmark synchronization issues caused by incorrect timezone handling.
+
+### Changed
+
+- Now only bookmarks that are successfully loaded (`state = 0` in readeck api) are displayed. Bookmarks that are still loading or have encountered an error will not be displayed. 
+
 ## [0.2.0] - 2025-03-25
 
 ### Added

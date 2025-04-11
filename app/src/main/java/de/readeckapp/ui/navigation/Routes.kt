@@ -16,3 +16,6 @@ object SettingsRoute
 
 @Serializable
 object OpenSourceLibrariesRoute
+
+@Serializable
+object LogViewRoute

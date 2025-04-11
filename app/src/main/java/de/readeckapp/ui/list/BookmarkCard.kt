@@ -11,11 +11,14 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
-import androidx.compose.material.icons.filled.DateRange
+import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Favorite
+import androidx.compose.material.icons.filled.Grade
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
+import androidx.compose.material.icons.outlined.Grade
+import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -38,6 +41,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -56,9 +60,9 @@ fun BookmarkCard(
     bookmark: Bookmark,
     onClickCard: (String) -> Unit,
     onClickDelete: (String) -> Unit,
-    onClickMarkRead: (String) -> Unit,
-    onClickFavorite: (String) -> Unit,
-    onClickArchive: (String) -> Unit,
+    onClickMarkRead: (String, Boolean) -> Unit,
+    onClickFavorite: (String, Boolean) -> Unit,
+    onClickArchive: (String, Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
     Card(
@@ -153,46 +157,46 @@ fun BookmarkCard(
                             onDismissRequest = { expanded = false }
                         ) {
                             DropdownMenuItem(
-                                text = { Text("Favorite") },
+                                text = { Text(stringResource(R.string.action_favorite)) },
                                 onClick = {
-                                    onClickFavorite(bookmark.id)
+                                    onClickFavorite(bookmark.id, !bookmark.isMarked)
                                     expanded = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Filled.Favorite,
-                                        contentDescription = "Favorite"
+                                        imageVector = if (bookmark.isMarked) Icons.Filled.Grade else Icons.Outlined.Grade,
+                                        contentDescription = stringResource(R.string.action_favorite)
                                     )
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Archive") },
+                                text = { Text(stringResource(R.string.action_archive)) },
                                 onClick = {
-                                    onClickArchive(bookmark.id)
+                                    onClickArchive(bookmark.id, !bookmark.isArchived)
                                     expanded = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Filled.DateRange,
-                                        contentDescription = "Archive"
+                                        imageVector = if (bookmark.isArchived) Icons.Filled.Inventory2 else Icons.Outlined.Inventory2,
+                                        contentDescription = stringResource(R.string.action_archive)
                                     )
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Mark Read") },
+                                text = { Text(stringResource(R.string.action_mark_read)) },
                                 onClick = {
-                                    onClickMarkRead(bookmark.id)
+                                    onClickMarkRead(bookmark.id, !bookmark.isRead())
                                     expanded = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        Icons.Filled.Check,
-                                        contentDescription = "Mark Read"
+                                        imageVector = if (bookmark.isRead()) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                                        contentDescription = stringResource(R.string.action_mark_read)
                                     )
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text("Delete") },
+                                text = { Text(stringResource(R.string.action_delete)) },
                                 onClick = {
                                     onClickDelete(bookmark.id)
                                     expanded = false
@@ -200,7 +204,7 @@ fun BookmarkCard(
                                 leadingIcon = {
                                     Icon(
                                         Icons.Filled.Delete,
-                                        contentDescription = "Delete"
+                                        contentDescription = stringResource(R.string.action_delete)
                                     )
                                 }
                             )
@@ -224,7 +228,7 @@ fun BookmarkCardPreview() {
         href = "https://example.com",
         created = kotlinx.datetime.LocalDateTime.parse("2024-01-15T10:00:00"), // Use LocalDateTime
         updated = kotlinx.datetime.LocalDateTime.parse("2024-01-16T12:00:00"), // Use LocalDateTime
-        state = 1,
+        state = Bookmark.State.LOADED,
         loaded = true,
         url = "https://example.com",
         title = "Sample Bookmark",
@@ -263,9 +267,9 @@ fun BookmarkCardPreview() {
             bookmark = sampleBookmark,
             onClickCard = {},
             onClickDelete = {},
-            onClickMarkRead = {},
-            onClickFavorite = {},
-            onClickArchive = {}
+            onClickMarkRead = { _, _ -> },
+            onClickFavorite = { _, _ -> },
+            onClickArchive = { _, _ -> }
         )
     }
 }

@@ -1,0 +1,74 @@
+{
+  "is_valid": false,
+  "errors": null,
+  "fields": {
+    "_to": {
+      "is_null": true,
+      "is_bound": false,
+      "value": null,
+      "errors": null
+    },
+    "add_labels": {
+      "is_null": false,
+      "is_bound": true,
+      "value": [
+        "string"
+      ],
+      "errors": null
+    },
+    "is_archived": {
+      "is_null": false,
+      "is_bound": true,
+      "value": false,
+      "errors": null
+    },
+    "is_deleted": {
+      "is_null": false,
+      "is_bound": true,
+      "value": false,
+      "errors": null
+    },
+    "is_marked": {
+      "is_null": false,
+      "is_bound": true,
+      "value": false,
+      "errors": [
+        "invalid type"
+      ]
+    },
+    "labels": {
+      "is_null": false,
+      "is_bound": true,
+      "value": [
+        "string"
+      ],
+      "errors": null
+    },
+    "read_anchor": {
+      "is_null": false,
+      "is_bound": true,
+      "value": "string",
+      "errors": null
+    },
+    "read_progress": {
+      "is_null": false,
+      "is_bound": true,
+      "value": 0,
+      "errors": null
+    },
+    "remove_labels": {
+      "is_null": false,
+      "is_bound": true,
+      "value": [
+        "string"
+      ],
+      "errors": null
+    },
+    "title": {
+      "is_null": false,
+      "is_bound": true,
+      "value": "string",
+      "errors": null
+    }
+  }
+}

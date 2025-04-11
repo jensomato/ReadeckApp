@@ -5,6 +5,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.domain.BookmarkRepository
+import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -14,6 +15,7 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
 import kotlinx.datetime.LocalDateTime
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
@@ -26,6 +28,7 @@ import kotlin.io.encoding.ExperimentalEncodingApi
 
 @HiltViewModel
 class BookmarkDetailViewModel @Inject constructor(
+    private val updateBookmarkUseCase: UpdateBookmarkUseCase,
     private val bookmarkRepository: BookmarkRepository,
     private val assetLoader: AssetLoader,
     savedStateHandle: SavedStateHandle
@@ -36,18 +39,20 @@ class BookmarkDetailViewModel @Inject constructor(
     private val htmlTemplate = flow {
         emit(assetLoader.loadAsset("html_template.html"))
     }
+    private val updateState = MutableStateFlow<UpdateBookmarkState?>(null)
 
     @OptIn(ExperimentalEncodingApi::class)
     val uiState = combine(
         bookmarkRepository.observeBookmark(bookmarkId!!),
-        htmlTemplate
-    ) { bookmark, htmlTemplate ->
-        if (htmlTemplate != null && bookmark.articleContent != null) {
+        htmlTemplate,
+        updateState
+    ) { bookmark, htmlTemplate, updateState ->
+        if (htmlTemplate != null && bookmark?.articleContent != null) {
             val content = htmlTemplate.replace("%s", bookmark.articleContent)
             val encodedHtml =
                 Base64.withPadding(Base64.PaddingOption.ABSENT).encode(content.toByteArray())
             UiState.Success(
-                Bookmark(
+                bookmark = Bookmark(
                     title = bookmark.title,
                     encodedHtmlContent = encodedHtml,
                     authors = bookmark.authors,
@@ -55,10 +60,15 @@ class BookmarkDetailViewModel @Inject constructor(
                     bookmarkId = bookmarkId,
                     siteName = bookmark.siteName,
                     imgSrc = bookmark.image.src,
-                    htmlContent = content
-                )
+                    htmlContent = content,
+                    isFavorite = bookmark.isMarked,
+                    isArchived = bookmark.isArchived,
+                    isRead = bookmark.isRead()
+                ),
+                updateBookmarkState = updateState
             )
         } else {
+            Timber.e("Error loading Article [bookmarkId=$bookmarkId, htmlTemplate=${htmlTemplate.isNullOrBlank()}, bookmarkArticle=${bookmark?.articleContent?.isNotBlank()}")
             UiState.Error
         }
     }
@@ -68,24 +78,61 @@ class BookmarkDetailViewModel @Inject constructor(
             initialValue = UiState.Loading
         )
 
-    fun toggleFavorite(bookmarkId: String) {
-        // TODO: Implement favorite functionality
-        Timber.d("Toggling favorite for $bookmarkId")
+    fun onToggleFavorite(bookmarkId: String, isFavorite: Boolean) {
+        updateBookmark {
+            updateBookmarkUseCase.updateIsFavorite(
+                bookmarkId = bookmarkId,
+                isFavorite = isFavorite
+            )
+        }
     }
 
-    fun toggleArchive(bookmarkId: String) {
-        // TODO: Implement archive functionality
-        Timber.d("Toggling archive for $bookmarkId")
+    fun onUpdateBookmarkStateConsumed() {
+        updateState.value = null
     }
 
-    fun markRead(bookmarkId: String) {
-        // TODO: Implement mark read functionality
-        Timber.d("Marking read for $bookmarkId")
+    fun onToggleArchive(bookmarkId: String, isArchived: Boolean) {
+        updateBookmark {
+            updateBookmarkUseCase.updateIsArchived(
+                bookmarkId = bookmarkId,
+                isArchived = isArchived
+            )
+        }
     }
 
-    fun deleteBookmark(bookmarkId: String) =
-        // TODO: Implement delete functionality
-        Timber.d("Deleting bookmark $bookmarkId")
+    fun onToggleMarkRead(bookmarkId: String, isRead: Boolean) {
+        updateBookmark {
+            updateBookmarkUseCase.updateIsRead(
+                bookmarkId = bookmarkId,
+                isRead = isRead
+            )
+        }
+    }
+
+    private fun updateBookmark(update: suspend () -> UpdateBookmarkUseCase.Result) {
+        viewModelScope.launch {
+            val state = when (val result = update()) {
+                is UpdateBookmarkUseCase.Result.Success -> UpdateBookmarkState.Success
+                is UpdateBookmarkUseCase.Result.GenericError -> UpdateBookmarkState.Error(result.message)
+                is UpdateBookmarkUseCase.Result.NetworkError -> UpdateBookmarkState.Error(result.message)
+            }
+            updateState.value = state
+        }
+    }
+
+    fun deleteBookmark(bookmarkId: String) {
+        viewModelScope.launch {
+            val state = when (val result = updateBookmarkUseCase.deleteBookmark(bookmarkId)) {
+                is UpdateBookmarkUseCase.Result.Success -> UpdateBookmarkState.Success
+                is UpdateBookmarkUseCase.Result.GenericError -> UpdateBookmarkState.Error(result.message)
+                is UpdateBookmarkUseCase.Result.NetworkError -> UpdateBookmarkState.Error(result.message)
+            }
+            if (state is UpdateBookmarkState.Success) {
+                _navigationEvent.update { NavigationEvent.NavigateBack }
+            }
+            updateState.value = state
+        }
+    }
 
     fun onClickBack() {
         _navigationEvent.update { NavigationEvent.NavigateBack }
@@ -109,7 +156,9 @@ class BookmarkDetailViewModel @Inject constructor(
     }
 
     sealed class UiState {
-        data class Success(val bookmark: Bookmark) : UiState()
+        data class Success(val bookmark: Bookmark, val updateBookmarkState: UpdateBookmarkState?) :
+            UiState()
+
         data object Loading : UiState()
         data object Error : UiState()
     }
@@ -122,6 +171,14 @@ class BookmarkDetailViewModel @Inject constructor(
         val bookmarkId: String,
         val siteName: String,
         val imgSrc: String,
-        val htmlContent: String
+        val htmlContent: String,
+        val isFavorite: Boolean,
+        val isArchived: Boolean,
+        val isRead: Boolean
     )
+
+    sealed class UpdateBookmarkState {
+        data object Success : UpdateBookmarkState()
+        data class Error(val message: String) : UpdateBookmarkState()
+    }
 }

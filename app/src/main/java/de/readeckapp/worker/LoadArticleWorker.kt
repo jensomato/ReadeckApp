@@ -16,20 +16,19 @@ class LoadArticleWorker @AssistedInject constructor(
     val loadArticleUseCase: LoadArticleUseCase
 ) : CoroutineWorker(appContext, workerParams) {
     override suspend fun doWork(): Result {
-        // TODO: Implement the actual work to load bookmarks
         try {
             Timber.d("Start Work with params=$workerParams")
             val bookmarkId = workerParams.inputData.getString(PARAM_BOOKMARK_ID)
-            Timber.d("bookmarkId=$bookmarkId")
             return if (bookmarkId != null) {
+                Timber.i("Start loading article [bookmarkId=$bookmarkId]")
                 loadArticleUseCase.execute(bookmarkId)
                 Result.success()
             } else {
+                Timber.w("No bookmarkId provided")
                 Result.failure()
             }
         } catch (e: Exception) {
-            Timber.e(e, "Error in worker")
-            // Handle errors (e.g., retry, failure)
+            Timber.e(e, "Error loading article")
             return Result.failure()
         }
     }
