@@ -65,8 +65,8 @@ class BookmarkRepositoryImpl @Inject constructor(
         return bookmarkDao.getBookmarkById(id).toDomain()
     }
 
-    override fun observeBookmark(id: String): Flow<Bookmark> {
-        return bookmarkDao.observeBookmark(id).map { it.toDomain() }
+    override fun observeBookmark(id: String): Flow<Bookmark?> {
+        return bookmarkDao.observeBookmark(id).map { it?.toDomain() }
     }
 
     override suspend fun deleteAllBookmarks() {
@@ -83,7 +83,12 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): BookmarkRepository.UpdateResult {
+    override suspend fun updateBookmark(
+        bookmarkId: String,
+        isFavorite: Boolean?,
+        isArchived: Boolean?,
+        isRead: Boolean?
+    ): BookmarkRepository.UpdateResult {
         return withContext(dispatcher) {
             try {
                 val response =
@@ -99,39 +104,38 @@ class BookmarkRepositoryImpl @Inject constructor(
                     Timber.i("Update Bookmark successful")
                     BookmarkRepository.UpdateResult.Success
                 } else {
-                    Timber.w("Error while Update Bookmark [code=${response.code()}, body=${response.errorBody()}]")
+                    val code = response.code()
                     val errorBodyString = response.errorBody()?.string()
-                    when (response.code()) {
+                    Timber.w("Error while Update Bookmark [code=$code, body=$errorBodyString]")
+                    when (code) {
                         422 -> {
                             if (!errorBodyString.isNullOrBlank()) {
                                 try {
-                                    json.decodeFromString<EditBookmarkErrorDto>(errorBodyString).let {
-                                        BookmarkRepository.UpdateResult.Error(it.errors.toString(), response.code())
-                                    }
+                                    json.decodeFromString<EditBookmarkErrorDto>(errorBodyString)
+                                        .let {
+                                            BookmarkRepository.UpdateResult.Error(
+                                                it.errors.toString(),
+                                                response.code()
+                                            )
+                                        }
                                 } catch (e: SerializationException) {
                                     Timber.e(e, "Failed to parse error: ${e.message}")
-                                    BookmarkRepository.UpdateResult.Error("Failed to parse error: ${e.message}", response.code(), e)
-                                }
-                            } else {
-                                Timber.e("Empty error body")
-                                BookmarkRepository.UpdateResult.Error("Empty error body", response.code())
-                            }
-                        }
-                        else -> {
-                            val errorState: StatusMessageDto = if (!errorBodyString.isNullOrBlank()) {
-                                try {
-                                    json.decodeFromString<StatusMessageDto>(errorBodyString)
-                                } catch (e: SerializationException) {
-                                    Timber.e(e, "Failed to parse error: ${e.message}")
-                                    StatusMessageDto(
-                                        response.code(),
-                                        "Failed to parse error: ${e.message}"
+                                    BookmarkRepository.UpdateResult.Error(
+                                        errorMessage = "Failed to parse error: ${e.message}",
+                                        code = response.code(),
+                                        ex = e
                                     )
                                 }
                             } else {
                                 Timber.e("Empty error body")
-                                StatusMessageDto(response.code(), "Empty error body")
+                                BookmarkRepository.UpdateResult.Error(
+                                    errorMessage = "Empty error body",
+                                    code = code
+                                )
                             }
+                        }
+                        else -> {
+                            val errorState = handleStatusMessage(response.code(), errorBodyString)
                             BookmarkRepository.UpdateResult.Error(
                                 errorMessage = errorState.message,
                                 code = errorState.status
@@ -144,8 +148,63 @@ class BookmarkRepositoryImpl @Inject constructor(
                 BookmarkRepository.UpdateResult.NetworkError("Network error: ${e.message}", ex = e)
             } catch (e: Exception) {
                 Timber.e(e, "Unexpected error while Update Bookmark: ${e.message}")
-                BookmarkRepository.UpdateResult.Error("An unexpected error occurred: ${e.message}", ex = e)
+                BookmarkRepository.UpdateResult.Error(
+                    "An unexpected error occurred: ${e.message}",
+                    ex = e
+                )
             }
+        }
+    }
+
+    override suspend fun deleteBookmark(id: String): BookmarkRepository.UpdateResult {
+        return withContext(dispatcher) {
+            try {
+                val response =
+                    readeckApi.deleteBookmark(id = id)
+                if (response.isSuccessful) {
+                    bookmarkDao.deleteBookmark(id)
+                    Timber.i("Delete Bookmark successful")
+                    BookmarkRepository.UpdateResult.Success
+                } else {
+                    val code = response.code()
+                    val errorBodyString = response.errorBody()?.string()
+                    Timber.w("Error while Delete Bookmark [code=$code, body=$errorBodyString]")
+                    val errorState = handleStatusMessage(code, errorBodyString)
+                    BookmarkRepository.UpdateResult.Error(
+                        errorMessage = errorState.message,
+                        code = errorState.status
+                    )
+                }
+            } catch (e: IOException) {
+                Timber.e(e, "Network error while Delete Bookmark: ${e.message}")
+                BookmarkRepository.UpdateResult.NetworkError("Network error: ${e.message}", ex = e)
+            } catch (e: Exception) {
+                Timber.e(e, "Unexpected error while Delete Bookmark: ${e.message}")
+                BookmarkRepository.UpdateResult.Error(
+                    "An unexpected error occurred: ${e.message}",
+                    ex = e
+                )
+            }
+        }
+    }
+
+    private fun handleStatusMessage(code: Int, errorBody: String?): StatusMessageDto {
+        return if (!errorBody.isNullOrBlank()) {
+            try {
+                json.decodeFromString<StatusMessageDto>(errorBody)
+            } catch (e: SerializationException) {
+                Timber.e(e, "Failed to parse error: ${e.message}")
+                StatusMessageDto(
+                    status = code,
+                    message = "Failed to parse error: ${e.message}"
+                )
+            }
+        } else {
+            Timber.e("Empty error body")
+            StatusMessageDto(
+                status = code,
+                message = "Empty error body"
+            )
         }
     }
 }

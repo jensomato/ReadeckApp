@@ -87,18 +87,19 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
 
     when (uiState) {
         is BookmarkDetailViewModel.UiState.Success -> {
+            val successMessage = stringResource(R.string.update_successful)
             LaunchedEffect(key1 = uiState) {
                 uiState.updateBookmarkState?.let {
                     when (it) {
                         is BookmarkDetailViewModel.UpdateBookmarkState.Success -> {
                             snackbarHostState.showSnackbar(
-                                message = "success",
+                                message = successMessage,
                                 duration = SnackbarDuration.Short
                             )
                         }
-                        else -> {
+                        is BookmarkDetailViewModel.UpdateBookmarkState.Error -> {
                             snackbarHostState.showSnackbar(
-                                message = "error",
+                                message = it.message,
                                 duration = SnackbarDuration.Long
                             )
                         }

@@ -5,6 +5,7 @@ import de.readeckapp.io.rest.auth.TokenManager
 import de.readeckapp.io.rest.model.AuthenticationRequestDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkErrorDto
+import de.readeckapp.io.rest.model.StatusMessageDto
 import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.test.runTest
@@ -16,6 +17,7 @@ import okhttp3.mockwebserver.MockResponse
 import okhttp3.mockwebserver.MockWebServer
 import org.junit.After
 import org.junit.Assert.assertEquals
+import org.junit.Assert.assertFalse
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -160,6 +162,39 @@ class ReadeckApiTest {
         assertTrue(response.isSuccessful)
         assertEquals(200, response.code())
         assertEquals(2, response.body()?.size)
+    }
+
+    @Test
+    fun testSuccessfulDeleteBookmark() = runTest {
+        mockWebServer.enqueue(MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_NO_CONTENT)
+        )
+
+        val response = readeckApi.deleteBookmark("bookmarkId")
+
+        assertTrue(response.isSuccessful)
+        assertEquals(HttpURLConnection.HTTP_NO_CONTENT, response.code())
+        // No body to assert, just checking the status code
+    }
+
+    @Test
+    fun testFailedDeleteBookmark() = runTest {
+        mockWebServer.enqueue(MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_FORBIDDEN)
+            .addHeader("Content-Type", "application/json")
+            .setBody(loadJsonFromClasspath("api/auth-failure.json"))
+        )
+
+        val response = readeckApi.deleteBookmark("bookmarkId")
+
+        assertFalse(response.isSuccessful)
+        assertEquals(HttpURLConnection.HTTP_FORBIDDEN, response.code())
+
+        val errorBody = response.errorBody()?.string()
+        val statusMessage = Json.decodeFromString<StatusMessageDto>(errorBody!!)
+
+        assertEquals(HttpURLConnection.HTTP_FORBIDDEN, statusMessage.status)
+        assertEquals("Invalid user and/or password", statusMessage.message)
     }
 
     private fun loadJsonFromClasspath(resourcePath: String): String {

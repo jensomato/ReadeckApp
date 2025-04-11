@@ -292,6 +292,42 @@ class BookmarkRepositoryImplTest {
         coVerify { readeckApi.editBookmark(bookmarkId, EditBookmarkDto(readProgress = 100)) }
     }
 
+    @Test
+    fun `deleteBookmark successful`() = runTest {
+        // Arrange
+        val bookmarkId = "123"
+        val response: Response<Unit> = Response.success(Unit)
+        coEvery { readeckApi.deleteBookmark(bookmarkId) } returns response
+
+        // Act
+        val result = bookmarkRepositoryImpl.deleteBookmark(id = bookmarkId)
+
+        // Assert
+        assertTrue(result is BookmarkRepository.UpdateResult.Success)
+        coVerify { readeckApi.deleteBookmark(bookmarkId) }
+    }
+
+    @Test
+    fun `deleteBookmark failure 404`() = runTest {
+        // Arrange
+        val bookmarkId = "123"
+        val statusMessageDto = StatusMessageDto(404, "Not Found")
+        val errorResponse = Response.error<Unit>(
+            404,
+            json.encodeToString(StatusMessageDto.serializer(), statusMessageDto).toResponseBody()
+        )
+        coEvery { readeckApi.deleteBookmark(bookmarkId) } returns errorResponse
+
+        // Act
+        val result = bookmarkRepositoryImpl.deleteBookmark(id = bookmarkId)
+
+        // Assert
+        assertTrue(result is BookmarkRepository.UpdateResult.Error)
+        assertEquals("Not Found", (result as BookmarkRepository.UpdateResult.Error).errorMessage)
+        assertEquals(404, result.code)
+        coVerify { readeckApi.deleteBookmark(bookmarkId) }
+    }
+
     private val editBookmarkResponseDto = EditBookmarkResponseDto(
         href = "http://example.com",
         id = "123",
