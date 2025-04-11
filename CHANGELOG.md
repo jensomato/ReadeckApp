@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.0] - 2025-04-11
+
 ### Added
 
 - Implemented the ability to delete bookmarks in list and detail screen. Closes #44
