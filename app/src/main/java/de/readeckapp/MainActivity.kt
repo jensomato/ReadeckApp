@@ -36,6 +36,7 @@ import de.readeckapp.ui.settings.SettingsScreen
 import de.readeckapp.ui.theme.ReadeckAppTheme
 import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -63,6 +64,11 @@ class MainActivity : ComponentActivity() {
                                 Toast.makeText(context, noValidUrlMessage, Toast.LENGTH_LONG).show()
                             }
                         }
+                    }
+                    if (newIntent.hasExtra("navigateToAccountSettings")) {
+                        Timber.d("Navigating to AccountSettingsScreen")
+                        newIntent.removeExtra("navigateToAccountSettings") // Prevent re-navigation
+                        navController.navigate(AccountSettingsRoute)
                     }
                     // Consume the intent after processing
                     intentState.value = null

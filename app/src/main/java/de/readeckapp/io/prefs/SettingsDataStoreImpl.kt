@@ -8,6 +8,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.datetime.Instant
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
@@ -52,14 +53,17 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
             putString(KEY_URL.name, url)
         }
     }
-    override suspend fun saveLastBookmarkTimestamp(timestamp: String) {
+
+    override suspend fun saveLastBookmarkTimestamp(timestamp: Instant) {
         encryptedSharedPreferences.edit {
-            putString(KEY_LAST_BOOKMARK_TIMESTAMP.name, timestamp)
+            putString(KEY_LAST_BOOKMARK_TIMESTAMP.name, timestamp.toString())
         }
     }
 
-    override suspend fun getLastBookmarkTimestamp(): String? {
-        return encryptedSharedPreferences.getString(KEY_LAST_BOOKMARK_TIMESTAMP.name, null)
+    override suspend fun getLastBookmarkTimestamp(): Instant? {
+        return encryptedSharedPreferences.getString(KEY_LAST_BOOKMARK_TIMESTAMP.name, null)?.let {
+            Instant.parse(it)
+        }
     }
 
     override suspend fun setInitialSyncPerformed(performed: Boolean) {

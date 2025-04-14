@@ -66,4 +66,8 @@ other{}
     <string name="action_delete">Löschen</string>
     <string name="error_no_article_content">Fehler, kein Artikelinhalt verfügbar</string>
     <string name="update_successful">Aktualisierung erfolgreich</string>
+    <string name="notification_channel_sync_name">Synchronisierungsfehler</string>
+    <string name="notification_channel_sync_description">Fehler, die zum Abbruch der Synchronisierung führen</string>
+    <string name="notification_authentication_error_title">Authentifizierung fehlgeschlagen</string>
+    <string name="notification_authentication_error_message">Bitte Anmeldeinformationen prüfen.</string>
 </resources>
