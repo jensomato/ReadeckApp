@@ -43,4 +43,23 @@ class Converters {
             else -> BookmarkEntity.State.ERROR
         }
     }
+
+    @TypeConverter
+    fun fromType(state: BookmarkEntity.Type): String {
+        return when (state) {
+            BookmarkEntity.Type.ARTICLE -> BookmarkEntity.Type.ARTICLE.value
+            BookmarkEntity.Type.PHOTO -> BookmarkEntity.Type.PHOTO.value
+            BookmarkEntity.Type.VIDEO -> BookmarkEntity.Type.VIDEO.value
+        }
+    }
+
+    @TypeConverter
+    fun toType(stateValue: String): BookmarkEntity.Type {
+        return when (stateValue) {
+            BookmarkEntity.Type.ARTICLE.value -> BookmarkEntity.Type.ARTICLE
+            BookmarkEntity.Type.PHOTO.value -> BookmarkEntity.Type.PHOTO
+            BookmarkEntity.Type.VIDEO.value -> BookmarkEntity.Type.VIDEO
+            else -> throw IllegalStateException("$stateValue can not be converted to BookmarkEntity.Type")
+        }
+    }
 }

@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fix #53: Show bookmarks of type `photo` in detail view
+
 ## [0.3.0] - 2025-04-11
 
 ### Added
