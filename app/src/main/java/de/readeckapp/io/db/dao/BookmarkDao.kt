@@ -87,8 +87,7 @@ interface BookmarkDao {
             }
             append(" ORDER BY created DESC")
         }.let { SimpleSQLiteQuery(it, args.toTypedArray()) }
-        System.out.println("query=${sqlQuery.sql}")
-        Timber.d("query=$sqlQuery")
+        Timber.d("query=${sqlQuery.sql}")
         return getBookmarksByFiltersDynamic(sqlQuery)
     }
 }

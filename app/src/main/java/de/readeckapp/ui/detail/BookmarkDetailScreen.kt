@@ -198,26 +198,41 @@ fun BookmarkDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BookmarkDetailHeader(modifier = Modifier, uiState = uiState)
-        if (!LocalInspectionMode.current) {
-            AndroidView(
-                modifier = Modifier.padding(0.dp),
-                factory = { context ->
-                    WebView(context).apply {
-                        settings.javaScriptEnabled = false
-                        settings.useWideViewPort = false
-                        settings.loadWithOverviewMode = false
-                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                        settings.defaultTextEncodingName = "utf-8"
-                        isVerticalScrollBarEnabled = false
-                        isHorizontalScrollBarEnabled = false
-                    }
-
-                },
-                update = {
-                    it.loadDataWithBaseURL(null, uiState.bookmark.htmlContent, "text/html", "utf-8", null)
-                }
-            )
+        when (uiState.bookmark.type) {
+//            BookmarkDetailViewModel.Bookmark.Type.PHOTO -> {
+//                // no article content
+//            }
+            else -> {
+                BookmarkDetailArticle(modifier = Modifier, uiState = uiState)
+            }
         }
+    }
+}
+
+@Composable
+fun BookmarkDetailArticle(
+    modifier: Modifier,
+    uiState: BookmarkDetailViewModel.UiState.Success
+) {
+    if (!LocalInspectionMode.current) {
+        AndroidView(
+            modifier = Modifier.padding(0.dp),
+            factory = { context ->
+                WebView(context).apply {
+                    settings.javaScriptEnabled = false
+                    settings.useWideViewPort = false
+                    settings.loadWithOverviewMode = false
+                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                    settings.defaultTextEncodingName = "utf-8"
+                    isVerticalScrollBarEnabled = false
+                    isHorizontalScrollBarEnabled = false
+                }
+
+            },
+            update = {
+                it.loadDataWithBaseURL(null, uiState.bookmark.htmlContent, "text/html", "utf-8", null)
+            }
+        )
     }
 }
 
@@ -422,5 +437,6 @@ private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     htmlContent = "htmlContent",
     isFavorite = false,
     isArchived = false,
-    isRead = false
+    isRead = false,
+    type = BookmarkDetailViewModel.Bookmark.Type.ARTICLE
 )

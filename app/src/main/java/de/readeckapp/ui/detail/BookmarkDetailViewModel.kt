@@ -47,29 +47,56 @@ class BookmarkDetailViewModel @Inject constructor(
         htmlTemplate,
         updateState
     ) { bookmark, htmlTemplate, updateState ->
-        if (htmlTemplate != null && bookmark?.articleContent != null) {
-            val content = htmlTemplate.replace("%s", bookmark.articleContent)
-            val encodedHtml =
-                Base64.withPadding(Base64.PaddingOption.ABSENT).encode(content.toByteArray())
-            UiState.Success(
-                bookmark = Bookmark(
-                    title = bookmark.title,
-                    encodedHtmlContent = encodedHtml,
-                    authors = bookmark.authors,
-                    createdDate = formatLocalDateTimeWithDateFormat(bookmark.created),
-                    bookmarkId = bookmarkId,
-                    siteName = bookmark.siteName,
-                    imgSrc = bookmark.image.src,
-                    htmlContent = content,
-                    isFavorite = bookmark.isMarked,
-                    isArchived = bookmark.isArchived,
-                    isRead = bookmark.isRead()
-                ),
-                updateBookmarkState = updateState
-            )
-        } else {
-            Timber.e("Error loading Article [bookmarkId=$bookmarkId, htmlTemplate=${htmlTemplate.isNullOrBlank()}, bookmarkArticle=${bookmark?.articleContent?.isNotBlank()}")
+        if (bookmark == null) {
+            Timber.e("Error loading bookmark [bookmarkId=$bookmarkId]")
             UiState.Error
+        } else if (htmlTemplate == null) {
+            Timber.e("Error loading htmlTemplate")
+            UiState.Error
+        } else {
+            val content = when (bookmark.type) {
+                de.readeckapp.domain.model.Bookmark.Type.Picture -> {
+                    htmlTemplate.replace("%s", """<img src="${bookmark.image.src}"/>""")
+                }
+                de.readeckapp.domain.model.Bookmark.Type.Video -> {
+                    bookmark.articleContent?.let {
+                        htmlTemplate.replace("%s", it)
+                    }
+                }
+                de.readeckapp.domain.model.Bookmark.Type.Article -> {
+                    bookmark.articleContent?.let {
+                        htmlTemplate.replace("%s", it)
+                    }
+                }
+            }
+            if (content != null) {
+                val encodedHtml =
+                    Base64.withPadding(Base64.PaddingOption.ABSENT).encode(content.toByteArray())
+                UiState.Success(
+                    bookmark = Bookmark(
+                        title = bookmark.title,
+                        encodedHtmlContent = encodedHtml,
+                        authors = bookmark.authors,
+                        createdDate = formatLocalDateTimeWithDateFormat(bookmark.created),
+                        bookmarkId = bookmarkId,
+                        siteName = bookmark.siteName,
+                        imgSrc = bookmark.image.src,
+                        htmlContent = content,
+                        isFavorite = bookmark.isMarked,
+                        isArchived = bookmark.isArchived,
+                        isRead = bookmark.isRead(),
+                        type = when (bookmark.type) {
+                            is de.readeckapp.domain.model.Bookmark.Type.Article -> Bookmark.Type.ARTICLE
+                            is de.readeckapp.domain.model.Bookmark.Type.Picture -> Bookmark.Type.PHOTO
+                            is de.readeckapp.domain.model.Bookmark.Type.Video -> Bookmark.Type.VIDEO
+                        }
+                    ),
+                    updateBookmarkState = updateState
+                )
+            } else {
+                Timber.e("Error loading bookmark content [bookmarkId=$bookmarkId, type=${bookmark.type}, articleContent=${bookmark.articleContent}, imageSrc=${bookmark.image.src}")
+                UiState.Error
+            }
         }
     }
         .stateIn(
@@ -174,8 +201,13 @@ class BookmarkDetailViewModel @Inject constructor(
         val htmlContent: String,
         val isFavorite: Boolean,
         val isArchived: Boolean,
-        val isRead: Boolean
-    )
+        val isRead: Boolean,
+        val type: Type
+    ) {
+        enum class Type {
+            ARTICLE, PHOTO, VIDEO
+        }
+    }
 
     sealed class UpdateBookmarkState {
         data object Success : UpdateBookmarkState()

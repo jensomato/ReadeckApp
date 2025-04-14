@@ -31,7 +31,7 @@ data class BookmarkEntity(
     val lang: String,
     val textDirection: String,
     val documentTpe: String,
-    val type: String,
+    val type: Type,
     val hasArticle: Boolean,
     val description: String,
     val isDeleted: Boolean,
@@ -57,10 +57,10 @@ data class BookmarkEntity(
     val thumbnail: ImageResourceEntity,
     val articleContent: String?
 ) {
-    sealed class Type(val value: String) {
-        data object Article: Type("article")
-        data object Video: Type("video")
-        data object Picture: Type("picture")
+    enum class Type(val value: String) {
+        ARTICLE("article"),
+        VIDEO("video"),
+        PHOTO("photo")
     }
     enum class State(val value: Int) {
         LOADED(0),
