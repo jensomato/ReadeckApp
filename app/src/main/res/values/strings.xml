@@ -65,4 +65,8 @@ other{}
     <string name="action_delete">Delete</string>
     <string name="error_no_article_content">Error, article content not available</string>
     <string name="update_successful">Update successful</string>
+    <string name="notification_channel_sync_name">Synchronization Errors</string>
+    <string name="notification_channel_sync_description">Errors in synchronization</string>
+    <string name="notification_authentication_error_title">Authentication Required</string>
+    <string name="notification_authentication_error_message">Please validate your credentials.</string>
 </resources>

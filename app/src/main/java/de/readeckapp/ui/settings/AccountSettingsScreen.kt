@@ -19,8 +19,6 @@ import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticationResult
-import kotlinx.coroutines.CoroutineScope
-import timber.log.Timber
 
 @Composable
 fun AccountSettingsScreen(

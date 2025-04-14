@@ -29,11 +29,15 @@ class AccountSettingsViewModel @Inject constructor(
 
     init {
         viewModelScope.launch {
+            val url = settingsDataStore.urlFlow.value
+            val username = settingsDataStore.usernameFlow.value
+            val password = settingsDataStore.passwordFlow.value
+            val isValidUrl = url.isValidUrl()
             _uiState.value = AccountSettingsUiState(
-                url = settingsDataStore.urlFlow.value,
-                username = settingsDataStore.usernameFlow.value,
-                password = settingsDataStore.passwordFlow.value,
-                loginEnabled = false,
+                url = url,
+                username = username,
+                password = password,
+                loginEnabled = isValidUrl && !username.isNullOrBlank() && !password.isNullOrBlank(),
                 urlError = null,
                 usernameError = null,
                 passwordError = null,

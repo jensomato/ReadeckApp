@@ -1,13 +1,18 @@
 package de.readeckapp.io.rest
 
+import android.content.Context
+import androidx.core.app.NotificationManagerCompat
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import de.readeckapp.BuildConfig
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.io.prefs.SettingsDataStoreImpl
 import de.readeckapp.io.rest.auth.AuthInterceptor
+import de.readeckapp.io.rest.auth.NotificationHelper
+import de.readeckapp.io.rest.auth.NotificationHelperImpl
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.MediaType.Companion.toMediaType
@@ -67,5 +72,19 @@ object NetworkModule {
     @Singleton
     fun provideSettingsDataStore(impl: SettingsDataStoreImpl): SettingsDataStore {
         return impl
+    }
+
+    @Provides
+    @Singleton
+    fun provideNotificationManagerCompat(@ApplicationContext context: Context): NotificationManagerCompat {
+        return NotificationManagerCompat.from(context)
+    }
+
+    @Provides
+    fun provideNotificationHelper(
+        @ApplicationContext context: Context,
+        notificationManager: NotificationManagerCompat
+    ): NotificationHelper {
+        return NotificationHelperImpl(context, notificationManager)
     }
 }
