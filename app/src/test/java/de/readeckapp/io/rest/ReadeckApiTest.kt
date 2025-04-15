@@ -1,6 +1,7 @@
 package de.readeckapp.io.rest
 
 import de.readeckapp.io.rest.auth.AuthInterceptor
+import de.readeckapp.io.rest.auth.NotificationHelper
 import de.readeckapp.io.rest.auth.TokenManager
 import de.readeckapp.io.rest.model.AuthenticationRequestDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
@@ -32,7 +33,8 @@ import java.net.HttpURLConnection
 class ReadeckApiTest {
     private lateinit var mockWebServer: MockWebServer
     val tokenManager = mockk<TokenManager>()
-    val authInterceptor = AuthInterceptor(tokenManager)
+    val notificationHelper = mockk<NotificationHelper>()
+    val authInterceptor = AuthInterceptor(tokenManager, notificationHelper)
     val loggingInterceptor =
         HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
     val okHttpClient = OkHttpClient.Builder()

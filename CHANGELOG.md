@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.1] - 2025-04-15
+
+### Added
+
+- Added metadata for F-Droid builds
+
+### Fixed
+
+- Fix #53: Show bookmarks of type `photo` in detail view
+
+### Changed
+
+- Readeck now displays notifications when authentication fails. These notifications allow users to quickly navigate to the account screen to verify their credentials and log in again. This feature assists users in addressing token-related issues that may arise when upgrading to Readeck 1.8.0, as outlined in the breaking changes documentation (https://readeck.org/en/blog/202503-readeck-18/#breaking-changes).
+
 ## [0.3.0] - 2025-04-11
 
 ### Added

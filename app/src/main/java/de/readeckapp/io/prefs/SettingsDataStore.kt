@@ -1,6 +1,7 @@
 package de.readeckapp.io.prefs
 
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.datetime.Instant
 
 interface SettingsDataStore {
     val tokenFlow: StateFlow<String?>
@@ -11,8 +12,8 @@ interface SettingsDataStore {
     fun savePassword(password: String)
     fun saveToken(token: String)
     fun saveUrl(url: String)
-    suspend fun saveLastBookmarkTimestamp(timestamp: String)
-    suspend fun getLastBookmarkTimestamp(): String?
+    suspend fun saveLastBookmarkTimestamp(timestamp: Instant)
+    suspend fun getLastBookmarkTimestamp(): Instant?
     suspend fun setInitialSyncPerformed(performed: Boolean)
     suspend fun isInitialSyncPerformed(): Boolean
     suspend fun clearCredentials()

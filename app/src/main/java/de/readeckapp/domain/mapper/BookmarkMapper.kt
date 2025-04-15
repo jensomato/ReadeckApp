@@ -31,9 +31,9 @@ fun Bookmark.toEntity(): BookmarkEntity = BookmarkEntity(
     textDirection = textDirection,
     documentTpe = documentTpe,
     type = when (type) {
-        Bookmark.Type.Article -> BookmarkEntity.Type.Article.value
-        Bookmark.Type.Picture -> BookmarkEntity.Type.Picture.value
-        Bookmark.Type.Video -> BookmarkEntity.Type.Video.value
+        Bookmark.Type.Article -> BookmarkEntity.Type.ARTICLE
+        Bookmark.Type.Picture -> BookmarkEntity.Type.PHOTO
+        Bookmark.Type.Video -> BookmarkEntity.Type.VIDEO
     },
     hasArticle = hasArticle,
     description = description,
@@ -83,10 +83,9 @@ fun BookmarkEntity.toDomain(): Bookmark = Bookmark(
     textDirection = textDirection,
     documentTpe = documentTpe,
     type = when (type) {
-        BookmarkEntity.Type.Article.value -> Bookmark.Type.Article
-        BookmarkEntity.Type.Picture.value -> Bookmark.Type.Picture
-        BookmarkEntity.Type.Video.value -> Bookmark.Type.Video
-        else -> Bookmark.Type.Article
+        BookmarkEntity.Type.ARTICLE -> Bookmark.Type.Article
+        BookmarkEntity.Type.PHOTO -> Bookmark.Type.Picture
+        BookmarkEntity.Type.VIDEO -> Bookmark.Type.Video
     },
     hasArticle = hasArticle,
     description = description,
@@ -136,10 +135,10 @@ fun BookmarkDto.toDomain(): Bookmark = Bookmark(
     lang = lang,
     textDirection = textDirection,
     documentTpe = documentTpe,
-    type = when (type) {
-        BookmarkEntity.Type.Article.value -> Bookmark.Type.Article
-        BookmarkEntity.Type.Picture.value -> Bookmark.Type.Picture
-        BookmarkEntity.Type.Video.value -> Bookmark.Type.Video
+    type = when (type.lowercase()) {
+        "article" -> Bookmark.Type.Article
+        "photo" -> Bookmark.Type.Picture
+        "video" -> Bookmark.Type.Video
         else -> Bookmark.Type.Article
     },
     hasArticle = hasArticle,

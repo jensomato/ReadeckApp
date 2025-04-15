@@ -39,9 +39,9 @@ class BookmarkRepositoryImpl @Inject constructor(
         return bookmarkDao.getBookmarksByFilters(
             type = type?.let {
                 when (it) {
-                    Bookmark.Type.Article -> BookmarkEntity.Type.Article
-                    Bookmark.Type.Picture -> BookmarkEntity.Type.Picture
-                    Bookmark.Type.Video -> BookmarkEntity.Type.Video
+                    Bookmark.Type.Article -> BookmarkEntity.Type.ARTICLE
+                    Bookmark.Type.Picture -> BookmarkEntity.Type.PHOTO
+                    Bookmark.Type.Video -> BookmarkEntity.Type.VIDEO
                 }
             },
             isUnread = unread,

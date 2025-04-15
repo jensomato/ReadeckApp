@@ -10,7 +10,6 @@ import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.io.rest.ReadeckApi
 import de.readeckapp.io.rest.model.BookmarkDto
 import de.readeckapp.worker.LoadArticleWorker
-import kotlinx.datetime.Instant
 import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toInstant
 import timber.log.Timber
@@ -34,8 +33,7 @@ class LoadBookmarksUseCase @Inject constructor(
 
         var offset = initialOffset
         try {
-            val lastLoadedTimestampString = settingsDataStore.getLastBookmarkTimestamp()
-            val lastLoadedTimestamp = lastLoadedTimestampString?.let { Instant.parse(it) }
+            val lastLoadedTimestamp = settingsDataStore.getLastBookmarkTimestamp()
             Timber.i("Loaded last bookmark timestamp: [utc=$lastLoadedTimestamp]")
 
             var hasMorePages = true
@@ -72,7 +70,7 @@ class LoadBookmarksUseCase @Inject constructor(
                     val latestBookmark = bookmarks.maxByOrNull { it.created }
                     latestBookmark?.let {
                         val timestamp = it.created.toInstant(TimeZone.currentSystemDefault())
-                        settingsDataStore.saveLastBookmarkTimestamp(timestamp.toString())
+                        settingsDataStore.saveLastBookmarkTimestamp(timestamp)
                         Timber.i("Saved last bookmark timestamp: [local=${it.created}, utc=$timestamp]")
                     }
 

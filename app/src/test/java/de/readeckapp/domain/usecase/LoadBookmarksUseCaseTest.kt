@@ -126,7 +126,7 @@ class LoadBookmarksUseCaseTest {
         loadBookmarksUseCase.execute(10, 0)
 
         // Verify that the timestamp is saved
-        coVerify { settingsDataStore.saveLastBookmarkTimestamp(bookmark2.created.toString()) }
+        coVerify { settingsDataStore.saveLastBookmarkTimestamp(bookmark2.created) }
         coVerify { bookmarkRepository.insertBookmarks(sampleBookmarks.map { it.toDomain() }) }
     }
 

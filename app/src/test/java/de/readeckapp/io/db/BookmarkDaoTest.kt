@@ -7,6 +7,8 @@ import de.readeckapp.io.db.dao.BookmarkDao
 import de.readeckapp.io.db.model.BookmarkEntity
 import de.readeckapp.io.db.model.ImageResourceEntity
 import de.readeckapp.io.db.model.ResourceEntity
+import de.readeckapp.test.logging.replaceDebugTree
+import de.readeckapp.test.logging.restoreDebugTree
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.test.StandardTestDispatcher
 import kotlinx.coroutines.test.runTest
@@ -35,6 +37,7 @@ class BookmarkDaoTest {
 
         @Before
         fun setup() {
+            replaceDebugTree()
             val context: Context = ApplicationProvider.getApplicationContext()
             db = Room.inMemoryDatabaseBuilder(context, ReadeckDatabase::class.java)
                 .allowMainThreadQueries().build()
@@ -45,6 +48,7 @@ class BookmarkDaoTest {
         @After
         fun tearDown() {
             db.close()
+            restoreDebugTree()
         }
 
         private fun generateTestData() = runTest {
@@ -52,11 +56,11 @@ class BookmarkDaoTest {
             val bookmarkEntities = (0 until 30).map { index ->
                 val currentDate = startDate.plus(index.toLong(), kotlinx.datetime.DateTimeUnit.DAY)
                 val type = when (index) {
-                    in 0..9 -> BookmarkEntity.Type.Article.value
-                    in 10..19 -> BookmarkEntity.Type.Video.value
-                    in 20..29 -> BookmarkEntity.Type.Picture.value
+                    in 0..9 -> BookmarkEntity.Type.ARTICLE
+                    in 10..19 -> BookmarkEntity.Type.VIDEO
+                    in 20..29 -> BookmarkEntity.Type.PHOTO
                     else -> {
-                        BookmarkEntity.Type.Article.value
+                        BookmarkEntity.Type.ARTICLE
                     }
                 }
                 val state = when (index) {
@@ -78,7 +82,7 @@ class BookmarkDaoTest {
                     authors = listOf("Author $index"),
                     lang = "en",
                     textDirection = "ltr",
-                    documentTpe = type,
+                    documentTpe = type.value.lowercase(),
                     type = type,
                     hasArticle = true,
                     description = "Description for bookmark $index",
@@ -109,9 +113,9 @@ class BookmarkDaoTest {
             @JvmStatic
             @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
             fun data(): List<ParameterType> = listOf(
-                ParameterType(BookmarkEntity.Type.Article),
-                ParameterType(BookmarkEntity.Type.Picture),
-                ParameterType(BookmarkEntity.Type.Video),
+                ParameterType(BookmarkEntity.Type.ARTICLE),
+                ParameterType(BookmarkEntity.Type.PHOTO),
+                ParameterType(BookmarkEntity.Type.VIDEO),
             )
         }
 
@@ -123,7 +127,7 @@ class BookmarkDaoTest {
             val list = flow.first()
             assertEquals(10, list.size)
             list.forEach {
-                assertEquals(parameter.type.value, it.type)
+                assertEquals(parameter.type, it.type)
             }
         }
 
