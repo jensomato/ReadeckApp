@@ -1,0 +1,3 @@
+<b>Readeck App</b> is an Android application designed to help users manage and read their saved articles and bookmarks.
+
+This app is a companion to Readeck <i>(https://readeck.org/en/)</i>, a self-hosted read-it-later service. To use this app, you'll need a Readeck account and server instance.

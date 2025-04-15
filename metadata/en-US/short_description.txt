@@ -1,0 +1,1 @@
+Android client for the Readeck self-hosted read-it-later service
