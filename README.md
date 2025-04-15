@@ -11,8 +11,8 @@ This app is a companion to Readeck (https://readeck.org/en/), a self-hosted read
 
 ## Screenshots
 
-<img src="assets/screenshot1.png" width="200px" />
-<img src="assets/screenshot2.png" width="200px" />
+<img src="metadata/en-US/images/phoneScreenshots/screenshot1.png" width="200px" />
+<img src="metadata/en-US/images/phoneScreenshots/screenshot2.png" width="200px" />
 
 ## Tech Stack
 
