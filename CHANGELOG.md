@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.3.2] - 2025-04-28
+
 ### Fixed
 
 - Fix #54: Persist article content in separate database table. Also improves performance.
