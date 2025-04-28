@@ -1,7 +1,9 @@
 package de.readeckapp.domain.mapper
 
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.io.db.model.ArticleContentEntity
 import de.readeckapp.io.db.model.BookmarkEntity
+import de.readeckapp.io.db.model.BookmarkWithArticleContent
 import de.readeckapp.io.db.model.ImageResourceEntity
 import de.readeckapp.io.db.model.ResourceEntity
 import de.readeckapp.io.rest.model.BookmarkDto as BookmarkDto
@@ -11,46 +13,48 @@ import kotlinx.datetime.TimeZone
 import kotlinx.datetime.toLocalDateTime
 import kotlinx.datetime.toInstant
 
-fun Bookmark.toEntity(): BookmarkEntity = BookmarkEntity(
-    id = id,
-    href = href,
-    created = created.toInstant(TimeZone.currentSystemDefault()),
-    updated = updated.toInstant(TimeZone.currentSystemDefault()),
-    state = when (state) {
-        Bookmark.State.LOADED -> BookmarkEntity.State.LOADED
-        Bookmark.State.ERROR -> BookmarkEntity.State.ERROR
-        Bookmark.State.LOADING -> BookmarkEntity.State.LOADING
-    },
-    loaded = loaded,
-    url = url,
-    title = title,
-    siteName = siteName,
-    site = site,
-    authors = authors,
-    lang = lang,
-    textDirection = textDirection,
-    documentTpe = documentTpe,
-    type = when (type) {
-        Bookmark.Type.Article -> BookmarkEntity.Type.ARTICLE
-        Bookmark.Type.Picture -> BookmarkEntity.Type.PHOTO
-        Bookmark.Type.Video -> BookmarkEntity.Type.VIDEO
-    },
-    hasArticle = hasArticle,
-    description = description,
-    isDeleted = isDeleted,
-    isMarked = isMarked,
-    isArchived = isArchived,
-    labels = labels,
-    readProgress = readProgress,
-    wordCount = wordCount,
-    readingTime = readingTime,
-    article = article.toEntity(),
-    icon = icon.toEntity(),
-    image = image.toEntity(),
-    log = log.toEntity(),
-    props = props.toEntity(),
-    thumbnail = thumbnail.toEntity(),
-    articleContent = articleContent
+fun Bookmark.toEntity(): BookmarkWithArticleContent = BookmarkWithArticleContent(
+    bookmark = BookmarkEntity(
+        id = id,
+        href = href,
+        created = created.toInstant(TimeZone.currentSystemDefault()),
+        updated = updated.toInstant(TimeZone.currentSystemDefault()),
+        state = when (state) {
+            Bookmark.State.LOADED -> BookmarkEntity.State.LOADED
+            Bookmark.State.ERROR -> BookmarkEntity.State.ERROR
+            Bookmark.State.LOADING -> BookmarkEntity.State.LOADING
+        },
+        loaded = loaded,
+        url = url,
+        title = title,
+        siteName = siteName,
+        site = site,
+        authors = authors,
+        lang = lang,
+        textDirection = textDirection,
+        documentTpe = documentTpe,
+        type = when (type) {
+            Bookmark.Type.Article -> BookmarkEntity.Type.ARTICLE
+            Bookmark.Type.Picture -> BookmarkEntity.Type.PHOTO
+            Bookmark.Type.Video -> BookmarkEntity.Type.VIDEO
+        },
+        hasArticle = hasArticle,
+        description = description,
+        isDeleted = isDeleted,
+        isMarked = isMarked,
+        isArchived = isArchived,
+        labels = labels,
+        readProgress = readProgress,
+        wordCount = wordCount,
+        readingTime = readingTime,
+        article = article.toEntity(),
+        icon = icon.toEntity(),
+        image = image.toEntity(),
+        log = log.toEntity(),
+        props = props.toEntity(),
+        thumbnail = thumbnail.toEntity()
+    ),
+    articleContent = articleContent?.let { ArticleContentEntity(bookmarkId = id, content = it) }
 )
 
 fun Bookmark.Resource.toEntity(): ResourceEntity = ResourceEntity(
@@ -102,7 +106,7 @@ fun BookmarkEntity.toDomain(): Bookmark = Bookmark(
     log = log.toDomain(),
     props = props.toDomain(),
     thumbnail = thumbnail.toDomain(),
-    articleContent = articleContent
+    articleContent = null // Article content will be fetched separately
 )
 
 fun ResourceEntity.toDomain(): Bookmark.Resource = Bookmark.Resource(

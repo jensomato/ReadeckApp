@@ -53,6 +53,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.rememberNavController
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import kotlinx.coroutines.launch
@@ -425,7 +426,7 @@ fun EmptyScreen(modifier: Modifier = Modifier) {
 @Composable
 fun BookmarkListView(
     modifier: Modifier = Modifier,
-    bookmarks: List<Bookmark>,
+    bookmarks: List<BookmarkListItem>,
     onClickBookmark: (String) -> Unit,
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String, Boolean) -> Unit,
@@ -467,41 +468,27 @@ fun EmptyScreenPreview() {
 @Preview(showBackground = true)
 @Composable
 fun BookmarkListViewPreview() {
-    val bookmarks = listOf(
-        Bookmark(
-            id = "1",
-            href = "https://example.com",
-            created = kotlinx.datetime.LocalDateTime.parse("2024-01-15T10:00:00"),
-            updated = kotlinx.datetime.LocalDateTime.parse("2024-01-16T12:00:00"),
-            state = Bookmark.State.LOADED,
-            loaded = true,
-            url = "https://example.com",
-            title = "Sample Bookmark",
-            siteName = "Example",
-            site = "example.com",
-            authors = listOf("John Doe"),
-            lang = "en",
-            textDirection = "ltr",
-            documentTpe = "article",
-            type = Bookmark.Type.Article,
-            hasArticle = true,
-            description = "This is a sample bookmark description.",
-            isDeleted = false,
-            isMarked = false,
-            isArchived = false,
-            labels = listOf("reading", "tech"),
-            readProgress = 50,
-            wordCount = 1000,
-            readingTime = 10,
-            article = Bookmark.Resource(""),
-            icon = Bookmark.ImageResource("", 100, 100),
-            image = Bookmark.ImageResource("https://via.placeholder.com/150", 150, 150),
-            log = Bookmark.Resource(""),
-            props = Bookmark.Resource(""),
-            thumbnail = Bookmark.ImageResource("", 100, 100),
-            articleContent = ""
-        )
+    val sampleBookmark = BookmarkListItem(
+        id = "1",
+        title = "Sample Bookmark",
+        siteName = "Example",
+        type = Bookmark.Type.Article,
+        isMarked = false,
+        isArchived = false,
+        labels = listOf(
+            "one",
+            "two",
+            "three",
+            "fourhundretandtwentyone",
+            "threethousendtwohundretandfive"
+        ),
+        isRead = true,
+        iconSrc = "https://picsum.photos/seed/picsum/640/480",
+        imageSrc = "https://picsum.photos/seed/picsum/640/480",
+        thumbnailSrc = "https://picsum.photos/seed/picsum/640/480",
     )
+    val bookmarks = listOf(sampleBookmark)
+
     // Provide a dummy NavHostController for the preview
     val navController = rememberNavController()
     BookmarkListView(
