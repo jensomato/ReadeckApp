@@ -53,11 +53,12 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkListItem
 import timber.log.Timber
 
 @Composable
 fun BookmarkCard(
-    bookmark: Bookmark,
+    bookmark: BookmarkListItem,
     onClickCard: (String) -> Unit,
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String, Boolean) -> Unit,
@@ -75,16 +76,16 @@ fun BookmarkCard(
         Column {
             // Image
             AsyncImage(
-                model = ImageRequest.Builder(LocalContext.current).data(bookmark.image.src)
+                model = ImageRequest.Builder(LocalContext.current).data(bookmark.imageSrc)
                     .crossfade(true).build(),
                 contentDescription = "Bookmark Image",
                 contentScale = ContentScale.Crop,
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(150.dp),
-                onLoading = { Timber.d("loading ${bookmark.image.src}") },
-                onError = { Timber.d("error ${bookmark.image.src}") },
-                onSuccess = { Timber.d("success ${bookmark.image.src}") },
+                onLoading = { Timber.d("loading ${bookmark.imageSrc}") },
+                onError = { Timber.d("error ${bookmark.imageSrc}") },
+                onSuccess = { Timber.d("success ${bookmark.imageSrc}") },
             )
 
             // Title, Date, and Labels
@@ -99,7 +100,7 @@ fun BookmarkCard(
                 HorizontalDivider(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
                     AsyncImage(
-                        model = ImageRequest.Builder(LocalContext.current).data(bookmark.icon.src)
+                        model = ImageRequest.Builder(LocalContext.current).data(bookmark.iconSrc)
                             .crossfade(true).build(),
                         contentDescription = "site icon",
                         contentScale = ContentScale.Fit,
@@ -185,12 +186,12 @@ fun BookmarkCard(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_mark_read)) },
                                 onClick = {
-                                    onClickMarkRead(bookmark.id, !bookmark.isRead())
+                                    onClickMarkRead(bookmark.id, !bookmark.isRead)
                                     expanded = false
                                 },
                                 leadingIcon = {
                                     Icon(
-                                        imageVector = if (bookmark.isRead()) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
+                                        imageVector = if (bookmark.isRead) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
                                         contentDescription = stringResource(R.string.action_mark_read)
                                     )
                                 }
@@ -223,25 +224,11 @@ fun BookmarkCardPreview() {
     val previewHandler = AsyncImagePreviewHandler {
         ColorImage(Color.Red.toArgb())
     }
-    val sampleBookmark = Bookmark(
+    val sampleBookmark = BookmarkListItem(
         id = "1",
-        href = "https://example.com",
-        created = kotlinx.datetime.LocalDateTime.parse("2024-01-15T10:00:00"), // Use LocalDateTime
-        updated = kotlinx.datetime.LocalDateTime.parse("2024-01-16T12:00:00"), // Use LocalDateTime
-        state = Bookmark.State.LOADED,
-        loaded = true,
-        url = "https://example.com",
         title = "Sample Bookmark",
         siteName = "Example",
-        site = "example.com",
-        authors = listOf("John Doe"),
-        lang = "en",
-        textDirection = "ltr",
-        documentTpe = "article",
         type = Bookmark.Type.Article,
-        hasArticle = true,
-        description = "This is a sample bookmark description.",
-        isDeleted = false,
         isMarked = false,
         isArchived = false,
         labels = listOf(
@@ -251,16 +238,10 @@ fun BookmarkCardPreview() {
             "fourhundretandtwentyone",
             "threethousendtwohundretandfive"
         ),
-        readProgress = 50,
-        wordCount = 1000,
-        readingTime = 10,
-        article = Bookmark.Resource(""),
-        icon = Bookmark.ImageResource("", 100, 100),
-        image = Bookmark.ImageResource("https://picsum.photos/seed/picsum/640/480", 150, 150),
-        log = Bookmark.Resource(""),
-        props = Bookmark.Resource(""),
-        thumbnail = Bookmark.ImageResource("", 100, 100),
-        articleContent = ""
+        isRead = true,
+        iconSrc = "https://picsum.photos/seed/picsum/640/480",
+        imageSrc = "https://picsum.photos/seed/picsum/640/480",
+        thumbnailSrc = "https://picsum.photos/seed/picsum/640/480",
     )
     CompositionLocalProvider(LocalAsyncImagePreviewHandler provides previewHandler) {
         BookmarkCard(

@@ -4,7 +4,9 @@ import android.content.Context
 import androidx.room.Room
 import androidx.test.core.app.ApplicationProvider
 import de.readeckapp.io.db.dao.BookmarkDao
+import de.readeckapp.io.db.model.ArticleContentEntity
 import de.readeckapp.io.db.model.BookmarkEntity
+import de.readeckapp.io.db.model.BookmarkWithArticleContent
 import de.readeckapp.io.db.model.ImageResourceEntity
 import de.readeckapp.io.db.model.ResourceEntity
 import de.readeckapp.test.logging.replaceDebugTree
@@ -27,6 +29,7 @@ import org.junit.experimental.runners.Enclosed
 import org.junit.runner.RunWith
 import org.robolectric.ParameterizedRobolectricTestRunner
 import org.robolectric.RobolectricTestRunner
+import timber.log.Timber
 
 @RunWith(Enclosed::class)
 class BookmarkDaoTest {
@@ -99,11 +102,47 @@ class BookmarkDaoTest {
                     log = ResourceEntity(""),
                     props = ResourceEntity(""),
                     thumbnail = ImageResourceEntity("", 100, 100),
-                    articleContent = ""
                 )
             }
-            bookmarkDao.insertBookmarks(bookmarkEntities)
+            val bookmarkArticles = bookmarkEntities.map {
+                BookmarkWithArticleContent(
+                    bookmark = it,
+                    articleContent = if (it.type == BookmarkEntity.Type.ARTICLE) {
+                        ArticleContentEntity(bookmarkId = it.id, content = "content")
+                    } else {
+                        null
+                    }
+                )
+            }
+            bookmarkDao.insertBookmarksWithArticleContent(bookmarkArticles)
         }
+    }
+
+    @RunWith(ParameterizedRobolectricTestRunner::class)
+    internal class GetBookmarkListItemsByFiltersTest(private val parameter: ParameterType) : BaseTest() {
+
+        companion object {
+            @JvmStatic
+            @ParameterizedRobolectricTestRunner.Parameters(name = "{0}")
+            fun data(): List<ParameterType> = listOf(
+                ParameterType(BookmarkEntity.Type.ARTICLE),
+                ParameterType(BookmarkEntity.Type.PHOTO),
+                ParameterType(BookmarkEntity.Type.VIDEO),
+            )
+        }
+
+        data class ParameterType(val type: BookmarkEntity.Type)
+
+        @Test
+        fun testFilterArticles() = runTest(testDispatcher) {
+            val flow = bookmarkDao.getBookmarkListItemsByFilters(parameter.type)
+            val list = flow.first()
+            assertEquals(10, list.size)
+            list.forEach {
+                assertEquals(parameter.type, it.type)
+            }
+        }
+
     }
 
     @RunWith(ParameterizedRobolectricTestRunner::class)
@@ -192,6 +231,15 @@ class BookmarkDaoTest {
             list.forEach { bookmark ->
                 assertEquals(BookmarkEntity.State.ERROR, bookmark.state)
             }
+        }
+    }
+
+    @RunWith(RobolectricTestRunner::class)
+    internal class GetArticleTest : BaseTest() {
+        @Test
+        fun testGetLoaded() = runTest(testDispatcher) {
+            val list = bookmarkDao.getAllBookmarksWithContent()
+            Timber.d("list=$list")
         }
     }
 }

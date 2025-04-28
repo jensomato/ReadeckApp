@@ -9,10 +9,12 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
+import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -46,6 +48,11 @@ class BookmarkListViewModel @Inject constructor(
     val createBookmarkUiState: StateFlow<CreateBookmarkUiState> =
         _createBookmarkUiState.asStateFlow()
 
+    val loadBookmarkExceptionHandler = CoroutineExceptionHandler { _, ex ->
+        Timber.e(ex, "Error loading bookmarks")
+        _uiState.value = UiState.Error
+    }
+
     init {
         val sharedUrl = savedStateHandle.get<String>("sharedUrl")
 
@@ -63,9 +70,9 @@ class BookmarkListViewModel @Inject constructor(
             )
         }
 
-        viewModelScope.launch {
+        viewModelScope.launch(loadBookmarkExceptionHandler) {
             filterState.collectLatest { filterState ->
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = filterState.type,
                     unread = filterState.unread,
                     archived = filterState.archived,
@@ -287,7 +294,7 @@ class BookmarkListViewModel @Inject constructor(
 
     sealed class UiState {
         data class Success(
-            val bookmarks: List<Bookmark>,
+            val bookmarks: List<BookmarkListItem>,
             val updateBookmarkState: UpdateBookmarkState?
         ) : UiState()
 
