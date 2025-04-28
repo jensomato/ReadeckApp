@@ -191,3 +191,9 @@ dependencies {
 aboutLibraries {
     configPath = "config"
 }
+
+tasks.whenTaskAdded {
+    if (name.contains("ArtProfile")) {
+        enabled = false
+    }
+}
