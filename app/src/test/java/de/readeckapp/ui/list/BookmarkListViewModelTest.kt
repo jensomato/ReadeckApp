@@ -5,6 +5,7 @@ import androidx.lifecycle.SavedStateHandle
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import io.mockk.coEvery
@@ -53,7 +54,7 @@ class BookmarkListViewModelTest {
 
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
-        every { bookmarkRepository.observeBookmarks(any(), any(), any(), any(), any()) } returns flowOf(
+        every { bookmarkRepository.observeBookmarkListItems(any(), any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
         every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
@@ -263,43 +264,23 @@ class BookmarkListViewModelTest {
     fun `observeBookmarks collects bookmarks with correct filters`() = runTest {
         // Arrange
         val expectedBookmarks = listOf(
-            Bookmark(
+            BookmarkListItem(
                 id = "1",
-                href = "https://example.com",
-                created = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
-                updated = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
-                state = Bookmark.State.LOADED,
-                loaded = true,
-                url = "https://example.com",
                 title = "Test Bookmark",
                 siteName = "Example Site",
-                site = "example.com",
-                authors = listOf("Author 1", "Author 2"),
-                lang = "en",
-                textDirection = "ltr",
-                documentTpe = "article",
                 type = Bookmark.Type.Article,
-                hasArticle = true,
-                description = "Test Description",
-                isDeleted = false,
                 isMarked = false,
                 isArchived = false,
                 labels = emptyList(),
-                readProgress = 0,
-                wordCount = 0,
-                readingTime = 0,
-                article = Bookmark.Resource(""),
-                articleContent = "Test Article Content",
-                icon = Bookmark.ImageResource("", 0, 0),
-                image = Bookmark.ImageResource("", 0, 0),
-                log = Bookmark.Resource(""),
-                props = Bookmark.Resource(""),
-                thumbnail = Bookmark.ImageResource("", 0, 0)
+                isRead = false,
+                thumbnailSrc = "",
+                iconSrc = "",
+                imageSrc = ""
             )
         )
         val bookmarkFlow = MutableStateFlow(expectedBookmarks)
         coEvery {
-            bookmarkRepository.observeBookmarks(
+            bookmarkRepository.observeBookmarkListItems(
                 type = Bookmark.Type.Article,
                 unread = true,
                 archived = null,
@@ -537,7 +518,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -608,7 +589,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+            bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -665,7 +646,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -728,7 +709,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -799,7 +780,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -856,7 +837,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -920,7 +901,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -991,7 +972,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -1048,7 +1029,7 @@ class BookmarkListViewModelTest {
 
             val bookmarkFlow = MutableStateFlow(bookmarks)
             coEvery {
-                bookmarkRepository.observeBookmarks(
+                bookmarkRepository.observeBookmarkListItems(
                     type = null,
                     unread = null,
                     archived = null,
@@ -1102,38 +1083,18 @@ class BookmarkListViewModelTest {
             coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
         }
     private val bookmarks = listOf(
-        Bookmark(
+        BookmarkListItem(
             id = "1",
-            href = "https://example.com",
-            created = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
-            updated = kotlinx.datetime.LocalDateTime(2024, 1, 1, 0, 0),
-            state = Bookmark.State.LOADED,
-            loaded = true,
-            url = "https://example.com",
             title = "Test Bookmark",
             siteName = "Example Site",
-            site = "example.com",
-            authors = listOf("Author 1", "Author 2"),
-            lang = "en",
-            textDirection = "ltr",
-            documentTpe = "article",
             type = Bookmark.Type.Article,
-            hasArticle = true,
-            description = "Test Description",
-            isDeleted = false,
             isMarked = false,
             isArchived = false,
             labels = emptyList(),
-            readProgress = 0,
-            wordCount = 0,
-            readingTime = 0,
-            article = Bookmark.Resource(""),
-            articleContent = "Test Article Content",
-            icon = Bookmark.ImageResource("", 0, 0),
-            image = Bookmark.ImageResource("", 0, 0),
-            log = Bookmark.Resource(""),
-            props = Bookmark.Resource(""),
-            thumbnail = Bookmark.ImageResource("", 0, 0)
+            isRead = false,
+            thumbnailSrc = "",
+            iconSrc = "",
+            imageSrc = ""
         )
     )
 }

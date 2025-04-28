@@ -4,6 +4,7 @@ import de.readeckapp.coroutine.IoDispatcher
 import de.readeckapp.domain.mapper.toDomain
 import de.readeckapp.domain.mapper.toEntity
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.io.db.dao.BookmarkDao
 import de.readeckapp.io.db.model.BookmarkEntity
 import de.readeckapp.io.rest.ReadeckApi
@@ -57,8 +58,56 @@ class BookmarkRepositoryImpl @Inject constructor(
         ).map { bookmarks -> bookmarks.map { it.toDomain() } }
     }
 
+    override fun observeBookmarkListItems(
+        type: Bookmark.Type?,
+        unread: Boolean?,
+        archived: Boolean?,
+        favorite: Boolean?,
+        state: Bookmark.State?
+    ): Flow<List<BookmarkListItem>> {
+        return bookmarkDao.getBookmarkListItemsByFilters(
+            type = type?.let {
+                when (it) {
+                    Bookmark.Type.Article -> BookmarkEntity.Type.ARTICLE
+                    Bookmark.Type.Picture -> BookmarkEntity.Type.PHOTO
+                    Bookmark.Type.Video -> BookmarkEntity.Type.VIDEO
+                }
+            },
+            isUnread = unread,
+            isArchived = archived,
+            isFavorite = favorite,
+            state = state?.let {
+                when (it) {
+                    Bookmark.State.LOADED -> BookmarkEntity.State.LOADED
+                    Bookmark.State.ERROR -> BookmarkEntity.State.ERROR
+                    Bookmark.State.LOADING -> BookmarkEntity.State.LOADING
+                }
+            }
+        ).map { listItems ->
+            listItems.map { listItem ->
+                BookmarkListItem(
+                    id = listItem.id,
+                    title = listItem.title,
+                    siteName = listItem.siteName,
+                    isMarked = listItem.isMarked,
+                    isArchived = listItem.isArchived,
+                    isRead = listItem.readProgress == 100,
+                    thumbnailSrc = listItem.thumbnailSrc,
+                    iconSrc = listItem.iconSrc,
+                    imageSrc = listItem.imageSrc,
+                    labels = listItem.labels,
+                    type = when (listItem.type) {
+                        BookmarkEntity.Type.ARTICLE -> Bookmark.Type.Article
+                        BookmarkEntity.Type.PHOTO -> Bookmark.Type.Picture
+                        BookmarkEntity.Type.VIDEO -> Bookmark.Type.Video
+                    }
+                )
+            }
+        }
+    }
+
     override suspend fun insertBookmarks(bookmarks: List<Bookmark>) {
-        bookmarkDao.insertBookmarks(bookmarks.map { it.toEntity() })
+        bookmarkDao.insertBookmarksWithArticleContent(bookmarks.map { it.toEntity() })
     }
 
     override suspend fun getBookmarkById(id: String): Bookmark {
@@ -66,7 +115,11 @@ class BookmarkRepositoryImpl @Inject constructor(
     }
 
     override fun observeBookmark(id: String): Flow<Bookmark?> {
-        return bookmarkDao.observeBookmark(id).map { it?.toDomain() }
+        return bookmarkDao.observeBookmarkWithArticleContent(id).map {
+            it?.let {
+                it.bookmark.toDomain().copy(articleContent = it.articleContent?.content)
+            }
+        }
     }
 
     override suspend fun deleteAllBookmarks() {
@@ -134,6 +187,7 @@ class BookmarkRepositoryImpl @Inject constructor(
                                 )
                             }
                         }
+
                         else -> {
                             val errorState = handleStatusMessage(response.code(), errorBodyString)
                             BookmarkRepository.UpdateResult.Error(

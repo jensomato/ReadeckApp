@@ -29,6 +29,12 @@ android {
         versionName = "0.3.1"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        javaCompileOptions {
+            annotationProcessorOptions {
+                arguments["room.schemaLocation"] = "$projectDir/schemas".toString()
+            }
+        }
     }
     signingConfigs {
         create("release") {
@@ -58,8 +64,8 @@ android {
             )
         }
         debug {
-            isMinifyEnabled = true
-            isShrinkResources = true
+            isMinifyEnabled = false
+            isShrinkResources = false
             isDebuggable = true
         }
         applicationVariants.all {
@@ -109,6 +115,9 @@ android {
         unitTests {
             isIncludeAndroidResources = true
         }
+    }
+    sourceSets {
+        getByName("debug").assets.srcDirs(files("$projectDir/schemas"))
     }
 }
 

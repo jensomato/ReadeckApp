@@ -54,8 +54,7 @@ data class BookmarkEntity(
     @Embedded(prefix = "props_")
     val props: ResourceEntity,
     @Embedded(prefix = "thumbnail_")
-    val thumbnail: ImageResourceEntity,
-    val articleContent: String?
+    val thumbnail: ImageResourceEntity
 ) {
     enum class Type(val value: String) {
         ARTICLE("article"),

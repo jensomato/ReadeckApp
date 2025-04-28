@@ -2,6 +2,7 @@ package de.readeckapp.domain
 
 import de.readeckapp.domain.model.Bookmark
 import kotlinx.coroutines.flow.Flow
+import de.readeckapp.domain.model.BookmarkListItem
 
 interface BookmarkRepository {
     fun observeBookmarks(
@@ -11,6 +12,14 @@ interface BookmarkRepository {
         favorite: Boolean? = null,
         state: Bookmark.State? = null
     ): Flow<List<Bookmark>>
+
+    fun observeBookmarkListItems(
+        type: Bookmark.Type? = null,
+        unread: Boolean? = null,
+        archived: Boolean? = null,
+        favorite: Boolean? = null,
+        state: Bookmark.State? = null
+    ): Flow<List<BookmarkListItem>>
 
     suspend fun insertBookmarks(bookmarks: List<Bookmark>)
     suspend fun getBookmarkById(id: String): Bookmark
