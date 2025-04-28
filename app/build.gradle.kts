@@ -119,6 +119,9 @@ android {
     sourceSets {
         getByName("debug").assets.srcDirs(files("$projectDir/schemas"))
     }
+    lint {
+        baseline = file("lint-baseline.xml")
+    }
 }
 
 dependencies {
