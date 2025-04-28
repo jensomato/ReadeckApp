@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Fix #54: Persist article content in separate database table. Also improves performance.
 
+### Changed
+
+- Disabled baseline profile to allow reproducible builds for F-Droid
+
 ## [0.3.1] - 2025-04-15
 
 ### Added
