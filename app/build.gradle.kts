@@ -192,6 +192,8 @@ dependencies {
 }
 
 aboutLibraries {
+    registerAndroidTasks = false
+    prettyPrint = true
     configPath = "config"
 }
 
