@@ -1,0 +1,72 @@
+<resources>
+    <string name="app_name">Readeck App</string>
+    <string name="back">Volver</string>
+    <string name="settings_topbar_title">Axustes</string>
+    <string name="settings_account_title">Conta</string>
+    <string name="settings_account_subtitle_default">Sesión non iniciada</string>
+    <string name="accountsettings_topbar_title">Conta</string>
+    <string name="account_settings_topbar_title">URL de Readeck</string>
+    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
+    <string name="account_settings_url_label">URL de Readeck</string>
+    <string name="account_settings_username_placeholder">identificador</string>
+    <string name="account_settings_username_label">Identificador</string>
+    <string name="account_settings_password_label">Contrasinal</string>
+    <string name="account_settings_password_placeholder">contrasinal</string>
+    <string name="account_settings_login">Acceder</string>
+    <string name="account_settings_url_error">URL non válido</string>
+    <string name="account_settings_username_error">Tes que escribir o identificador</string>
+    <string name="account_settings_password_error">Tes que escribir o contrasinal</string>
+    <string name="authors" translatable="true">
+{count, plural,
+zero{}
+one{from {author}}
+many{from {author} et. al.}
+other{}
+}
+    </string>
+    <string name="settings_open_source_libraries">Bibliotecas de Código aberto</string>
+    <string name="settings_open_source_libraries_subtitle">Ver as bibliotecas de código aberto que usa esta app.</string>
+    <string name="bookmarks">Marcadores</string>
+    <string name="menu">Menú</string>
+    <string name="refresh_bookmarks">Actualizar Marcadores</string>
+    <string name="all">Todo</string>
+    <string name="unread">Sen ler</string>
+    <string name="archive">Arquivo</string>
+    <string name="favorites">Favoritos</string>
+    <string name="articles">Artigos</string>
+    <string name="videos">Vídeos</string>
+    <string name="pictures">Imaxes</string>
+    <string name="settings">Axustes</string>
+    <string name="an_error_occurred">Houbo un fallo.</string>
+    <string name="no_bookmarks_found">Non hai marcadores.</string>
+    <string name="add_bookmark">Engadir marcador</string>
+    <string name="title">Título (Optativo)</string>
+    <string name="url">URL</string>
+    <string name="invalid_url">URL non válido</string>
+    <string name="save">Gardar</string>
+    <string name="cancel">Desbotar</string>
+    <string name="create_bookmark_error">Erro ao crear o marcador: %1$s</string>
+    <string name="add_new_bookmark">Engadir Novo marcador</string>
+    <string name="create">Crear</string>
+    <string name="error">Erro</string>
+    <string name="ok">OK</string>
+    <string name="not_valid_url">URL non válido</string>
+    <string name="log_view_title">Rexistros</string>
+    <string name="log_view_send_logs">Enviar rexistros</string>
+    <string name="settings_logs">Rexistros</string>
+    <string name="settings_logs_subtitle">Ver e Enviar ficheiro cos rexistros</string>
+    <string name="log_view_share_title">Enviar rexistros</string>
+    <string name="log_view_no_log_file_found">Non hai ficheiro de rexistro</string>
+
+    <!-- Bookmark Card Actions -->
+    <string name="action_favorite">Favorecer</string>
+    <string name="action_archive">Arquivar</string>
+    <string name="action_mark_read">Lido</string>
+    <string name="action_delete">Eliminar</string>
+    <string name="error_no_article_content">Erro, o contido do artigo non está dispoñible</string>
+    <string name="update_successful">Actualización correcta</string>
+    <string name="notification_channel_sync_name">Erros ao sincronizar</string>
+    <string name="notification_channel_sync_description">Erros na sincronización</string>
+    <string name="notification_authentication_error_title">Require autenticación</string>
+    <string name="notification_authentication_error_message">Comproba as túas credenciais.</string>
+</resources>
