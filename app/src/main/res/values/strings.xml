@@ -69,4 +69,7 @@ other{}
     <string name="notification_channel_sync_description">Errors in synchronization</string>
     <string name="notification_authentication_error_title">Authentication Required</string>
     <string name="notification_authentication_error_message">Please validate your credentials.</string>
+    <string name="detail_view_no_content">No article content found</string>
+    <string name="detail_view_image_content_description">Bookmark Image</string>
+    <string name="detail_view_error_image_content_description">Bookmark Error Image</string>
 </resources>

@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Fixed
 
 - Fix #64: Add library definitions to version control.
+- Fix #66: Show bookmark detail view for all bookmark, even if no article content is available.
 
 ## [0.3.2] - 2025-04-28
 

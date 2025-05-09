@@ -57,19 +57,23 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.viewinterop.AndroidView
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
-import coil3.compose.AsyncImage
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
+import de.readeckapp.ui.components.ErrorPlaceholderImage
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
     val viewModel: BookmarkDetailViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
-    val onClickToggleFavorite: (String, Boolean) -> Unit = { id, isFavorite -> viewModel.onToggleFavorite(id, isFavorite) }
-    val onClickToggleArchive: (String, Boolean) -> Unit = { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
-    val onMarkRead: (String, Boolean) -> Unit = { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
+    val onClickToggleFavorite: (String, Boolean) -> Unit =
+        { id, isFavorite -> viewModel.onToggleFavorite(id, isFavorite) }
+    val onClickToggleArchive: (String, Boolean) -> Unit =
+        { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
+    val onMarkRead: (String, Boolean) -> Unit =
+        { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.uiState.collectAsState().value
@@ -198,15 +202,24 @@ fun BookmarkDetailContent(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BookmarkDetailHeader(modifier = Modifier, uiState = uiState)
-        when (uiState.bookmark.type) {
-//            BookmarkDetailViewModel.Bookmark.Type.PHOTO -> {
-//                // no article content
-//            }
-            else -> {
-                BookmarkDetailArticle(modifier = Modifier, uiState = uiState)
-            }
+        if (uiState.bookmark.htmlContent != null) {
+            BookmarkDetailArticle(modifier = Modifier, uiState = uiState)
+        } else {
+            EmptyBookmarkDetailArticle(
+                modifier = Modifier
+            )
         }
     }
+}
+
+@Composable
+fun EmptyBookmarkDetailArticle(
+    modifier: Modifier
+) {
+    Text(
+        modifier = modifier,
+        text = stringResource(R.string.detail_view_no_content)
+    )
 }
 
 @Composable
@@ -230,7 +243,13 @@ fun BookmarkDetailArticle(
 
             },
             update = {
-                it.loadDataWithBaseURL(null, uiState.bookmark.htmlContent, "text/html", "utf-8", null)
+                it.loadDataWithBaseURL(
+                    null,
+                    uiState.bookmark.htmlContent!!,
+                    "text/html",
+                    "utf-8",
+                    null
+                )
             }
         )
     }
@@ -253,11 +272,17 @@ fun BookmarkDetailHeader(
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         // Header Section Start
-        AsyncImage(
+        SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(uiState.bookmark.imgSrc)
                 .crossfade(true).build(),
-            contentDescription = "Bookmark Image",
+            contentDescription = stringResource(R.string.detail_view_image_content_description),
             contentScale = ContentScale.FillWidth,
+            error = {
+                ErrorPlaceholderImage(
+                    modifier = Modifier.fillMaxWidth().height(200.dp),
+                    imageContentDescription = stringResource(R.string.detail_view_error_image_content_description)
+                )
+            },
             modifier = Modifier
                 .fillMaxWidth()
                 .height(200.dp)
@@ -357,7 +382,12 @@ fun BookmarkDetailMenu(
                     onClickDeleteBookmark(uiState.bookmark.bookmarkId)
                     expanded = false
                 },
-                leadingIcon = { Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.action_delete)) }
+                leadingIcon = {
+                    Icon(
+                        Icons.Filled.Delete,
+                        contentDescription = stringResource(R.string.action_delete)
+                    )
+                }
             )
         }
     }
