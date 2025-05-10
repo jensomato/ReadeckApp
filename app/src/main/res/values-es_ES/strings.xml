@@ -19,8 +19,8 @@
     <string name="authors" translatable="true">
 {count, plural,
 zero{}
-one{from {author}}
-many{from {author} et. al.}
+one{de {author}}
+many{de {author} y otros}
 other{}
 }
     </string>
