@@ -1,5 +1,6 @@
 package de.readeckapp.ui.list
 
+import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -96,6 +97,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val onClickMarkRead: (String, Boolean) -> Unit = { bookmarkId, isRead -> viewModel.onToggleMarkReadBookmark(bookmarkId, isRead) }
     val onClickFavorite: (String, Boolean) -> Unit = { bookmarkId, isFavorite -> viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite) }
     val onClickArchive: (String, Boolean) -> Unit = { bookmarkId, isArchived -> viewModel.onToggleArchiveBookmark(bookmarkId, isArchived) }
+    val onClickShareBookmark: (String, Context) -> Unit = { url, context -> viewModel.onClickShareBookmark(url, context) }
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -268,7 +270,8 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                             onClickDelete = onClickDelete,
                             onClickArchive = onClickArchive,
                             onClickFavorite = onClickFavorite,
-                            onClickMarkRead = onClickMarkRead
+                            onClickMarkRead = onClickMarkRead,
+                            onClickShareBookmark = onClickShareBookmark
                         )
                     } else {
                         EmptyScreen(modifier = Modifier.padding(padding))
@@ -449,6 +452,7 @@ fun BookmarkListView(
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
+    onClickShareBookmark: (String, Context) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
         items(bookmarks) { bookmark ->
@@ -458,7 +462,8 @@ fun BookmarkListView(
                 onClickDelete = onClickDelete,
                 onClickArchive = onClickArchive,
                 onClickFavorite = onClickFavorite,
-                onClickMarkRead = onClickMarkRead
+                onClickMarkRead = onClickMarkRead,
+                onClickShareBookmark = onClickShareBookmark
             )
         }
     }
@@ -487,6 +492,7 @@ fun EmptyScreenPreview() {
 fun BookmarkListViewPreview() {
     val sampleBookmark = BookmarkListItem(
         id = "1",
+        url = "https://sample.url",
         title = "Sample Bookmark",
         siteName = "Example",
         type = Bookmark.Type.Article,
@@ -515,6 +521,7 @@ fun BookmarkListViewPreview() {
         onClickDelete = {},
         onClickArchive = { _, _ -> },
         onClickFavorite = { _, _ -> },
-        onClickMarkRead = { _, _ -> }
+        onClickMarkRead = { _, _ -> },
+        onClickShareBookmark = {_, _ -> }
     )
 }

@@ -1,6 +1,7 @@
 package de.readeckapp.ui.list
 
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -174,6 +175,17 @@ class BookmarkListViewModel @Inject constructor(
                 println("Error loading bookmarks: ${e.message}")
             }
         }
+    }
+
+    fun onClickShareBookmark(url: String, context: Context) {
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, url)
+            type = "text/plain"
+        }
+        val chooser = Intent.createChooser(sendIntent, null)
+
+        context.startActivity(chooser, null)
     }
 
     fun onDeleteBookmark(bookmarkId: String) {

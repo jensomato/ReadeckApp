@@ -87,6 +87,7 @@ class BookmarkRepositoryImpl @Inject constructor(
             listItems.map { listItem ->
                 BookmarkListItem(
                     id = listItem.id,
+                    url = listItem.url,
                     title = listItem.title,
                     siteName = listItem.siteName,
                     isMarked = listItem.isMarked,
