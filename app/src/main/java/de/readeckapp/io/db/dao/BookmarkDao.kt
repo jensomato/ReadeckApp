@@ -143,6 +143,7 @@ interface BookmarkDao {
         val sqlQuery = buildString {
             append("""SELECT
             id,
+            url,
             title,
             siteName,
             isMarked,

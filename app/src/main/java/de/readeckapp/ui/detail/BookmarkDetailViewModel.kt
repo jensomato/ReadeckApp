@@ -1,5 +1,7 @@
 package de.readeckapp.ui.detail
 
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -74,8 +76,10 @@ class BookmarkDetailViewModel @Inject constructor(
             val encodedHtml = content?.let {
                 Base64.withPadding(Base64.PaddingOption.ABSENT).encode(it.toByteArray())
             }
+
             UiState.Success(
                 bookmark = Bookmark(
+                    url = bookmark.url,
                     title = bookmark.title,
                     encodedHtmlContent = encodedHtml,
                     authors = bookmark.authors,
@@ -145,6 +149,18 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
 
+    fun shareBookmark(url: String, context: Context) {
+
+        val sendIntent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, url)
+            type = "text/plain"
+        }
+        val chooser = Intent.createChooser(sendIntent, null)
+
+        context.startActivity(chooser, null)
+    }
+
     fun deleteBookmark(bookmarkId: String) {
         viewModelScope.launch {
             val state = when (val result = updateBookmarkUseCase.deleteBookmark(bookmarkId)) {
@@ -189,6 +205,7 @@ class BookmarkDetailViewModel @Inject constructor(
     }
 
     data class Bookmark(
+        val url: String,
         val title: String,
         val encodedHtmlContent: String?,
         val authors: List<String>,

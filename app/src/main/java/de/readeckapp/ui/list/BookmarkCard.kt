@@ -1,5 +1,6 @@
 package de.readeckapp.ui.list
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -19,6 +20,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -63,9 +65,12 @@ fun BookmarkCard(
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
+    onClickShareBookmark: (String, Context) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
+    val context = LocalContext.current
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -197,6 +202,19 @@ fun BookmarkCard(
                                 }
                             )
                             DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_share)) },
+                                onClick = {
+                                    onClickShareBookmark(bookmark.url, context)
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Share,
+                                        contentDescription = stringResource(R.string.action_share)
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_delete)) },
                                 onClick = {
                                     onClickDelete(bookmark.id)
@@ -226,6 +244,7 @@ fun BookmarkCardPreview() {
     }
     val sampleBookmark = BookmarkListItem(
         id = "1",
+        url = "https://sample.url",
         title = "Sample Bookmark",
         siteName = "Example",
         type = Bookmark.Type.Article,
@@ -250,7 +269,8 @@ fun BookmarkCardPreview() {
             onClickDelete = {},
             onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
-            onClickArchive = { _, _ -> }
+            onClickArchive = { _, _ -> },
+            onClickShareBookmark = {_, _ -> }
         )
     }
 }
