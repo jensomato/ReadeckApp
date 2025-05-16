@@ -3,8 +3,10 @@ package de.readeckapp.io.prefs
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
+import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
+import de.readeckapp.domain.model.AutoSyncTimeframe
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -25,6 +27,8 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_PASSWORD = stringPreferencesKey("password")
     private val KEY_LAST_BOOKMARK_TIMESTAMP = stringPreferencesKey("lastBookmarkTimestamp")
     private val KEY_INITIAL_SYNC_PERFORMED = "initial_sync_performed"
+    private val KEY_AUTOSYNC_ENABLED = booleanPreferencesKey("autosync_enabled")
+    private val KEY_AUTOSYNC_TIMEFRAME = stringPreferencesKey("autosync_timeframe")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -74,6 +78,29 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
 
     override suspend fun isInitialSyncPerformed(): Boolean {
         return encryptedSharedPreferences.getBoolean(KEY_INITIAL_SYNC_PERFORMED, false)
+    }
+
+    override suspend fun isAutoSyncEnabled(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_AUTOSYNC_ENABLED.name, false)
+    }
+
+    override suspend fun setAutoSyncEnabled(isEnabled: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_AUTOSYNC_ENABLED.name, isEnabled)
+        }
+    }
+
+    override suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe {
+        return encryptedSharedPreferences.getString(KEY_AUTOSYNC_TIMEFRAME.name, AutoSyncTimeframe.MANUAL.name)?.let {
+            AutoSyncTimeframe.valueOf(it)
+        } ?: AutoSyncTimeframe.MANUAL
+    }
+
+    override suspend fun saveAutoSyncTimeframe(autoSyncTimeframe: AutoSyncTimeframe) {
+        Timber.d("saveAutoSyncTimeframe")
+        encryptedSharedPreferences.edit {
+            putString(KEY_AUTOSYNC_TIMEFRAME.name, autoSyncTimeframe.name)
+        }
     }
 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)

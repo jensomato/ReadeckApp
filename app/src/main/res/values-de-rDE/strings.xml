@@ -58,6 +58,8 @@ other{}
     <string name="settings_logs_subtitle">Logdateien anzeigen und senden</string>
     <string name="log_view_share_title">Logs senden</string>
     <string name="log_view_no_log_file_found">Keine Logdatei gefunden</string>
+    <string name="settings_sync">Synchronisierung</string>
+    <string name="settings_sync_subtitle">Synchronisierungseinstellungen</string>
 
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorit</string>

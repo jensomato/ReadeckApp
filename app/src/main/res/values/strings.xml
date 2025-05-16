@@ -16,6 +16,7 @@
     <string name="account_settings_url_error">Invalid URL</string>
     <string name="account_settings_username_error">Username cannot be empty</string>
     <string name="account_settings_password_error">Password cannot be empty</string>
+    <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,
 zero{}
@@ -57,6 +58,8 @@ other{}
     <string name="settings_logs_subtitle">View and Send Logfiles</string>
     <string name="log_view_share_title">Send Logs</string>
     <string name="log_view_no_log_file_found">No log file found</string>
+    <string name="settings_sync">Synchronization</string>
+    <string name="settings_sync_subtitle">Synchronization Settings</string>
 
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorite</string>
@@ -72,4 +75,17 @@ other{}
     <string name="detail_view_no_content">No article content found</string>
     <string name="detail_view_image_content_description">Bookmark Image</string>
     <string name="detail_view_error_image_content_description">Bookmark Error Image</string>
+    <string name="settings_sync_full_sync_heading">Full Synchronization</string>
+    <string name="settings_sync_auto_full_sync_title">Full synchronization in background</string>
+    <string name="settings_sync_auto_full_button">Fully synchronize now</string>
+    <string name="settings_sync_support_text">Synchronize <b>all</b> data from your Readeck server, ensuring a complete copy on your device. Unlike incremental synchronization, which only retrieves changes, **full synchronization is necessary to detect any bookmarks that have been deleted from the server**. While this process takes longer and uses more data, it guarantees your app data is completely up-to-date, including reflecting all deletions.</string>
+    <string name="settings_sync_dialog_support_text">How often should the automatic full synchronization be performed in the background?</string>
+    <string name="auto_sync_timeframe_manual">Manual</string>
+    <string name="auto_sync_timeframe_01_hours">Every hour</string>
+    <string name="auto_sync_timeframe_06_hours">Every 6 hours</string>
+    <string name="auto_sync_timeframe_12_hours">Every 12 hours</string>
+    <string name="auto_sync_timeframe_07_days">Every 7 days</string>
+    <string name="auto_sync_timeframe_01_days">Once a day</string>
+    <string name="auto_sync_timeframe_14_days">Every 14 days</string>
+    <string name="auto_sync_timeframe_30_days">Every 30 days</string>
 </resources>

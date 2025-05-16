@@ -1,5 +1,6 @@
 package de.readeckapp.io.prefs
 
+import de.readeckapp.domain.model.AutoSyncTimeframe
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
 
@@ -18,4 +19,8 @@ interface SettingsDataStore {
     suspend fun isInitialSyncPerformed(): Boolean
     suspend fun clearCredentials()
     suspend fun saveCredentials(url: String, username: String, password: String, token: String)
+    suspend fun setAutoSyncEnabled(isEnabled: Boolean)
+    suspend fun isAutoSyncEnabled(): Boolean
+    suspend fun saveAutoSyncTimeframe(autoSyncTimeframe: AutoSyncTimeframe)
+    suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe
 }

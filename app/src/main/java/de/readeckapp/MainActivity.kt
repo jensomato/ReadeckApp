@@ -29,10 +29,12 @@ import de.readeckapp.ui.navigation.BookmarkListRoute
 import de.readeckapp.ui.navigation.LogViewRoute
 import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
 import de.readeckapp.ui.navigation.SettingsRoute
+import de.readeckapp.ui.navigation.SyncSettingsRoute
 import de.readeckapp.ui.settings.AccountSettingsScreen
 import de.readeckapp.ui.settings.LogViewScreen
 import de.readeckapp.ui.settings.OpenSourceLibrariesScreen
 import de.readeckapp.ui.settings.SettingsScreen
+import de.readeckapp.ui.settings.SyncSettingsScreen
 import de.readeckapp.ui.theme.ReadeckAppTheme
 import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.launch
@@ -106,6 +108,9 @@ fun ReadeckNavHost(navController: NavHostController) {
         }
         composable<LogViewRoute> {
             LogViewScreen(navController = navController)
+        }
+        composable<SyncSettingsRoute> {
+            SyncSettingsScreen(navHostController = navController)
         }
     }
 }
