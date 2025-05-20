@@ -28,7 +28,7 @@ class LoadBookmarksUseCase @Inject constructor(
     }
 
     @Transaction
-    suspend fun execute(pageSize: Int, initialOffset: Int): UseCaseResult<Unit> {
+    suspend fun execute(pageSize: Int = DEFAULT_PAGE_SIZE, initialOffset: Int = 0): UseCaseResult<Unit> {
         Timber.d("execute(pageSize=$pageSize, initialOffset=$initialOffset")
 
         var offset = initialOffset
@@ -89,5 +89,9 @@ class LoadBookmarksUseCase @Inject constructor(
             Timber.e(e, "Error loading bookmarks")
             return UseCaseResult.Error(e)
         }
+    }
+
+    companion object {
+        const val DEFAULT_PAGE_SIZE = 50
     }
 }

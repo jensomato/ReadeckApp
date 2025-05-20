@@ -7,6 +7,7 @@ import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.io.db.dao.BookmarkDao
 import de.readeckapp.io.db.model.BookmarkEntity
+import de.readeckapp.io.db.model.RemoteBookmarkIdEntity
 import de.readeckapp.io.rest.ReadeckApi
 import de.readeckapp.io.rest.model.CreateBookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
@@ -261,4 +262,68 @@ class BookmarkRepositoryImpl @Inject constructor(
             )
         }
     }
+
+    override suspend fun performFullSync(): BookmarkRepository.SyncResult = withContext(dispatcher) {
+        try {
+            bookmarkDao.clearRemoteBookmarkIds() // Clear any previous sync data
+
+            val pageSize = 50
+            var offset = 0
+            var hasMore = true
+
+            while (hasMore) {
+                val response = readeckApi.getBookmarks(limit = pageSize, offset = offset, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+
+                if (response.isSuccessful) {
+                    val remoteBookmarks = response.body() ?: emptyList()
+                    Timber.d("Fetched ${remoteBookmarks.size} remote bookmarks (offset=$offset)")
+
+                    val totalCountHeader = response.headers()[ReadeckApi.Header.TOTAL_COUNT]
+                    val totalPagesHeader = response.headers()[ReadeckApi.Header.TOTAL_PAGES]
+                    val currentPageHeader = response.headers()[ReadeckApi.Header.CURRENT_PAGE]
+
+                    if (totalCountHeader == null || totalPagesHeader == null || currentPageHeader == null) {
+                        return@withContext BookmarkRepository.SyncResult.Error("Missing headers in API response")
+                    }
+
+                    val totalCount = totalCountHeader.toInt()
+                    val totalPages = totalPagesHeader.toInt()
+                    val currentPage = currentPageHeader.toInt()
+
+                    Timber.d("currentPage=$currentPage")
+                    Timber.d("totalPages=$totalPages")
+                    Timber.d("totalCount=$totalCount")
+
+                    // Save remote bookmark IDs to the temporary table
+                    val remoteBookmarkIdEntities = remoteBookmarks.map { RemoteBookmarkIdEntity(it.id) }
+                    bookmarkDao.insertRemoteBookmarkIds(remoteBookmarkIdEntities)
+
+                    if (currentPage < totalPages) {
+                        offset += pageSize
+                    } else {
+                        hasMore = false
+                    }
+                } else {
+                    Timber.e("Full sync failed at offset=$offset with code: ${response.code()}")
+                    return@withContext BookmarkRepository.SyncResult.Error(
+                        errorMessage = "Full sync failed",
+                        code = response.code(),
+                        ex = null
+                    )
+                }
+            }
+
+            // After fetching all remote IDs, find local bookmarks to delete
+            val deleted = bookmarkDao.removeDeletedBookmars()
+            Timber.i("Deleted bookmarks: $deleted")
+
+            bookmarkDao.clearRemoteBookmarkIds() // Clean up the temporary table
+
+            BookmarkRepository.SyncResult.Success(countDeleted = deleted)
+        } catch (e: Exception) {
+            Timber.e(e, "Full sync failed")
+            BookmarkRepository.SyncResult.NetworkError(errorMessage = "Network error during full sync", ex = e)
+        }
+    }
+
 }

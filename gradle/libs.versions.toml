@@ -36,6 +36,7 @@ paging = "3.3.6"
 uiTestJunit4Android = "1.7.8"
 aboutLibraries = "12.0.0-a04"
 treessence = "1.1.2"
+accompanist = "0.37.3"
 
 [libraries]
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
@@ -98,6 +99,7 @@ androidx-paging-runtime-ktx = { group = "androidx.paging", name = "paging-runtim
 aboutlibraries-core = { module = "com.mikepenz:aboutlibraries-core", version.ref = "aboutLibraries" }
 aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3", version.ref = "aboutLibraries" }
 treessence = { module = "com.github.bastienpaulfr:Treessence", version.ref = "treessence" }
+accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }

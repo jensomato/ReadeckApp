@@ -16,6 +16,7 @@
     <string name="account_settings_url_error">Invalid URL</string>
     <string name="account_settings_username_error">Username cannot be empty</string>
     <string name="account_settings_password_error">Password cannot be empty</string>
+    <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,
 zero{}
@@ -57,6 +58,8 @@ other{}
     <string name="settings_logs_subtitle">View and Send Logfiles</string>
     <string name="log_view_share_title">Send Logs</string>
     <string name="log_view_no_log_file_found">No log file found</string>
+    <string name="settings_sync">Synchronization</string>
+    <string name="settings_sync_subtitle">Synchronization Settings</string>
 
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorite</string>
@@ -72,4 +75,26 @@ other{}
     <string name="detail_view_no_content">No article content found</string>
     <string name="detail_view_image_content_description">Bookmark Image</string>
     <string name="detail_view_error_image_content_description">Bookmark Error Image</string>
+    <string name="settings_sync_full_sync_heading">Background Synchronization</string>
+    <string name="settings_sync_auto_full_sync_title">Background Synchronization</string>
+    <string name="settings_sync_auto_full_button">Synchronize now</string>
+    <string name="settings_sync_support_text">To keep your bookmark list up-to-date, the app occasionally checks for and removes bookmarks you\'ve deleted on the Readedeck server. Since this process requires downloading all your bookmark data, it runs automatically in the background. This helps ensure your app accurately reflects your current Readedeck bookmarks without you having to manually delete them.</string>
+    <string name="settings_sync_dialog_support_text">How often should the synchronization be performed in the background?</string>
+    <string name="auto_sync_timeframe_manual">Manual</string>
+    <string name="auto_sync_timeframe_01_hours">Every hour</string>
+    <string name="auto_sync_timeframe_06_hours">Every 6 hours</string>
+    <string name="auto_sync_timeframe_12_hours">Every 12 hours</string>
+    <string name="auto_sync_timeframe_07_days">Every 7 days</string>
+    <string name="auto_sync_timeframe_01_days">Once a day</string>
+    <string name="auto_sync_timeframe_14_days">Every 14 days</string>
+    <string name="auto_sync_timeframe_30_days">Every 30 days</string>
+    <string name="auto_sync_next_run">Next synchronization on %1$s</string>
+    <string name="auto_sync_next_run_null">No synchronization scheduled</string>
+    <string name="auto_sync_notification_success">Background synchronization successful. %1$d bookmarks deleted.</string>
+    <string name="auto_sync_notification_failure">Background synchronization failed.</string>
+    <string name="auto_sync_notification_running">Background synchronization running.</string>
+    <string name="auto_sync_notification_channel">Background Synchronization</string>
+    <string name="auto_sync_notification_rationale_dialog_title">Notification Permission Required</string>
+    <string name="auto_sync_notification_rationale_dialog_text">To notify you about background sync failures, we need permission to send notifications.  Please grant this permission.</string>
+    <string name="auto_sync_notification_rationale_dialog_grant_button">Grant Permission</string>
 </resources>
