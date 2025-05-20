@@ -9,10 +9,22 @@ Readeck App is an Android application designed to help users manage and read the
 
 This app is a companion to Readeck (https://readeck.org/en/), a self-hosted read-it-later service. To use this app, you'll need a Readeck account and server instance.
 
+## Installation
+
+Readeck App is available on F-Droid and by downloading the APK file directly from our [GitHub Releases page](https://github.com/jensomato/ReadeckApp/releases).
+
+[<img src="https://f-droid.org/badge/get-it-on.png"
+    alt="Get it on F-Droid"
+    height="80">](https://f-droid.org/en/packages/de.readeckapp/)
+
+There is also a snapshot releases built from the `develop` branch. This means they might not be as stable as a final release, but they'll give you a sneak peek at the latest features and improvements.
+
 ## Screenshots
 
-<img src="metadata/en-US/images/phoneScreenshots/screenshot1.png" width="200px" />
-<img src="metadata/en-US/images/phoneScreenshots/screenshot2.png" width="200px" />
+[<img width=200 alt="Screenshot 1"
+src="metadata/en-US/images/phoneScreenshots/screenshot1.png?raw=true">](metadata/en-US/images/phoneScreenshots/screenshot1.png?raw=true)
+[<img width=200 alt="Screenshot 2"
+src="metadata/en-US/images/phoneScreenshots/screenshot2.png?raw=true">](metadata/en-US/images/phoneScreenshots/screenshot2.png?raw=true)
 
 ## Tech Stack
 
@@ -38,12 +50,12 @@ Keep in mind that these are snapshot releases built from the `develop` branch. T
 
 Here are some of the features planned for future releases:
 
-*   ~~Offline access to saved content~~
+*   ✅ ~~Offline access to saved content~~
 *   Organizing content with labels and categories
-*   Mark articles as read/unread
-*   Archive/unarchive articles
-*   Favorite articles
-*   Add articles
+*   ✅ ~~Mark articles as read/unread~~
+*   ✅ ~~Archive/unarchive articles~~
+*   ✅ ~~Favorite articles~~
+*   ✅ ~~Add articles~~
 *   ...
 
 ## License
