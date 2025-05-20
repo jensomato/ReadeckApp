@@ -7,15 +7,16 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Implemented background synchronization of bookmarks. The app now automatically synchronizes with the Readeck server in the background to detect and remove bookmarks that have been deleted on the server. This ensures that the local bookmark list remains consistent with the server.
+- Added translation for Spanish by @xmgz
+- Added icons to navigation drawer by @sockenklaus
+
 ### Fixed
 
 - Fix #64: Add library definitions to version control.
 - Fix #66: Show bookmark detail view for all bookmark, even if no article content is available.
-
-### Added
-
-- Added translation for Spanish by @xmgz
-- Added icons to navigation drawer by @sockenklaus
 
 ## [0.3.2] - 2025-04-28
 

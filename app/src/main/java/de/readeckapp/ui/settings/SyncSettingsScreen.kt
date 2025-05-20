@@ -1,5 +1,7 @@
 package de.readeckapp.ui.settings
 
+import android.Manifest
+import android.os.Build
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -22,6 +24,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.SideEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
@@ -30,12 +33,16 @@ import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.Dialog
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
+import com.google.accompanist.permissions.ExperimentalPermissionsApi
+import com.google.accompanist.permissions.rememberPermissionState
 import de.readeckapp.R
 import de.readeckapp.domain.model.AutoSyncTimeframe
 import de.readeckapp.ui.theme.Typography
 
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalPermissionsApi::class)
 @Composable
 fun SyncSettingsScreen(
     navHostController: NavHostController
@@ -46,8 +53,17 @@ fun SyncSettingsScreen(
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val onClickDoFullSyncNow: () -> Unit = { viewModel.onClickDoFullSyncNow() }
     val onClickAutoSync: () -> Unit = { viewModel.onClickAutoSync() }
-    val onClickAutoSyncSwitch: (value: Boolean) -> Unit = { value -> viewModel.onClickAutoSyncSwitch(value) }
+    val onClickAutoSyncSwitch: (value: Boolean) -> Unit =
+        { value -> viewModel.onClickAutoSyncSwitch(value) }
     val snackbarHostState = remember { SnackbarHostState() }
+    val notificationPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
+        rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
+    } else {
+        null
+    }?.also {
+        viewModel.setPermissionState(it)
+    }
+
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -60,22 +76,39 @@ fun SyncSettingsScreen(
         }
     }
 
-    if (settingsUiState.showDialog) {
-        AutoSyncTimeframeDialog(
-            autoSyncTimeframeOptions = settingsUiState.autoSyncTimeframeOptions,
-            onDismissRequest = { viewModel.onDismissDialog() },
-            onElementSelected =  { viewModel.onAutoSyncTimeframeSelected(it) }
-        )
+    when (settingsUiState.showDialog) {
+        Dialog.AutoSyncTimeframeDialog -> {
+            AutoSyncTimeframeDialog(
+                autoSyncTimeframeOptions = settingsUiState.autoSyncTimeframeOptions,
+                onDismissRequest = { viewModel.onDismissDialog() },
+                onElementSelected = { viewModel.onAutoSyncTimeframeSelected(it) }
+            )
+        }
+        Dialog.RationaleDialog -> {
+            NotificationRationaleDialog(
+                onRationaleDialogDismiss = { viewModel.onDismissDialog() },
+                onRationaleDialogConfirm = { viewModel.onRationaleDialogConfirm() }
+            )
+        }
+        Dialog.PermissionRequest -> {
+            SideEffect {
+                viewModel.onDismissDialog()
+                notificationPermissionState?.launchPermissionRequest()
+            }
+        }
+        else -> {
+            // noop
+        }
     }
 
     SyncSettingsView(
         modifier = Modifier,
         snackbarHostState = snackbarHostState,
-        settingsUiState = settingsUiState,
         onClickBack = onClickBack,
         onClickDoFullSyncNow = onClickDoFullSyncNow,
         onClickAutoSync = onClickAutoSync,
         onClickAutoSyncSwitch = onClickAutoSyncSwitch,
+        settingsUiState = settingsUiState
     )
 }
 
@@ -137,9 +170,21 @@ fun SyncSettingsView(
                         text = stringResource(settingsUiState.autoSyncTimeframeLabel),
                         style = Typography.bodySmall
                     )
+                    val nextRunMsg = settingsUiState.nextAutoSyncRun?.let {
+                        stringResource(
+                            R.string.auto_sync_next_run,
+                            settingsUiState.nextAutoSyncRun
+                        )
+                    } ?: stringResource(R.string.auto_sync_next_run_null)
+                    Text(
+                        text = nextRunMsg,
+                        style = Typography.bodySmall
+                    )
                 }
                 Row {
-                    Switch(checked = settingsUiState.autoSyncEnabled, onCheckedChange = { onClickAutoSyncSwitch(it)} )
+                    Switch(
+                        checked = settingsUiState.autoSyncEnabled,
+                        onCheckedChange = { onClickAutoSyncSwitch(it) })
                 }
             }
             Box(
@@ -148,6 +193,7 @@ fun SyncSettingsView(
             ) {
                 Button(
                     onClick = onClickDoFullSyncNow,
+                    enabled = settingsUiState.autoSyncButtonEnabled
                 ) {
                     Text(stringResource(R.string.settings_sync_auto_full_button))
                 }
@@ -163,25 +209,22 @@ fun SyncSettingsScreenViewPreview() {
         autoSyncEnabled = true,
         autoSyncTimeframe = AutoSyncTimeframe.HOURS_12,
         autoSyncTimeframeOptions = listOf(),
-        showDialog = false,
-        autoSyncTimeframeLabel = AutoSyncTimeframe.HOURS_12.toLabelResource()
+        showDialog = null,
+        autoSyncTimeframeLabel = AutoSyncTimeframe.HOURS_12.toLabelResource(),
+        nextAutoSyncRun = null,
+        autoSyncButtonEnabled = false
     )
     SyncSettingsView(
         modifier = Modifier,
         snackbarHostState = SnackbarHostState(),
-        settingsUiState = settingsUiState,
         onClickBack = {},
         onClickAutoSync = {},
         onClickAutoSyncSwitch = {},
         onClickDoFullSyncNow = {},
+        settingsUiState = settingsUiState
     )
 }
 
 object SyncSettingsScreenTestTags {
     const val BACK_BUTTON = "AccountSettingsScreenTestTags.BackButton"
-    const val TOPBAR = "AccountSettingsScreenTestTags.TopBar"
-    const val SETTINGS_ITEM = "AccountSettingsScreenTestTags.SettingsItem"
-    const val SETTINGS_ITEM_TITLE = "AccountSettingsScreenTestTags.SettingsItem.Title"
-    const val SETTINGS_ITEM_SUBTITLE = "AccountSettingsScreenTestTags.SettingsItem.Subtitle"
-    const val SETTINGS_ITEM_ACCOUNT = "Account"
 }

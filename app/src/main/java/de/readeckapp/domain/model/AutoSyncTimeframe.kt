@@ -3,7 +3,7 @@ package de.readeckapp.domain.model
 import java.util.concurrent.TimeUnit
 
 
-enum class AutoSyncTimeframe(repeatInterval: Long, repeatIntervalTimeUnit: TimeUnit) {
+enum class AutoSyncTimeframe(val repeatInterval: Long, val repeatIntervalTimeUnit: TimeUnit) {
     MANUAL(0L, TimeUnit.MILLISECONDS),
     HOURS_01(1L, TimeUnit.HOURS),
     HOURS_06(6L, TimeUnit.HOURS),
