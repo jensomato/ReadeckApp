@@ -8,6 +8,7 @@ import de.readeckapp.io.db.model.ArticleContentEntity
 import de.readeckapp.io.db.model.BookmarkEntity
 import de.readeckapp.io.db.model.BookmarkWithArticleContent
 import de.readeckapp.io.db.model.ImageResourceEntity
+import de.readeckapp.io.db.model.RemoteBookmarkIdEntity
 import de.readeckapp.io.db.model.ResourceEntity
 import de.readeckapp.test.logging.replaceDebugTree
 import de.readeckapp.test.logging.restoreDebugTree
@@ -22,6 +23,7 @@ import kotlinx.datetime.plus
 import org.junit.After
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
+import org.junit.Assert.assertNull
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -49,7 +51,7 @@ class BookmarkDaoTest {
         }
 
         @After
-        fun tearDown() {
+         fun tearDown() {
             db.close()
             restoreDebugTree()
         }
@@ -67,8 +69,8 @@ class BookmarkDaoTest {
                     }
                 }
                 val state = when (index) {
-                    9,19,29 -> BookmarkEntity.State.ERROR
-                    8,18,28 -> BookmarkEntity.State.LOADING
+                    9, 19, 29 -> BookmarkEntity.State.ERROR
+                    8, 18, 28 -> BookmarkEntity.State.LOADING
                     else -> BookmarkEntity.State.LOADED
                 }
                 BookmarkEntity(
@@ -115,11 +117,15 @@ class BookmarkDaoTest {
                 )
             }
             bookmarkDao.insertBookmarksWithArticleContent(bookmarkArticles)
+            val ids = bookmarkArticles.map { RemoteBookmarkIdEntity(it.bookmark.id) }
+                .filterNot { it.id == "test-1" || it.id == "test-11" || it.id == "test-21" }
+           bookmarkDao.insertRemoteBookmarkIds(ids + RemoteBookmarkIdEntity("not-a-bookmark"))
         }
     }
 
     @RunWith(ParameterizedRobolectricTestRunner::class)
-    internal class GetBookmarkListItemsByFiltersTest(private val parameter: ParameterType) : BaseTest() {
+    internal class GetBookmarkListItemsByFiltersTest(private val parameter: ParameterType) :
+        BaseTest() {
 
         companion object {
             @JvmStatic
@@ -240,6 +246,41 @@ class BookmarkDaoTest {
         fun testGetLoaded() = runTest(testDispatcher) {
             val list = bookmarkDao.getAllBookmarksWithContent()
             Timber.d("list=$list")
+        }
+    }
+
+    @RunWith(RobolectricTestRunner::class)
+    internal class RemoteBookmarkIdTest : BaseTest() {
+        @Test
+        fun testGetRemoteBookmarkIds() = runTest(testDispatcher) {
+            val list = bookmarkDao.getAllRemoteBookmarkIds()
+            assertEquals(28, list.size)
+            list.forEach {
+                val bookmark = bookmarkDao.getBookmarkById(it)
+                if (bookmark != null) {
+                    assertEquals(it, bookmark.id)
+                    Timber.d("id=$it")
+                    Timber.d("bookmark=$bookmark")
+                } else {
+                    assertEquals(it, "not-a-bookmark")
+                    Timber.d("not-a-bookmark")
+                }
+            }
+        }
+
+        @Test
+        fun testRemoveBookmarks() = runTest(testDispatcher) {
+            val removedIds = listOf<String>("test-1", "test-11", "test-21")
+            removedIds.forEach {
+                assertNotNull(bookmarkDao.getBookmarkById(it))
+                Timber.d("id=$it is not null")
+            }
+            val count = bookmarkDao.removeDeletedBookmars()
+            assertEquals(3, count)
+            removedIds.forEach {
+                assertNull(bookmarkDao.getBookmarkById(it))
+                Timber.d("id=$it is null")
+            }
         }
     }
 }

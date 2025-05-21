@@ -2,9 +2,13 @@ package de.readeckapp.domain
 
 import de.readeckapp.io.db.dao.BookmarkDao
 import de.readeckapp.io.rest.ReadeckApi
+import de.readeckapp.io.rest.model.BookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkErrorDto
 import de.readeckapp.io.rest.model.EditBookmarkResponseDto
+import de.readeckapp.io.rest.model.ImageResource
+import de.readeckapp.io.rest.model.Resource
+import de.readeckapp.io.rest.model.Resources
 import de.readeckapp.io.rest.model.StatusMessageDto
 import io.mockk.coEvery
 import io.mockk.coVerify
@@ -17,6 +21,7 @@ import kotlinx.coroutines.test.runTest
 import kotlinx.coroutines.test.setMain
 import kotlinx.datetime.Clock
 import kotlinx.serialization.json.Json
+import okhttp3.Headers
 import okhttp3.ResponseBody.Companion.toResponseBody
 import org.junit.After
 import org.junit.Assert.assertEquals
@@ -25,6 +30,7 @@ import org.junit.Before
 import org.junit.Test
 import retrofit2.Response
 import java.io.IOException
+import kotlin.time.Duration.Companion.days
 
 @OptIn(ExperimentalCoroutinesApi::class)
 class BookmarkRepositoryImplTest {
@@ -328,6 +334,99 @@ class BookmarkRepositoryImplTest {
         coVerify { readeckApi.deleteBookmark(bookmarkId) }
     }
 
+    @Test
+    fun `performFullSync successful sync with multiple pages`() = runTest {
+        // Arrange
+        val pageSize = 50
+        val totalCount = 120
+        val totalPages = 3
+        val bookmarkList1 = List(pageSize) { bookmarkDto.copy(id = "bookmark_$it") }
+        val bookmarkList2 = List(pageSize) { bookmarkDto.copy(id = "bookmark_${it + pageSize}") }
+        val bookmarkList3 = List(20) { bookmarkDto.copy(id = "bookmark_${it + 2 * pageSize}") }
+
+        coEvery {
+            readeckApi.getBookmarks(limit = pageSize, offset = 0, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+        } returns Response.success(bookmarkList1, Headers.headersOf(
+            ReadeckApi.Header.TOTAL_COUNT, totalCount.toString(),
+            ReadeckApi.Header.TOTAL_PAGES, totalPages.toString(),
+            ReadeckApi.Header.CURRENT_PAGE, "1"
+        ))
+
+        coEvery {
+            readeckApi.getBookmarks(limit = pageSize, offset = pageSize, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+        } returns Response.success(bookmarkList2, Headers.headersOf(
+            ReadeckApi.Header.TOTAL_COUNT, totalCount.toString(),
+            ReadeckApi.Header.TOTAL_PAGES, totalPages.toString(),
+            ReadeckApi.Header.CURRENT_PAGE, "2"
+        ))
+
+        coEvery {
+            readeckApi.getBookmarks(limit = pageSize, offset = 2 * pageSize, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+        } returns Response.success(bookmarkList3, Headers.headersOf(
+            ReadeckApi.Header.TOTAL_COUNT, totalCount.toString(),
+            ReadeckApi.Header.TOTAL_PAGES, totalPages.toString(),
+            ReadeckApi.Header.CURRENT_PAGE, "3"
+        ))
+
+        coEvery { bookmarkDao.removeDeletedBookmars() } returns 10
+        coEvery { bookmarkDao.insertRemoteBookmarkIds(any()) } returns Unit
+
+        // Act
+        val result = bookmarkRepositoryImpl.performFullSync()
+
+        // Assert
+        assertTrue(result is BookmarkRepository.SyncResult.Success)
+        assertEquals(10, (result as BookmarkRepository.SyncResult.Success).countDeleted)
+
+        coVerify { readeckApi.getBookmarks(limit = pageSize, offset = 0, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created)) }
+        coVerify { readeckApi.getBookmarks(limit = pageSize, offset = pageSize, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created)) }
+        coVerify { readeckApi.getBookmarks(limit = pageSize, offset = 2 * pageSize, updatedSince = null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created)) }
+        coVerify { bookmarkDao.insertRemoteBookmarkIds(any()) }
+        coVerify { bookmarkDao.removeDeletedBookmars() }
+        coVerify { bookmarkDao.clearRemoteBookmarkIds() }
+    }
+
+    @Test
+    fun `performFullSync API error`() = runTest {
+        // Arrange
+        coEvery { readeckApi.getBookmarks(limit = any(), offset = any(), updatedSince = any(), ReadeckApi.SortOrder(ReadeckApi.Sort.Created)) } returns Response.error(500, "Error".toResponseBody())
+
+        // Act
+        val result = bookmarkRepositoryImpl.performFullSync()
+
+        // Assert
+        assertTrue(result is BookmarkRepository.SyncResult.Error)
+        assertEquals("Full sync failed", (result as BookmarkRepository.SyncResult.Error).errorMessage)
+        assertEquals(500, result.code)
+    }
+
+    @Test
+    fun `performFullSync missing headers`() = runTest {
+        // Arrange
+        coEvery { readeckApi.getBookmarks(limit = any(), offset = any(), updatedSince = any(), ReadeckApi.SortOrder(ReadeckApi.Sort.Created)) } returns Response.success(emptyList())
+
+        // Act
+        val result = bookmarkRepositoryImpl.performFullSync()
+
+        // Assert
+        assertTrue(result is BookmarkRepository.SyncResult.Error)
+        assertEquals("Missing headers in API response", (result as BookmarkRepository.SyncResult.Error).errorMessage)
+    }
+
+    @Test
+    fun `performFullSync network error`() = runTest {
+        // Arrange
+        coEvery { readeckApi.getBookmarks(limit = any(), offset = any(), updatedSince = any(), ReadeckApi.SortOrder(ReadeckApi.Sort.Created)) } throws IOException("Network error")
+
+        // Act
+        val result = bookmarkRepositoryImpl.performFullSync()
+
+        // Assert
+        assertTrue(result is BookmarkRepository.SyncResult.NetworkError)
+        assertEquals("Network error during full sync", (result as BookmarkRepository.SyncResult.NetworkError).errorMessage)
+        assertTrue((result as BookmarkRepository.SyncResult.NetworkError).ex is IOException)
+    }
+
     private val editBookmarkResponseDto = EditBookmarkResponseDto(
         href = "http://example.com",
         id = "123",
@@ -339,5 +438,44 @@ class BookmarkRepositoryImplTest {
         readProgress = 50,
         title = "New Title",
         updated = Clock.System.now()
+    )
+
+    val bookmarkDto = BookmarkDto(
+        id = "1",
+        href = "https://example.com",
+        created = Clock.System.now().minus(1.days),
+        updated = Clock.System.now().minus(1.days),
+        state = 1,
+        loaded = true,
+        url = "https://example.com/article",
+        title = "Sample Article",
+        siteName = "Example Site",
+        site = "example.com",
+        authors = listOf("John Doe", "Jane Smith"),
+        lang = "en",
+        textDirection = "ltr",
+        documentTpe = "article",
+        type = "article",
+        hasArticle = true,
+        description = "This is a sample article description.",
+        isDeleted = false,
+        isMarked = false,
+        isArchived = false,
+        labels = listOf("sample", "article"),
+        readProgress = 0,
+        resources = Resources(
+            article = Resource(src = "https://example.com/article.pdf"),
+            icon = ImageResource(src = "https://example.com/icon.png", width = 32, height = 32),
+            image = ImageResource(src = "https://example.com/image.jpg", width = 600, height = 400),
+            log = Resource(src = "https://example.com/log.txt"),
+            props = Resource(src = "https://example.com/props.json"),
+            thumbnail = ImageResource(
+                src = "https://example.com/thumbnail.jpg",
+                width = 200,
+                height = 150
+            )
+        ),
+        wordCount = 1000,
+        readingTime = 5
     )
 }

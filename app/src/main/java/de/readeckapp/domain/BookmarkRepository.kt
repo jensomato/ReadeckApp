@@ -28,9 +28,15 @@ interface BookmarkRepository {
     suspend fun deleteBookmark(id: String): UpdateResult
     suspend fun createBookmark(title: String, url: String): String
     suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): UpdateResult
+    suspend fun performFullSync(): SyncResult
     sealed class UpdateResult {
         data object Success: UpdateResult()
         data class Error(val errorMessage: String, val code: Int? = null, val ex: Exception? = null): UpdateResult()
         data class NetworkError(val errorMessage: String, val ex: Exception?): UpdateResult()
+    }
+    sealed class SyncResult {
+        data class Success(val countDeleted: Int): SyncResult()
+        data class Error(val errorMessage: String, val code: Int? = null, val ex: Exception? = null): SyncResult()
+        data class NetworkError(val errorMessage: String, val ex: Exception?): SyncResult()
     }
 }

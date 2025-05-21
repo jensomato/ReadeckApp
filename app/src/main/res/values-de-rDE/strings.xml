@@ -17,6 +17,7 @@
     <string name="account_settings_url_error">Ungültige URL</string>
     <string name="account_settings_username_error">Benutzername darf nicht leer sein</string>
     <string name="account_settings_password_error">Passwort darf nicht leer sein</string>
+    <string name="sync_settings_topbar_title">Synchronisierungseinstellungen</string>
     <string name="authors" translatable="true">
 {count, plural,
 zero{}
@@ -58,6 +59,8 @@ other{}
     <string name="settings_logs_subtitle">Logdateien anzeigen und senden</string>
     <string name="log_view_share_title">Logs senden</string>
     <string name="log_view_no_log_file_found">Keine Logdatei gefunden</string>
+    <string name="settings_sync">Synchronisierung</string>
+    <string name="settings_sync_subtitle">Synchronisierungseinstellungen</string>
 
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorit</string>
@@ -70,4 +73,29 @@ other{}
     <string name="notification_channel_sync_description">Fehler, die zum Abbruch der Synchronisierung führen</string>
     <string name="notification_authentication_error_title">Authentifizierung fehlgeschlagen</string>
     <string name="notification_authentication_error_message">Bitte Anmeldeinformationen prüfen.</string>
+    <string name="detail_view_no_content">Kein Artikelinhalt gefunden</string>
+    <string name="detail_view_image_content_description">Lesezeichen Bild</string>
+    <string name="detail_view_error_image_content_description">Lesezeichen Fehler Bild</string>
+    <string name="settings_sync_full_sync_heading">Synchronisierung im Hintergrund</string>
+    <string name="settings_sync_auto_full_sync_title">Synchronisierung im Hintergrund</string>
+    <string name="settings_sync_auto_full_button">Jetzt Synchronisieren</string>
+    <string name="settings_sync_dialog_support_text">Wie oft soll die Synchronisierung im Hintergrund durchgeführt werden?</string>
+    <string name="auto_sync_timeframe_manual">Manuell</string>
+    <string name="auto_sync_timeframe_01_hours">Jede Stunde</string>
+    <string name="auto_sync_timeframe_06_hours">Alle 6 Stunden</string>
+    <string name="auto_sync_timeframe_12_hours">Alle 12 Stunden</string>
+    <string name="auto_sync_timeframe_07_days">Alle 7 Tage</string>
+    <string name="auto_sync_timeframe_01_days">Einmal pro Tag</string>
+    <string name="auto_sync_timeframe_14_days">Alle 14 Tage</string>
+    <string name="auto_sync_timeframe_30_days">Alle 30 Tage</string>
+    <string name="auto_sync_next_run">Nächste Synchronisierung am %1$1s</string>
+    <string name="auto_sync_next_run_null">Keine Synchronisierung geplant</string>
+    <string name="settings_sync_support_text">Um deine Lesezeichenliste aktuell zu halten, prüft die App gelegentlich, ob du Lesezeichen auf dem Readedeck-Server gelöscht hast, und entfernt diese. Da dieser Vorgang das Herunterladen all deiner Lesezeichen-Daten erfordert, läuft er automatisch im Hintergrund ab. So wird sichergestellt, dass deine App deine aktuellen Readedeck-Lesezeichen korrekt widerspiegelt, ohne dass du sie manuell löschen musst.</string>
+    <string name="auto_sync_notification_success">Synchronisierung im Hintergrund erfolgreich. %1$d Lesezeichen gelöscht.</string>
+    <string name="auto_sync_notification_failure">Synchronisierung im Hintergrund gescheitert.</string>
+    <string name="auto_sync_notification_running">Synchronisierung im Hintergrund läuft.</string>
+    <string name="auto_sync_notification_channel">Synchronisierung im Hintergrund</string>
+    <string name="auto_sync_notification_rationale_dialog_title">Benachrichtigungen Berechtigung benötigt</string>
+    <string name="auto_sync_notification_rationale_dialog_text">Um Sie über Fehler bei der Hintergrundsynchronisierung zu informieren, benötigen wir die Berechtigung, Ihnen Benachrichtigungen zu senden. Bitte erteilen Sie diese Berechtigung.</string>
+    <string name="auto_sync_notification_rationale_dialog_grant_button">Erteilen</string>
 </resources>

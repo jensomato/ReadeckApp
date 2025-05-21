@@ -7,6 +7,7 @@ import androidx.room.testing.MigrationTestHelper
 import androidx.sqlite.db.framework.FrameworkSQLiteOpenHelperFactory
 import androidx.test.ext.junit.runners.AndroidJUnit4
 import androidx.test.platform.app.InstrumentationRegistry
+import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -26,7 +27,7 @@ class ReadeckDatabaseMigrationTest {
             emptyList<AutoMigrationSpec>(), // workaround for https://issuetracker.google.com/issues/298459978
             FrameworkSQLiteOpenHelperFactory()
         )
-        helper.createDatabase(TEST_DB, 1).apply {
+        val db = helper.createDatabase(TEST_DB, 1).apply {
             execSQL(
                 """
                 INSERT INTO bookmarks (
@@ -297,5 +298,33 @@ class ReadeckDatabaseMigrationTest {
             cursor2.close()
         }
         dbV2.close()
+        db.close()
+    }
+
+    @Test
+    @Throws(IOException::class)
+    fun migrate2To3() {
+        val helper = MigrationTestHelper(
+            InstrumentationRegistry.getInstrumentation(),
+            ReadeckDatabase::class.java,
+            emptyList<AutoMigrationSpec>(), // workaround for https://issuetracker.google.com/issues/298459978
+            FrameworkSQLiteOpenHelperFactory()
+        )
+        val db = helper.createDatabase(TEST_DB, 2)
+
+        val dbV3 = helper.runMigrationsAndValidate(TEST_DB, 3, true, ReadeckDatabase.MIGRATION_2_3)
+
+        var cursor = dbV3.query("PRAGMA table_info('remote_bookmark_ids')")
+        try {
+            cursor.moveToFirst()
+            var contentValues = ContentValues()
+            DatabaseUtils.cursorRowToContentValues(cursor, contentValues)
+            assertEquals("id", contentValues.get("name"))
+            println("$contentValues")
+        } finally {
+            cursor.close()
+        }
+        dbV3.close()
+        db.close()
     }
 }

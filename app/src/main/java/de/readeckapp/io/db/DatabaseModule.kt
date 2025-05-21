@@ -18,11 +18,15 @@ object DatabaseModule {
     @Singleton
     fun provideDatabase(@ApplicationContext context: Context): ReadeckDatabase {
         return Room.databaseBuilder(context, ReadeckDatabase::class.java, "readeck.db")
-            .addMigrations(ReadeckDatabase.MIGRATION_1_2)
+            .addMigrations(
+                ReadeckDatabase.MIGRATION_1_2,
+                ReadeckDatabase.MIGRATION_2_3
+            )
             .build()
     }
 
     @Provides
     @Singleton
-    fun provideBookmarkDao(readeckDatabase: ReadeckDatabase): BookmarkDao = readeckDatabase.getBookmarkDao()
+    fun provideBookmarkDao(readeckDatabase: ReadeckDatabase): BookmarkDao =
+        readeckDatabase.getBookmarkDao()
 }

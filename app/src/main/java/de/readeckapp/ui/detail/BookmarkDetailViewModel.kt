@@ -58,45 +58,43 @@ class BookmarkDetailViewModel @Inject constructor(
                 de.readeckapp.domain.model.Bookmark.Type.Picture -> {
                     htmlTemplate.replace("%s", """<img src="${bookmark.image.src}"/>""")
                 }
+
                 de.readeckapp.domain.model.Bookmark.Type.Video -> {
                     bookmark.articleContent?.let {
                         htmlTemplate.replace("%s", it)
                     }
                 }
+
                 de.readeckapp.domain.model.Bookmark.Type.Article -> {
                     bookmark.articleContent?.let {
                         htmlTemplate.replace("%s", it)
                     }
                 }
             }
-            if (content != null) {
-                val encodedHtml =
-                    Base64.withPadding(Base64.PaddingOption.ABSENT).encode(content.toByteArray())
-                UiState.Success(
-                    bookmark = Bookmark(
-                        title = bookmark.title,
-                        encodedHtmlContent = encodedHtml,
-                        authors = bookmark.authors,
-                        createdDate = formatLocalDateTimeWithDateFormat(bookmark.created),
-                        bookmarkId = bookmarkId,
-                        siteName = bookmark.siteName,
-                        imgSrc = bookmark.image.src,
-                        htmlContent = content,
-                        isFavorite = bookmark.isMarked,
-                        isArchived = bookmark.isArchived,
-                        isRead = bookmark.isRead(),
-                        type = when (bookmark.type) {
-                            is de.readeckapp.domain.model.Bookmark.Type.Article -> Bookmark.Type.ARTICLE
-                            is de.readeckapp.domain.model.Bookmark.Type.Picture -> Bookmark.Type.PHOTO
-                            is de.readeckapp.domain.model.Bookmark.Type.Video -> Bookmark.Type.VIDEO
-                        }
-                    ),
-                    updateBookmarkState = updateState
-                )
-            } else {
-                Timber.e("Error loading bookmark content [bookmarkId=$bookmarkId, type=${bookmark.type}, articleContent=${bookmark.articleContent}, imageSrc=${bookmark.image.src}")
-                UiState.Error
+            val encodedHtml = content?.let {
+                Base64.withPadding(Base64.PaddingOption.ABSENT).encode(it.toByteArray())
             }
+            UiState.Success(
+                bookmark = Bookmark(
+                    title = bookmark.title,
+                    encodedHtmlContent = encodedHtml,
+                    authors = bookmark.authors,
+                    createdDate = formatLocalDateTimeWithDateFormat(bookmark.created),
+                    bookmarkId = bookmarkId,
+                    siteName = bookmark.siteName,
+                    imgSrc = bookmark.image.src,
+                    htmlContent = content,
+                    isFavorite = bookmark.isMarked,
+                    isArchived = bookmark.isArchived,
+                    isRead = bookmark.isRead(),
+                    type = when (bookmark.type) {
+                        is de.readeckapp.domain.model.Bookmark.Type.Article -> Bookmark.Type.ARTICLE
+                        is de.readeckapp.domain.model.Bookmark.Type.Picture -> Bookmark.Type.PHOTO
+                        is de.readeckapp.domain.model.Bookmark.Type.Video -> Bookmark.Type.VIDEO
+                    }
+                ),
+                updateBookmarkState = updateState
+            )
         }
     }
         .stateIn(
@@ -192,13 +190,13 @@ class BookmarkDetailViewModel @Inject constructor(
 
     data class Bookmark(
         val title: String,
-        val encodedHtmlContent: String,
+        val encodedHtmlContent: String?,
         val authors: List<String>,
         val createdDate: String,
         val bookmarkId: String,
         val siteName: String,
         val imgSrc: String,
-        val htmlContent: String,
+        val htmlContent: String?,
         val isFavorite: Boolean,
         val isArchived: Boolean,
         val isRead: Boolean,

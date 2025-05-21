@@ -14,6 +14,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Refresh
+import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.Description
+import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Image
+import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Movie
+import androidx.compose.material.icons.outlined.OndemandVideo
+import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
@@ -122,6 +131,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     HorizontalDivider()
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.all)) },
+                        icon = { Icon(Icons.Outlined.Bookmarks, contentDescription = null) },
                         selected = filterState.value == BookmarkListViewModel.FilterState(),
                         onClick = {
                             onClickAll()
@@ -130,6 +140,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.unread)) },
+                        icon = {Icon(Icons.Outlined.TaskAlt, contentDescription = null)},
                         selected = filterState.value.unread == true,
                         onClick = {
                             onClickFilterUnread()
@@ -138,6 +149,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.archive)) },
+                        icon = { Icon(Icons.Outlined.Inventory2, contentDescription = null) },
                         selected = filterState.value.archived == true,
                         onClick = {
                             onClickFilterArchive()
@@ -146,6 +158,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.favorites)) },
+                        icon = { Icon(Icons.Outlined.Favorite, contentDescription = null) },
                         selected = filterState.value.favorite == true,
                         onClick = {
                             onClickFilterFavorite()
@@ -155,6 +168,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     HorizontalDivider()
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.articles)) },
+                        icon = { Icon(Icons.Outlined.Description, contentDescription = null) },
                         selected = filterState.value.type == Bookmark.Type.Article,
                         onClick = {
                             onClickFilterArticles()
@@ -163,6 +177,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.videos)) },
+                        icon = { Icon(Icons.Outlined.Movie, contentDescription = null) },
                         selected = filterState.value.type == Bookmark.Type.Video,
                         onClick = {
                             onClickFilterVideos()
@@ -171,6 +186,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.pictures)) },
+                        icon = { Icon(Icons.Outlined.Image, contentDescription = null) },
                         selected = filterState.value.type == Bookmark.Type.Picture,
                         onClick = {
                             onClickFilterPictures()
@@ -180,6 +196,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     HorizontalDivider()
                     NavigationDrawerItem(
                         label = { Text(text = stringResource(id = R.string.settings)) },
+                        icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         selected = false,
                         onClick = {
                             onClickSettings()
@@ -216,7 +233,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { viewModel.loadBookmarks() }) {
+                FloatingActionButton(onClick = { viewModel.onClickLoadBookmarks() }) {
                     Icon(
                         Icons.Filled.Refresh,
                         contentDescription = stringResource(id = R.string.refresh_bookmarks)
