@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.4.0] - 2025-05-21
+
 ### Added
 
 - Implemented background synchronization of bookmarks. The app now automatically synchronizes with the Readeck server in the background to detect and remove bookmarks that have been deleted on the server. This ensures that the local bookmark list remains consistent with the server.

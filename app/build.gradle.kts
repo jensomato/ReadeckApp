@@ -25,8 +25,8 @@ android {
         applicationId = "de.readeckapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 302
-        versionName = "0.3.2"
+        versionCode = 400
+        versionName = "0.4.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
