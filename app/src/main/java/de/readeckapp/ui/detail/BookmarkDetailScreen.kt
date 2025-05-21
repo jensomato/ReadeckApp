@@ -1,7 +1,5 @@
 package de.readeckapp.ui.detail
 
-import android.content.Context
-import android.content.Intent
 import android.icu.text.MessageFormat
 import android.view.View
 import android.webkit.WebView
@@ -65,6 +63,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.ui.components.ErrorPlaceholderImage
+import de.readeckapp.ui.components.ShareBookmarkChooser
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
@@ -77,7 +76,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
     val onMarkRead: (String, Boolean) -> Unit =
         { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
-    val onClickShareBookmark: (String, Context) -> Unit = { url, context -> viewModel.shareBookmark(url, context) }
+    val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.uiState.collectAsState().value
@@ -126,6 +125,8 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onClickDeleteBookmark = onClickDeleteBookmark,
                 uiState = uiState
             )
+            // Consumes a shareIntent and creates the corresponding share dialog
+            ShareBookmarkChooser(viewModel)
         }
 
         is BookmarkDetailViewModel.UiState.Loading -> {
@@ -154,7 +155,7 @@ fun BookmarkDetailScreen(
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
-    onClickShareBookmark: (String, Context) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     Scaffold(
@@ -331,11 +332,11 @@ fun BookmarkDetailMenu(
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
-    onClickShareBookmark: (String, Context) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val context = LocalContext.current
+
     Box(
         contentAlignment = Alignment.BottomEnd
     ) {
@@ -388,7 +389,7 @@ fun BookmarkDetailMenu(
             DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_share)) },
                 onClick = {
-                    onClickShareBookmark(uiState.bookmark.url, context)
+                    onClickShareBookmark(uiState.bookmark.url)
                     expanded = false
                 },
                 leadingIcon = {
@@ -436,7 +437,7 @@ fun BookmarkDetailScreenPreview() {
         onClickDeleteBookmark = {},
         onClickToggleFavorite = { _, _ -> },
         onMarkRead = { _, _ -> },
-        onClickShareBookmark = {_, _ -> },
+        onClickShareBookmark = {_ -> },
         onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,

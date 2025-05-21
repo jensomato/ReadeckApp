@@ -9,6 +9,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
+import de.readeckapp.ui.IBookmarkViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -34,9 +35,13 @@ class BookmarkDetailViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val assetLoader: AssetLoader,
     savedStateHandle: SavedStateHandle
-) : ViewModel() {
+) : ViewModel(), IBookmarkViewModel {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
+
+    private val _shareIntent = MutableStateFlow<Intent?>(null)
+    override val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
+
     private val bookmarkId: String? = savedStateHandle["bookmarkId"]
     private val htmlTemplate = flow {
         emit(assetLoader.loadAsset("html_template.html"))
@@ -149,16 +154,19 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
 
-    fun shareBookmark(url: String, context: Context) {
+    fun onClickShareBookmark(url: String) {
 
-        val sendIntent = Intent().apply {
+        val intent = Intent().apply {
             action = Intent.ACTION_SEND
             putExtra(Intent.EXTRA_TEXT, url)
             type = "text/plain"
         }
-        val chooser = Intent.createChooser(sendIntent, null)
 
-        context.startActivity(chooser, null)
+        _shareIntent.value = intent
+    }
+
+    override fun onShareIntentConsumed() {
+        _shareIntent.value = null
     }
 
     fun deleteBookmark(bookmarkId: String) {

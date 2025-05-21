@@ -56,6 +56,7 @@ import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
+import de.readeckapp.ui.components.ShareBookmarkChooser
 import timber.log.Timber
 
 @Composable
@@ -65,11 +66,10 @@ fun BookmarkCard(
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
-    onClickShareBookmark: (String, Context) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
 ) {
     var expanded by remember { mutableStateOf(false) }
-    val context = LocalContext.current
 
     Card(
         modifier = Modifier
@@ -204,7 +204,7 @@ fun BookmarkCard(
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_share)) },
                                 onClick = {
-                                    onClickShareBookmark(bookmark.url, context)
+                                    onClickShareBookmark(bookmark.url)
                                     expanded = false
                                 },
                                 leadingIcon = {
@@ -270,7 +270,7 @@ fun BookmarkCardPreview() {
             onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
             onClickArchive = { _, _ -> },
-            onClickShareBookmark = {_, _ -> }
+            onClickShareBookmark = {_ -> }
         )
     }
 }
