@@ -1,0 +1,14 @@
+<b>Added</b>
+
+<ul>
+  <li>Implemented background synchronization of bookmarks. The app now automatically synchronizes with the Readeck server in the background to detect and remove bookmarks that have been deleted on the server. This ensures that the local bookmark list remains consistent with the server.</li>
+  <li>Added translation for Spanish by @xmgz</li>
+  <li>Added icons to navigation drawer by @sockenklaus</li>
+</ul>
+
+<b>Fixed</b>
+
+<ul>
+  <li>Fix #64: Add library definitions to version control.</li>
+  <li>Fix #66: Show bookmark detail view for all bookmark, even if no article content is available.</li>
+</ul>

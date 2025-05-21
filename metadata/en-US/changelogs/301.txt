@@ -1,0 +1,17 @@
+<b>Added</b>
+
+<ul>
+  <li>Added metadata for F-Droid builds</li>
+</ul>
+
+<b>Fixed</b>
+
+<ul>
+  <li>Fix #53: Show bookmarks of type `photo` in detail view</li>
+</ul>
+
+<b>Changed</b>
+
+<ul>
+  <li>Readeck now displays notifications when authentication fails. These notifications allow users to quickly navigate to the account screen to verify their credentials and log in again. This feature assists users in addressing token-related issues that may arise when upgrading to Readeck 1.8.0, as outlined in the breaking changes documentation (https://readeck.org/en/blog/202503-readeck-18/#breaking-changes).</li>
+</ul>
