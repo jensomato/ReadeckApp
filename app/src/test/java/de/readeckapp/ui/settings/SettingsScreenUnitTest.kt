@@ -46,7 +46,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = {},
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = {}
+                    onClickLogs = {},
+                    onClickSync = {}
                 )
             }
         }
@@ -63,7 +64,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = {},
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = {}
+                    onClickLogs = {},
+                    onClickSync = {}
                 )
             }
         }
@@ -83,7 +85,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = {},
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = {}
+                    onClickLogs = {},
+                    onClickSync = {}
                 )
             }
         }
@@ -109,7 +112,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = { accountClicked = true },
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = {}
+                    onClickLogs = {},
+                    onClickSync = {}
                 )
             }
         }
@@ -130,7 +134,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = {},
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = {}
+                    onClickLogs = {},
+                    onClickSync = {}
                 )
             }
         }
@@ -148,7 +153,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = {},
                     onClickBack = { backClicked = true },
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = {}
+                    onClickLogs = {},
+                    onClickSync = {}
                 )
             }
         }
@@ -168,7 +174,8 @@ class SettingsScreenUnitTest {
                     onClickAccount = {},
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
-                    onClickLogs = { logsClicked = true }
+                    onClickLogs = { logsClicked = true },
+                    onClickSync = {}
                 )
             }
         }

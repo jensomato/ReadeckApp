@@ -1,0 +1,11 @@
+<b>Fixed</b>
+
+<ul>
+  <li>Fix #54: Persist article content in separate database table. Also improves performance.</li>
+</ul>
+
+<b>Changed</b>
+
+<ul>
+  <li>Disabled baseline profile to allow reproducible builds for F-Droid</li>
+</ul>

@@ -1,6 +1,7 @@
 package de.readeckapp.io.db.dao
 
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.OnConflictStrategy.Companion.REPLACE
@@ -15,6 +16,7 @@ import timber.log.Timber
 import de.readeckapp.io.db.model.ArticleContentEntity
 import de.readeckapp.io.db.model.BookmarkWithArticleContent
 import de.readeckapp.io.db.model.BookmarkListItemEntity
+import de.readeckapp.io.db.model.RemoteBookmarkIdEntity
 
 @Dao
 interface BookmarkDao {
@@ -188,4 +190,21 @@ interface BookmarkDao {
         Timber.d("query=${sqlQuery.sql}")
         return getBookmarkListItemsByFiltersDynamic(sqlQuery)
     }
+
+    @Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun insertRemoteBookmarkIds(ids: List<RemoteBookmarkIdEntity>)
+
+    @Query("DELETE FROM remote_bookmark_ids")
+    suspend fun clearRemoteBookmarkIds()
+
+    @Query("SELECT id FROM remote_bookmark_ids")
+    suspend fun getAllRemoteBookmarkIds(): List<String>
+
+    @Query(
+        """
+            DELETE FROM bookmarks
+            WHERE NOT EXISTS (SELECT 1 FROM remote_bookmark_ids WHERE bookmarks.id = remote_bookmark_ids.id)
+        """
+    )
+    suspend fun removeDeletedBookmars(): Int
 }
