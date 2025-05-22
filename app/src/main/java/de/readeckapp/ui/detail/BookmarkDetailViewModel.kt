@@ -7,9 +7,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -35,6 +37,10 @@ class BookmarkDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
+
+    private val _openUrlEvent = MutableSharedFlow<String>()
+    val openUrlEvent = _openUrlEvent.asSharedFlow()
+
     private val bookmarkId: String? = savedStateHandle["bookmarkId"]
     private val htmlTemplate = flow {
         emit(assetLoader.loadAsset("html_template.html"))
@@ -76,6 +82,7 @@ class BookmarkDetailViewModel @Inject constructor(
             }
             UiState.Success(
                 bookmark = Bookmark(
+                    url = bookmark.url,
                     title = bookmark.title,
                     encodedHtmlContent = encodedHtml,
                     authors = bookmark.authors,
@@ -159,6 +166,14 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
 
+    fun onClickOpenUrl(url: String){
+        if (url.isNotBlank()) {
+            viewModelScope.launch {
+                _openUrlEvent.emit(url)
+            }
+        }
+    }
+
     fun onClickBack() {
         _navigationEvent.update { NavigationEvent.NavigateBack }
     }
@@ -189,6 +204,7 @@ class BookmarkDetailViewModel @Inject constructor(
     }
 
     data class Bookmark(
+        val url: String,
         val title: String,
         val encodedHtmlContent: String?,
         val authors: List<String>,

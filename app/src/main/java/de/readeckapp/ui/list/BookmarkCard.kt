@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
@@ -65,6 +66,7 @@ fun BookmarkCard(
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
+    onClickOpenUrl: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
     Card(
@@ -102,7 +104,10 @@ fun BookmarkCard(
 
                 )
                 HorizontalDivider(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onClickOpenUrl(bookmark.url) }
+                ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current).data(bookmark.iconSrc)
                             .crossfade(true).build(),
@@ -114,6 +119,14 @@ fun BookmarkCard(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(text = bookmark.siteName, style = MaterialTheme.typography.titleSmall)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = stringResource(R.string.action_open_in_browser),
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp)
+                    )
 
                 }
 
@@ -230,6 +243,7 @@ fun BookmarkCardPreview() {
     }
     val sampleBookmark = BookmarkListItem(
         id = "1",
+        url = "https://example.com",
         title = "Sample Bookmark",
         siteName = "Example",
         type = Bookmark.Type.Article,
@@ -254,7 +268,8 @@ fun BookmarkCardPreview() {
             onClickDelete = {},
             onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
-            onClickArchive = { _, _ -> }
+            onClickArchive = { _, _ -> },
+            onClickOpenUrl = {}
         )
     }
 }

@@ -20,7 +20,6 @@ import androidx.compose.material.icons.outlined.Favorite
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Movie
-import androidx.compose.material.icons.outlined.OndemandVideo
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
@@ -53,6 +52,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -65,6 +65,7 @@ import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.SettingsRoute
+import de.readeckapp.util.openUrlInCustomTab
 import kotlinx.coroutines.launch
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -96,6 +97,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val onClickMarkRead: (String, Boolean) -> Unit = { bookmarkId, isRead -> viewModel.onToggleMarkReadBookmark(bookmarkId, isRead) }
     val onClickFavorite: (String, Boolean) -> Unit = { bookmarkId, isFavorite -> viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite) }
     val onClickArchive: (String, Boolean) -> Unit = { bookmarkId, isArchived -> viewModel.onToggleArchiveBookmark(bookmarkId, isArchived) }
+    val onClickOpenInBrowser: (String) -> Unit = { url -> viewModel.onClickOpenInBrowser(url) }
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -110,6 +112,13 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                 }
             }
             viewModel.onNavigationEventConsumed() // Consume the event
+        }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(Unit) {
+        viewModel.openUrlEvent.collect {
+            url -> openUrlInCustomTab(context, url)
         }
     }
 
@@ -268,7 +277,8 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                             onClickDelete = onClickDelete,
                             onClickArchive = onClickArchive,
                             onClickFavorite = onClickFavorite,
-                            onClickMarkRead = onClickMarkRead
+                            onClickMarkRead = onClickMarkRead,
+                            onClickOpenInBrowser = onClickOpenInBrowser
                         )
                     } else {
                         EmptyScreen(modifier = Modifier.padding(padding))
@@ -449,6 +459,7 @@ fun BookmarkListView(
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
+    onClickOpenInBrowser: (String) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
         items(bookmarks) { bookmark ->
@@ -458,7 +469,8 @@ fun BookmarkListView(
                 onClickDelete = onClickDelete,
                 onClickArchive = onClickArchive,
                 onClickFavorite = onClickFavorite,
-                onClickMarkRead = onClickMarkRead
+                onClickMarkRead = onClickMarkRead,
+                onClickOpenUrl = onClickOpenInBrowser
             )
         }
     }
@@ -487,6 +499,7 @@ fun EmptyScreenPreview() {
 fun BookmarkListViewPreview() {
     val sampleBookmark = BookmarkListItem(
         id = "1",
+        url = "https://example.com",
         title = "Sample Bookmark",
         siteName = "Example",
         type = Bookmark.Type.Article,
@@ -515,6 +528,7 @@ fun BookmarkListViewPreview() {
         onClickDelete = {},
         onClickArchive = { _, _ -> },
         onClickFavorite = { _, _ -> },
-        onClickMarkRead = { _, _ -> }
+        onClickMarkRead = { _, _ -> },
+        onClickOpenInBrowser = {}
     )
 }

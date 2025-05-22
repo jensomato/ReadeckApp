@@ -135,6 +135,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.junit)
     implementation(libs.androidx.ui.test.junit4.android)
+    implementation(libs.androidx.browser)
     // hilt
     ksp(libs.dagger.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)
