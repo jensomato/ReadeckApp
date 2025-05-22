@@ -74,8 +74,7 @@ other{}
     <string name="notification_authentication_error_title">Authentifizierung fehlgeschlagen</string>
     <string name="notification_authentication_error_message">Bitte Anmeldeinformationen prüfen.</string>
     <string name="detail_view_no_content">Kein Artikelinhalt gefunden</string>
-    <string name="detail_view_image_content_description">Lesezeichen Bild</string>
-    <string name="detail_view_error_image_content_description">Lesezeichen Fehler Bild</string>
+    <string name="common_bookmark_image_content_description">Lesezeichen Bild</string>
     <string name="settings_sync_full_sync_heading">Synchronisierung im Hintergrund</string>
     <string name="settings_sync_auto_full_sync_title">Synchronisierung im Hintergrund</string>
     <string name="settings_sync_auto_full_button">Jetzt Synchronisieren</string>

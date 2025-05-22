@@ -275,12 +275,12 @@ fun BookmarkDetailHeader(
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(uiState.bookmark.imgSrc)
                 .crossfade(true).build(),
-            contentDescription = stringResource(R.string.detail_view_image_content_description),
+            contentDescription = stringResource(R.string.common_bookmark_image_content_description),
             contentScale = ContentScale.FillWidth,
             error = {
                 ErrorPlaceholderImage(
                     modifier = Modifier.fillMaxWidth().height(200.dp),
-                    imageContentDescription = stringResource(R.string.detail_view_error_image_content_description)
+                    imageContentDescription = stringResource(R.string.common_bookmark_image_content_description)
                 )
             },
             modifier = Modifier

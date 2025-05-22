@@ -73,8 +73,7 @@ other{}
     <string name="notification_authentication_error_title">Authentication Required</string>
     <string name="notification_authentication_error_message">Please validate your credentials.</string>
     <string name="detail_view_no_content">No article content found</string>
-    <string name="detail_view_image_content_description">Bookmark Image</string>
-    <string name="detail_view_error_image_content_description">Bookmark Error Image</string>
+    <string name="common_bookmark_image_content_description">Bookmark Image</string>
     <string name="settings_sync_full_sync_heading">Background Synchronization</string>
     <string name="settings_sync_auto_full_sync_title">Background Synchronization</string>
     <string name="settings_sync_auto_full_button">Synchronize now</string>
