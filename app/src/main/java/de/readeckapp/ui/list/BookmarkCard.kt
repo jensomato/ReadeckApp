@@ -49,12 +49,13 @@ import coil3.ColorImage
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
-import timber.log.Timber
+import de.readeckapp.ui.components.ErrorPlaceholderImage
 
 @Composable
 fun BookmarkCard(
@@ -75,17 +76,20 @@ fun BookmarkCard(
     ) {
         Column {
             // Image
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current).data(bookmark.imageSrc)
                     .crossfade(true).build(),
-                contentDescription = "Bookmark Image",
-                contentScale = ContentScale.Crop,
+                contentDescription = stringResource(R.string.common_bookmark_image_content_description),
+                contentScale = ContentScale.FillWidth,
+                error = {
+                    ErrorPlaceholderImage(
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        imageContentDescription = stringResource(R.string.common_bookmark_image_content_description)
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp),
-                onLoading = { Timber.d("loading ${bookmark.imageSrc}") },
-                onError = { Timber.d("error ${bookmark.imageSrc}") },
-                onSuccess = { Timber.d("success ${bookmark.imageSrc}") },
+                    .height(150.dp)
             )
 
             // Title, Date, and Labels
