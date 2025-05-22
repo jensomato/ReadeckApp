@@ -13,7 +13,6 @@ import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
-import de.readeckapp.ui.IBookmarkViewModel
 import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -33,7 +32,7 @@ class BookmarkListViewModel @Inject constructor(
     @ApplicationContext private val context: Context, // Inject Context
     private val settingsDataStore: SettingsDataStore, // Inject SettingsDataStore
     savedStateHandle: SavedStateHandle
-) : ViewModel(), IBookmarkViewModel {
+) : ViewModel() {
     private val _navigationEvent =
         MutableStateFlow<NavigationEvent?>(null) // Using StateFlow for navigation events
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
@@ -45,7 +44,7 @@ class BookmarkListViewModel @Inject constructor(
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
-    override val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
+    val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
 
     // Add state for the CreateBookmarkDialog
     private val _createBookmarkUiState =
@@ -190,7 +189,7 @@ class BookmarkListViewModel @Inject constructor(
         _shareIntent.value = intent
     }
 
-    override fun onShareIntentConsumed() {
+    fun onShareIntentConsumed() {
         _shareIntent.value = null
     }
 

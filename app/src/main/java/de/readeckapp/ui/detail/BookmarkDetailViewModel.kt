@@ -9,7 +9,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
-import de.readeckapp.ui.IBookmarkViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -35,12 +34,12 @@ class BookmarkDetailViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val assetLoader: AssetLoader,
     savedStateHandle: SavedStateHandle
-) : ViewModel(), IBookmarkViewModel {
+) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
-    override val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
+    val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
 
     private val bookmarkId: String? = savedStateHandle["bookmarkId"]
     private val htmlTemplate = flow {
@@ -165,7 +164,7 @@ class BookmarkDetailViewModel @Inject constructor(
         _shareIntent.value = intent
     }
 
-    override fun onShareIntentConsumed() {
+    fun onShareIntentConsumed() {
         _shareIntent.value = null
     }
 

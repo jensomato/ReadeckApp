@@ -1,6 +1,5 @@
 package de.readeckapp.ui.list
 
-import android.content.Context
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -54,6 +53,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -275,7 +275,11 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                             onClickShareBookmark = onClickShareBookmark
                         )
                         // Consumes a shareIntent and creates the corresponding share dialog
-                        ShareBookmarkChooser(viewModel)
+                        ShareBookmarkChooser(
+                            context = LocalContext.current,
+                            intent = viewModel.shareIntent.collectAsState().value,
+                            onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
+                        )
                     } else {
                         EmptyScreen(modifier = Modifier.padding(padding))
                     }

@@ -1,19 +1,18 @@
 package de.readeckapp.ui.components
 
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
-import androidx.compose.ui.platform.LocalContext
-import de.readeckapp.ui.IBookmarkViewModel
 import android.content.Intent
+import android.content.Context
 
 @Composable
-fun ShareBookmarkChooser(viewModel : IBookmarkViewModel){
-    val shareIntent = viewModel.shareIntent.collectAsState().value
-    val context = LocalContext.current
-
-    if (shareIntent != null) {
-        val chooser = Intent.createChooser(shareIntent, null)
+fun ShareBookmarkChooser(
+    context: Context,
+    intent: Intent?,
+    onShareIntentConsumed: () -> Unit
+){
+    if (intent != null) {
+        val chooser = Intent.createChooser(intent, null)
         context.startActivity(chooser)
-        viewModel.onShareIntentConsumed()
+        onShareIntentConsumed.invoke()
     }
 }

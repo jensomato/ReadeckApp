@@ -56,7 +56,6 @@ import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
-import de.readeckapp.ui.components.ShareBookmarkChooser
 import timber.log.Timber
 
 @Composable

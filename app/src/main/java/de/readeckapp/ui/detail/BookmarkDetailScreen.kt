@@ -126,7 +126,11 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 uiState = uiState
             )
             // Consumes a shareIntent and creates the corresponding share dialog
-            ShareBookmarkChooser(viewModel)
+            ShareBookmarkChooser(
+                context = LocalContext.current,
+                intent = viewModel.shareIntent.collectAsState().value,
+                onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
+            )
         }
 
         is BookmarkDetailViewModel.UiState.Loading -> {
