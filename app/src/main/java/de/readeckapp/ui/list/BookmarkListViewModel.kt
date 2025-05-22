@@ -169,10 +169,10 @@ class BookmarkListViewModel @Inject constructor(
         _navigationEvent.update { null } // Reset the event
     }
 
-    fun loadBookmarks() {
+    private fun loadBookmarks(initialLoad: Boolean = false) {
         viewModelScope.launch {
             try {
-                LoadBookmarksWorker.enqueue(context) // Enqueue for incremental sync
+                LoadBookmarksWorker.enqueue(context, isInitialLoad = initialLoad) // Enqueue for incremental sync
             } catch (e: Exception) {
                 // Handle errors (e.g., show error message)
                 println("Error loading bookmarks: ${e.message}")
@@ -191,6 +191,10 @@ class BookmarkListViewModel @Inject constructor(
 
     fun onShareIntentConsumed() {
         _shareIntent.value = null
+    }
+    
+    fun onClickLoadBookmarks() {
+        loadBookmarks(true)
     }
 
     fun onDeleteBookmark(bookmarkId: String) {

@@ -236,7 +236,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { viewModel.loadBookmarks() }) {
+                FloatingActionButton(onClick = { viewModel.onClickLoadBookmarks() }) {
                     Icon(
                         Icons.Filled.Refresh,
                         contentDescription = stringResource(id = R.string.refresh_bookmarks)
