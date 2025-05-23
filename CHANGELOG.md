@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added the ability to share links to bookmarks from list view and datail view. Closes #45. Contributed by @sockenklaus
+
 ## [0.4.0] - 2025-05-21
 
 ### Added
