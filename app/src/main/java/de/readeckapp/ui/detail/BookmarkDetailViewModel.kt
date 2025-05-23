@@ -9,9 +9,11 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -37,6 +39,9 @@ class BookmarkDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
+
+    private val _openUrlEvent = MutableSharedFlow<String>()
+    val openUrlEvent = _openUrlEvent.asSharedFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
@@ -179,6 +184,14 @@ class BookmarkDetailViewModel @Inject constructor(
                 _navigationEvent.update { NavigationEvent.NavigateBack }
             }
             updateState.value = state
+        }
+    }
+
+    fun onClickOpenUrl(url: String){
+        if (url.isNotBlank()) {
+            viewModelScope.launch {
+                _openUrlEvent.emit(url)
+            }
         }
     }
 
