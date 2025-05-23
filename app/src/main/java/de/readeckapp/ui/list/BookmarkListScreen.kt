@@ -280,7 +280,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                             onClickArchive = onClickArchive,
                             onClickFavorite = onClickFavorite,
                             onClickMarkRead = onClickMarkRead,
-                            onClickOpenInBrowser = onClickOpenInBrowser
+                            onClickOpenInBrowser = onClickOpenInBrowser,
                             onClickShareBookmark = onClickShareBookmark
                         )
                         // Consumes a shareIntent and creates the corresponding share dialog

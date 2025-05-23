@@ -176,7 +176,7 @@ fun BookmarkDetailScreen(
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
     onClickDeleteBookmark: (String) -> Unit,
-    onClickOpenUrl: (String) -> Unit
+    onClickOpenUrl: (String) -> Unit,
     onClickShareBookmark: (String) -> Unit,
 ) {
     Scaffold(
