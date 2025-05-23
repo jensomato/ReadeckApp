@@ -7,20 +7,24 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import androidx.navigation.toRoute
 import dagger.hilt.android.AndroidEntryPoint
+import de.readeckapp.domain.model.Theme
 import de.readeckapp.ui.detail.BookmarkDetailScreen
 import de.readeckapp.ui.list.BookmarkListScreen
 import de.readeckapp.ui.navigation.AccountSettingsRoute
@@ -30,11 +34,13 @@ import de.readeckapp.ui.navigation.LogViewRoute
 import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import de.readeckapp.ui.navigation.SyncSettingsRoute
+import de.readeckapp.ui.navigation.UiSettingsRoute
 import de.readeckapp.ui.settings.AccountSettingsScreen
 import de.readeckapp.ui.settings.LogViewScreen
 import de.readeckapp.ui.settings.OpenSourceLibrariesScreen
 import de.readeckapp.ui.settings.SettingsScreen
 import de.readeckapp.ui.settings.SyncSettingsScreen
+import de.readeckapp.ui.settings.UiSettingsScreen
 import de.readeckapp.ui.theme.ReadeckAppTheme
 import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.launch
@@ -49,6 +55,8 @@ class MainActivity : ComponentActivity() {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
+            val viewModel = hiltViewModel<MainViewModel>()
+            val theme = viewModel.theme.collectAsState()
             val navController = rememberNavController()
             intentState = remember { mutableStateOf(intent) }
             val scope = rememberCoroutineScope()
@@ -77,7 +85,13 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            ReadeckAppTheme {
+            val darkTheme = when (theme.value) {
+                Theme.LIGHT -> false
+                Theme.DARK -> true
+                Theme.SYSTEM -> isSystemInDarkTheme()
+            }
+
+            ReadeckAppTheme(darkTheme = darkTheme) {
                 ReadeckNavHost(navController)
             }
         }
@@ -111,6 +125,9 @@ fun ReadeckNavHost(navController: NavHostController) {
         }
         composable<SyncSettingsRoute> {
             SyncSettingsScreen(navHostController = navController)
+        }
+        composable<UiSettingsRoute> {
+            UiSettingsScreen(navHostController = navController)
         }
     }
 }
