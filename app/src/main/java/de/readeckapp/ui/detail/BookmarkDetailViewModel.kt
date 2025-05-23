@@ -1,5 +1,7 @@
 package de.readeckapp.ui.detail
 
+import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,6 +43,9 @@ class BookmarkDetailViewModel @Inject constructor(
     private val _openUrlEvent = MutableSharedFlow<String>()
     val openUrlEvent = _openUrlEvent.asSharedFlow()
 
+    private val _shareIntent = MutableStateFlow<Intent?>(null)
+    val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
+
     private val bookmarkId: String? = savedStateHandle["bookmarkId"]
     private val htmlTemplate = flow {
         emit(assetLoader.loadAsset("html_template.html"))
@@ -80,6 +85,7 @@ class BookmarkDetailViewModel @Inject constructor(
             val encodedHtml = content?.let {
                 Base64.withPadding(Base64.PaddingOption.ABSENT).encode(it.toByteArray())
             }
+
             UiState.Success(
                 bookmark = Bookmark(
                     url = bookmark.url,
@@ -150,6 +156,21 @@ class BookmarkDetailViewModel @Inject constructor(
             }
             updateState.value = state
         }
+    }
+
+    fun onClickShareBookmark(url: String) {
+
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, url)
+            type = "text/plain"
+        }
+
+        _shareIntent.value = intent
+    }
+
+    fun onShareIntentConsumed() {
+        _shareIntent.value = null
     }
 
     fun deleteBookmark(bookmarkId: String) {

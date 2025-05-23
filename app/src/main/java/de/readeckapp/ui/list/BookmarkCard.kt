@@ -1,5 +1,6 @@
 package de.readeckapp.ui.list
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -20,6 +21,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -65,10 +67,12 @@ fun BookmarkCard(
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
     onClickOpenUrl: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -214,6 +218,19 @@ fun BookmarkCard(
                                 }
                             )
                             DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_share)) },
+                                onClick = {
+                                    onClickShareBookmark(bookmark.url)
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Share,
+                                        contentDescription = stringResource(R.string.action_share)
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_delete)) },
                                 onClick = {
                                     onClickDelete(bookmark.id)
@@ -269,7 +286,8 @@ fun BookmarkCardPreview() {
             onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
             onClickArchive = { _, _ -> },
-            onClickOpenUrl = {}
+            onClickOpenUrl = {},
+            onClickShareBookmark = {_ -> }
         )
     }
 }
