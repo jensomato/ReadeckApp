@@ -266,6 +266,7 @@ class BookmarkListViewModelTest {
         val expectedBookmarks = listOf(
             BookmarkListItem(
                 id = "1",
+                url = "https://example.url",
                 title = "Test Bookmark",
                 siteName = "Example Site",
                 type = Bookmark.Type.Article,
@@ -1085,6 +1086,7 @@ class BookmarkListViewModelTest {
     private val bookmarks = listOf(
         BookmarkListItem(
             id = "1",
+            url = "https://example.url",
             title = "Test Bookmark",
             siteName = "Example Site",
             type = Bookmark.Type.Article,

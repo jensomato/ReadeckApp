@@ -66,6 +66,7 @@ other{}
     <string name="action_favorite">Favorit</string>
     <string name="action_archive">Archivieren</string>
     <string name="action_mark_read">Gelesen</string>
+    <string name="action_share">Link teilen</string>
     <string name="action_delete">Löschen</string>
     <string name="error_no_article_content">Fehler, kein Artikelinhalt verfügbar</string>
     <string name="update_successful">Aktualisierung erfolgreich</string>

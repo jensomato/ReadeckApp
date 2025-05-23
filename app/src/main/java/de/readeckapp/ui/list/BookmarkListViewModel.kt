@@ -1,6 +1,7 @@
 package de.readeckapp.ui.list
 
 import android.content.Context
+import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
@@ -41,6 +42,9 @@ class BookmarkListViewModel @Inject constructor(
 
     private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
+
+    private val _shareIntent = MutableStateFlow<Intent?>(null)
+    val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
 
     // Add state for the CreateBookmarkDialog
     private val _createBookmarkUiState =
@@ -176,6 +180,19 @@ class BookmarkListViewModel @Inject constructor(
         }
     }
 
+    fun onClickShareBookmark(url: String) {
+        val intent = Intent().apply {
+            action = Intent.ACTION_SEND
+            putExtra(Intent.EXTRA_TEXT, url)
+            type = "text/plain"
+        }
+        _shareIntent.value = intent
+    }
+
+    fun onShareIntentConsumed() {
+        _shareIntent.value = null
+    }
+    
     fun onClickLoadBookmarks() {
         loadBookmarks(true)
     }
