@@ -11,6 +11,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 - Added the ability to share links to bookmarks from list view and datail view. Closes #45. Contributed by @sockenklaus
 
+### Changed
+
+- Show placeholder images on image load failure in main list view. Closes #81
+
 ## [0.4.0] - 2025-05-21
 
 ### Added
