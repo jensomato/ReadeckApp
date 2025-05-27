@@ -1,0 +1,60 @@
+name: Build Test Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Setup Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Decode Keystore
+        run: |
+          echo "${{ secrets.SIGNING_KEY }}" | base64 --decode > ${{ github.workspace }}/keystore.jks
+
+      - name: Set Env Vars
+        id: set_env
+        run: |
+          echo "TIMESTAMP=$(date +%Y%m%dT%H%M%S)" >> "$GITHUB_OUTPUT"
+          echo "COMMIT_SHA=$(git rev-parse --short HEAD)" >> "$GITHUB_OUTPUT"
+
+      - name: Build apk with Gradle
+        run: ./gradlew assembleGithubSnapshotRelease
+        env: 
+          SNAPSHOT_VERSION_NAME: ${{ steps.set_env.outputs.TIMESTAMP }}-${{ steps.set_env.outputs.COMMIT_SHA }}
+          KEY_ALIAS: ${{ secrets.ALIAS }}
+          KEYSTORE_PASSWORD: ${{ secrets.KEY_STORE_PASSWORD }}
+          KEY_PASSWORD: ${{ secrets.KEY_PASSWORD }}
+          KEYSTORE: ${{ github.workspace }}/keystore.jks
+
+      - name: Create Checksum
+        id: create_checksum
+        run: |
+          FILENAME=$(echo app/build/outputs/apk/githubSnapshot/release/*.apk)
+          sha256sum $FILENAME > checksums.txt
+          echo "ARTIFACT_FILENAME=$FILENAME" >> "$GITHUB_OUTPUT"
+
+      - name: Archive APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-release-${{ github.GITHUB_REV }}
+          retention-days: 5
+          path: |
+            ${{ steps.create_checksum.outputs.ARTIFACT_FILENAME }}
+            checksums.txt
