@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -62,6 +63,7 @@ import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.ui.components.ErrorPlaceholderImage
+import de.readeckapp.ui.components.ShareBookmarkChooser
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
@@ -74,6 +76,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
     val onMarkRead: (String, Boolean) -> Unit =
         { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
+    val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.uiState.collectAsState().value
@@ -118,8 +121,15 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onClickToggleFavorite = onClickToggleFavorite,
                 onClickToggleArchive = onClickToggleArchive,
                 onMarkRead = onMarkRead,
+                onClickShareBookmark = onClickShareBookmark,
                 onClickDeleteBookmark = onClickDeleteBookmark,
                 uiState = uiState
+            )
+            // Consumes a shareIntent and creates the corresponding share dialog
+            ShareBookmarkChooser(
+                context = LocalContext.current,
+                intent = viewModel.shareIntent.collectAsState().value,
+                onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
             )
         }
 
@@ -149,6 +159,7 @@ fun BookmarkDetailScreen(
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     Scaffold(
@@ -179,6 +190,7 @@ fun BookmarkDetailScreen(
                 onClickToggleFavorite = onClickToggleFavorite,
                 onClickToggleArchive = onClickToggleArchive,
                 onMarkRead = onMarkRead,
+                onClickShareBookmark = onClickShareBookmark,
                 onClickDeleteBookmark = onClickDeleteBookmark
             )
         }
@@ -324,9 +336,11 @@ fun BookmarkDetailMenu(
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+
     Box(
         contentAlignment = Alignment.BottomEnd
     ) {
@@ -377,6 +391,20 @@ fun BookmarkDetailMenu(
                 }
             )
             DropdownMenuItem(
+                text = { Text(stringResource(R.string.action_share)) },
+                onClick = {
+                    onClickShareBookmark(uiState.bookmark.url)
+                    expanded = false
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Outlined.Share,
+                        contentDescription = stringResource(R.string.action_share)
+                    )
+                }
+
+            )
+            DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_delete)) },
                 onClick = {
                     onClickDeleteBookmark(uiState.bookmark.bookmarkId)
@@ -413,6 +441,7 @@ fun BookmarkDetailScreenPreview() {
         onClickDeleteBookmark = {},
         onClickToggleFavorite = { _, _ -> },
         onMarkRead = { _, _ -> },
+        onClickShareBookmark = {_ -> },
         onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
@@ -459,6 +488,7 @@ private fun BookmarkDetailHeaderPreview() {
 private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     bookmarkId = "1",
     createdDate = "2024-01-15T10:00:00",
+    url = "https://sample.url",
     title = "This is a very long title of a small sample bookmark",
     siteName = "Example",
     authors = listOf("John Doe"),
