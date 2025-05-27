@@ -16,16 +16,18 @@ fun String?.isValidUrl(): Boolean {
 }
 
 fun openUrlInCustomTab(context: Context, url: String) {
-    try {
-        val builder = CustomTabsIntent.Builder()
-        builder.setStartAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out)
-        builder.setExitAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out)
+    if(url.isValidUrl()){
+        try {
+            val builder = CustomTabsIntent.Builder()
+            builder.setStartAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out)
+            builder.setExitAnimations(context, android.R.anim.fade_in, android.R.anim.fade_out)
 
-        val customTabsIntent = builder.build()
-        customTabsIntent.launchUrl(context, url.toUri())
-    } catch (e: Exception) {
-        // Fallback: Open in standard browser if Custom Tabs fails or is not available
-        val intent = Intent(Intent.ACTION_VIEW, url.toUri())
-        context.startActivity(intent)
+            val customTabsIntent = builder.build()
+            customTabsIntent.launchUrl(context, url.toUri())
+        } catch (e: Exception) {
+            // Fallback: Open in standard browser if Custom Tabs fails or is not available
+            val intent = Intent(Intent.ACTION_VIEW, url.toUri())
+            context.startActivity(intent)
+        }
     }
 }

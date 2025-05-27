@@ -16,10 +16,8 @@ import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.CoroutineExceptionHandler
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
 import kotlinx.coroutines.flow.update
@@ -39,8 +37,8 @@ class BookmarkListViewModel @Inject constructor(
         MutableStateFlow<NavigationEvent?>(null) // Using StateFlow for navigation events
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
 
-    private val _openUrlEvent = MutableSharedFlow<String>()
-    val openUrlEvent = _openUrlEvent.asSharedFlow()
+    private val _openUrlEvent = MutableStateFlow<String>("")
+    val openUrlEvent = _openUrlEvent.asStateFlow()
 
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
@@ -171,15 +169,15 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     fun onClickOpenInBrowser(url: String){
-        if (url.isNotBlank()) {
-            viewModelScope.launch {
-                _openUrlEvent.emit(url)
-            }
-        }
+        _openUrlEvent.value = url
     }
 
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event
+    }
+
+    fun onOpenUrlEventConsumed() {
+        _openUrlEvent.value = ""
     }
 
     private fun loadBookmarks(initialLoad: Boolean = false) {

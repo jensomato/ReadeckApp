@@ -75,6 +75,7 @@ import de.readeckapp.ui.components.ShareBookmarkChooser
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
     val viewModel: BookmarkDetailViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
+    val openUrlEvent = viewModel.openUrlEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val onClickToggleFavorite: (String, Boolean) -> Unit =
         { id, isFavorite -> viewModel.onToggleFavorite(id, isFavorite) }
@@ -101,10 +102,9 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
     }
 
     val context = LocalContext.current
-    LaunchedEffect(Unit){
-        viewModel.openUrlEvent.collect {
-            url -> openUrlInCustomTab(context, url)
-        }
+    LaunchedEffect(key1 = openUrlEvent.value){
+        openUrlInCustomTab(context, openUrlEvent.value)
+        viewModel.onOpenUrlEventConsumed()
     }
 
     when (uiState) {

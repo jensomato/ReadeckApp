@@ -1,6 +1,5 @@
 package de.readeckapp.ui.detail
 
-import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -9,11 +8,9 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
-import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asSharedFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flow
@@ -40,8 +37,8 @@ class BookmarkDetailViewModel @Inject constructor(
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
 
-    private val _openUrlEvent = MutableSharedFlow<String>()
-    val openUrlEvent = _openUrlEvent.asSharedFlow()
+    private val _openUrlEvent = MutableStateFlow<String>("")
+    val openUrlEvent = _openUrlEvent.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
@@ -188,11 +185,7 @@ class BookmarkDetailViewModel @Inject constructor(
     }
 
     fun onClickOpenUrl(url: String){
-        if (url.isNotBlank()) {
-            viewModelScope.launch {
-                _openUrlEvent.emit(url)
-            }
-        }
+         _openUrlEvent.value = url
     }
 
     fun onClickBack() {
@@ -201,6 +194,10 @@ class BookmarkDetailViewModel @Inject constructor(
 
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event
+    }
+
+    fun onOpenUrlEventConsumed() {
+        _openUrlEvent.value = ""
     }
 
     private fun formatLocalDateTimeWithDateFormat(localDateTime: LocalDateTime): String {

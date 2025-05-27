@@ -74,6 +74,7 @@ import kotlinx.coroutines.launch
 fun BookmarkListScreen(navHostController: NavHostController) {
     val viewModel: BookmarkListViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
+    val openUrlEvent = viewModel.openUrlEvent.collectAsState()
     val uiState = viewModel.uiState.collectAsState().value
     val createBookmarkUiState = viewModel.createBookmarkUiState.collectAsState().value
 
@@ -118,10 +119,9 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     }
 
     val context = LocalContext.current
-    LaunchedEffect(Unit) {
-        viewModel.openUrlEvent.collect {
-            url -> openUrlInCustomTab(context, url)
-        }
+    LaunchedEffect(key1 = openUrlEvent.value) {
+        openUrlInCustomTab(context, openUrlEvent.value)
+        viewModel.onOpenUrlEventConsumed()
     }
 
     ModalNavigationDrawer(
