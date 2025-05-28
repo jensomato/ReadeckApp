@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -45,10 +46,13 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -68,6 +72,7 @@ import de.readeckapp.ui.components.ShareBookmarkChooser
 import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import kotlinx.coroutines.launch
+import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -83,6 +88,10 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isRefreshing = uiState is BookmarkListViewModel.UiState.Loading
+
 
     // UI event handlers (pass filter update functions)
     val onClickAll = { viewModel.onClickAll() }
@@ -244,53 +253,63 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                 }
             }
         ) { padding ->
-            when (uiState) {
-                is BookmarkListViewModel.UiState.Success -> {
-                    LaunchedEffect(key1 = uiState.updateBookmarkState) {
-                        uiState.updateBookmarkState?.let { result ->
-                            val message = when (result) {
-                                is BookmarkListViewModel.UpdateBookmarkState.Success -> {
-                                    "success"
-                                }
+            PullToRefreshBox(
+                isRefreshing = isRefreshing,
+                onRefresh = { viewModel.onClickLoadBookmarks() },
+                state = pullToRefreshState,
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth()
+            ) {
+                Timber.d("Refreshing $isRefreshing")
+                when (uiState) {
+                    is BookmarkListViewModel.UiState.Success -> {
+                        LaunchedEffect(key1 = uiState.updateBookmarkState) {
+                            uiState.updateBookmarkState?.let { result ->
+                                val message = when (result) {
+                                    is BookmarkListViewModel.UpdateBookmarkState.Success -> {
+                                        "success"
+                                    }
 
-                                is BookmarkListViewModel.UpdateBookmarkState.Error -> {
-                                    result.message
+                                    is BookmarkListViewModel.UpdateBookmarkState.Error -> {
+                                        result.message
+                                    }
                                 }
+                                snackbarHostState.showSnackbar(
+                                    message = message,
+                                    duration = SnackbarDuration.Short
+                                )
                             }
-                            snackbarHostState.showSnackbar(
-                                message = message,
-                                duration = SnackbarDuration.Short
+                        }
+                        if (uiState.bookmarks.isNotEmpty()) {
+                            BookmarkListView(
+                                bookmarks = uiState.bookmarks,
+                                onClickBookmark = onClickBookmark,
+                                onClickDelete = onClickDelete,
+                                onClickArchive = onClickArchive,
+                                onClickFavorite = onClickFavorite,
+                                onClickMarkRead = onClickMarkRead,
+                                onClickShareBookmark = onClickShareBookmark
                             )
+                            // Consumes a shareIntent and creates the corresponding share dialog
+                            ShareBookmarkChooser(
+                                context = LocalContext.current,
+                                intent = viewModel.shareIntent.collectAsState().value,
+                                onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
+                            )
+                        } else {
+                            EmptyScreen()
                         }
                     }
-                    if (uiState.bookmarks.isNotEmpty()) {
-                        BookmarkListView(
-                            modifier = Modifier.padding(padding),
-                            bookmarks = uiState.bookmarks,
-                            onClickBookmark = onClickBookmark,
-                            onClickDelete = onClickDelete,
-                            onClickArchive = onClickArchive,
-                            onClickFavorite = onClickFavorite,
-                            onClickMarkRead = onClickMarkRead,
-                            onClickShareBookmark = onClickShareBookmark
-                        )
-                        // Consumes a shareIntent and creates the corresponding share dialog
-                        ShareBookmarkChooser(
-                            context = LocalContext.current,
-                            intent = viewModel.shareIntent.collectAsState().value,
-                            onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
-                        )
-                    } else {
-                        EmptyScreen(modifier = Modifier.padding(padding))
+
+                    is BookmarkListViewModel.UiState.Loading -> {
+                        Timber.d("Entering loading state")
+                        // LoadingScreen()
                     }
-                }
 
-                is BookmarkListViewModel.UiState.Loading -> {
-                    LoadingScreen(modifier = Modifier.padding(padding))
-                }
-
-                is BookmarkListViewModel.UiState.Error -> {
-                    ErrorScreen(modifier = Modifier.padding(padding))
+                    is BookmarkListViewModel.UiState.Error -> {
+                        ErrorScreen()
+                    }
                 }
             }
 
@@ -410,10 +429,10 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
     ) {
         Column(
             horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
+            //verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            CircularProgressIndicator()
+            //CircularProgressIndicator()
         }
     }
 }

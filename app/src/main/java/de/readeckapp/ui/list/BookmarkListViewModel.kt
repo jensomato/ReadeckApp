@@ -170,6 +170,7 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     private fun loadBookmarks(initialLoad: Boolean = false) {
+        _uiState.value = UiState.Loading
         viewModelScope.launch {
             try {
                 LoadBookmarksWorker.enqueue(context, isInitialLoad = initialLoad) // Enqueue for incremental sync
