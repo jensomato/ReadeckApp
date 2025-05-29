@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the ability to open original url in browser. Closes #74. Contributed by @sockenklaus
 - Added the ability to share links to bookmarks from list view and datail view. Closes #45. Contributed by @sockenklaus
 
 ### Changed
