@@ -12,6 +12,7 @@ import androidx.compose.material.icons.filled.Info
 import androidx.compose.material.icons.filled.List
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Sync
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -35,6 +36,7 @@ import de.readeckapp.ui.navigation.AccountSettingsRoute
 import de.readeckapp.ui.navigation.LogViewRoute
 import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
 import de.readeckapp.ui.navigation.SyncSettingsRoute
+import de.readeckapp.ui.navigation.UiSettingsRoute
 
 @Composable
 fun SettingsScreen(
@@ -48,6 +50,7 @@ fun SettingsScreen(
     val onClickOpenSourceLibraries: () -> Unit = { viewModel.onClickOpenSourceLibraries() }
     val onClickLogs: () -> Unit = { viewModel.onClickLogs() }
     val onClickSync: () -> Unit = { viewModel.onClickSync() }
+    val onClickUi: () -> Unit = { viewModel.onClickView() }
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
             when (event) {
@@ -63,6 +66,9 @@ fun SettingsScreen(
                 is SettingsViewModel.NavigationEvent.NavigateToSyncView -> {
                     navHostController.navigate(SyncSettingsRoute)
                 }
+                is SettingsViewModel.NavigationEvent.NavigateToUiSettings -> {
+                    navHostController.navigate(UiSettingsRoute)
+                }
                 is SettingsViewModel.NavigationEvent.NavigateBack -> {
                     navHostController.popBackStack()
                 }
@@ -76,7 +82,8 @@ fun SettingsScreen(
         onClickBack = onClickBack,
         onClickOpenSourceLibraries = onClickOpenSourceLibraries,
         onClickLogs = onClickLogs,
-        onClickSync = onClickSync
+        onClickSync = onClickSync,
+        onClickUi = onClickUi
     )
 }
 
@@ -88,7 +95,8 @@ fun SettingScreenView(
     onClickBack: () -> Unit,
     onClickOpenSourceLibraries: () -> Unit,
     onClickLogs: () -> Unit,
-    onClickSync: () -> Unit
+    onClickSync: () -> Unit,
+    onClickUi: () -> Unit
 ) {
     Scaffold(
         topBar = {
@@ -143,6 +151,13 @@ fun SettingScreenView(
                 onClick = onClickSync,
                 testTag = SettingsScreenTestTags.SETTINGS_ITEM_SYNC
             )
+            SettingItem(
+                icon = Icons.Filled.Visibility,
+                title = stringResource(R.string.settings_ui),
+                subtitle = stringResource(R.string.settings_ui_subtitle),
+                onClick = onClickUi,
+                testTag = SettingsScreenTestTags.SETTINGS_ITEM_UI
+            )
         }
     }
 }
@@ -190,7 +205,8 @@ fun SettingScreenViewPreview() {
         onClickBack = {},
         onClickOpenSourceLibraries = {},
         onClickLogs = {},
-        onClickSync = {}
+        onClickSync = {},
+        onClickUi = {}
     )
 }
 
@@ -216,4 +232,5 @@ object SettingsScreenTestTags {
     const val SETTINGS_ITEM_OPEN_SOURCE = "OpenSource"
     const val SETTINGS_ITEM_LOGS = "Logs"
     const val SETTINGS_ITEM_SYNC = "Sync"
+    const val SETTINGS_ITEM_UI = "Ui"
 }

@@ -49,12 +49,17 @@ class SettingsViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateToSyncView }
     }
 
+    fun onClickView() {
+        _navigationEvent.update { NavigationEvent.NavigateToUiSettings }
+    }
+
     sealed class NavigationEvent {
         data object NavigateToAccountSettings : NavigationEvent()
         data object NavigateToOpenSourceLibraries : NavigationEvent()
         data object NavigateBack : NavigationEvent()
         data object NavigateToLogView : NavigationEvent()
         data object NavigateToSyncView : NavigationEvent()
+        data object NavigateToUiSettings : NavigationEvent()
     }
 
 }

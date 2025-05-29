@@ -4,6 +4,7 @@ import android.icu.text.MessageFormat
 import android.view.View
 import android.webkit.WebView
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -67,9 +68,12 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
+import de.readeckapp.domain.model.Template
 import de.readeckapp.ui.components.ErrorPlaceholderImage
 import de.readeckapp.util.openUrlInCustomTab
 import de.readeckapp.ui.components.ShareBookmarkChooser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
@@ -237,7 +241,7 @@ fun BookmarkDetailContent(
             uiState = uiState,
             onClickOpenUrl = onClickOpenUrl
         )
-        if (uiState.bookmark.htmlContent != null) {
+        if (uiState.bookmark.articleContent != null) {
             BookmarkDetailArticle(modifier = Modifier, uiState = uiState)
         } else {
             EmptyBookmarkDetailArticle(
@@ -262,32 +266,52 @@ fun BookmarkDetailArticle(
     modifier: Modifier,
     uiState: BookmarkDetailViewModel.UiState.Success
 ) {
-    if (!LocalInspectionMode.current) {
-        AndroidView(
-            modifier = Modifier.padding(0.dp),
-            factory = { context ->
-                WebView(context).apply {
-                    settings.javaScriptEnabled = false
-                    settings.useWideViewPort = false
-                    settings.loadWithOverviewMode = false
-                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                    settings.defaultTextEncodingName = "utf-8"
-                    isVerticalScrollBarEnabled = false
-                    isHorizontalScrollBarEnabled = false
+    val isSystemInDarkMode = isSystemInDarkTheme()
+    val content = remember(isSystemInDarkMode, uiState.template) {
+        mutableStateOf<String?>(null)
+    }
+    LaunchedEffect(isSystemInDarkMode, uiState.template) {
+        content.value = getTemplate(uiState, isSystemInDarkMode)
+    }
+    if (content.value != null) {
+        if (!LocalInspectionMode.current) {
+            AndroidView(
+                modifier = Modifier.padding(0.dp),
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = false
+                        settings.useWideViewPort = false
+                        settings.loadWithOverviewMode = false
+                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                        settings.defaultTextEncodingName = "utf-8"
+                        isVerticalScrollBarEnabled = false
+                        isHorizontalScrollBarEnabled = false
+                    }
+
+                },
+                update = {
+                    it.loadDataWithBaseURL(
+                        null,
+                        content.value!!,
+                        "text/html",
+                        "utf-8",
+                        null
+                    )
                 }
-            },
-            update = {
-                it.loadDataWithBaseURL(
-                    null,
-                    uiState.bookmark.htmlContent!!,
-                    "text/html",
-                    "utf-8",
-                    null
-                )
-            }
-        )
+            )
+        }
+
+    } else {
+        CircularProgressIndicator()
     }
 }
+
+suspend fun getTemplate(uiState: BookmarkDetailViewModel.UiState.Success, isSystemInDarkMode: Boolean): String? {
+    return withContext(Dispatchers.IO) {
+        uiState.bookmark.getContent(uiState.template, isSystemInDarkMode)
+    }
+}
+
 
 @Composable
 fun BookmarkDetailHeader(
@@ -482,7 +506,8 @@ fun BookmarkDetailScreenPreview() {
         onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
-            updateBookmarkState = null
+            updateBookmarkState = null,
+            template = Template.SimpleTemplate("template")
         ),
         onClickOpenUrl = {}
     )
@@ -496,7 +521,8 @@ private fun BookmarkDetailContentPreview() {
             modifier = Modifier,
             uiState = BookmarkDetailViewModel.UiState.Success(
                 bookmark = sampleBookmark,
-                updateBookmarkState = null
+                updateBookmarkState = null,
+                template = Template.SimpleTemplate("template")
             ),
             onClickOpenUrl = {}
         )
@@ -518,7 +544,8 @@ private fun BookmarkDetailHeaderPreview() {
         modifier = Modifier,
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
-            updateBookmarkState = null
+            updateBookmarkState = null,
+            template = Template.SimpleTemplate("template")
         ),
         onClickOpenUrl = {}
     )
@@ -533,10 +560,9 @@ private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     siteName = "Example",
     authors = listOf("John Doe"),
     imgSrc = "https://via.placeholder.com/150",
-    encodedHtmlContent = "encodedHtmlContent",
-    htmlContent = "htmlContent",
     isFavorite = false,
     isArchived = false,
     isRead = false,
-    type = BookmarkDetailViewModel.Bookmark.Type.ARTICLE
+    type = BookmarkDetailViewModel.Bookmark.Type.ARTICLE,
+    articleContent = "articleContent"
 )

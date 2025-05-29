@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added the ability to select the theme in the settings. The theme selection is now also considered when displaying content in the bookmark details. Dynamic changing of the dark mode when using the system theme is also supported. Closes #77
 - Added the ability to open original url in browser. Closes #74. Contributed by @sockenklaus
 - Added the ability to share links to bookmarks from list view and datail view. Closes #45. Contributed by @sockenklaus
 
