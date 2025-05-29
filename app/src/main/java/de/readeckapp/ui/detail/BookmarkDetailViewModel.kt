@@ -1,6 +1,5 @@
 package de.readeckapp.ui.detail
 
-import android.content.Context
 import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
@@ -37,6 +36,9 @@ class BookmarkDetailViewModel @Inject constructor(
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
+
+    private val _openUrlEvent = MutableStateFlow<String>("")
+    val openUrlEvent = _openUrlEvent.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
@@ -182,12 +184,20 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
 
+    fun onClickOpenUrl(url: String){
+         _openUrlEvent.value = url
+    }
+
     fun onClickBack() {
         _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event
+    }
+
+    fun onOpenUrlEventConsumed() {
+        _openUrlEvent.value = ""
     }
 
     private fun formatLocalDateTimeWithDateFormat(localDateTime: LocalDateTime): String {
