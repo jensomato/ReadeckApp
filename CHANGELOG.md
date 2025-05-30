@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.5.0] - 2025-05-30
+
 ### Added
 
 - Added the ability to select the theme in the settings. The theme selection is now also considered when displaying content in the bookmark details. Dynamic changing of the dark mode when using the system theme is also supported. Closes #77
