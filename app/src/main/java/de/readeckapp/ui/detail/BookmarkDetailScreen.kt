@@ -3,17 +3,23 @@ package de.readeckapp.ui.detail
 import android.icu.text.MessageFormat
 import android.view.View
 import android.webkit.WebView
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
@@ -62,13 +68,18 @@ import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
+import de.readeckapp.domain.model.Template
 import de.readeckapp.ui.components.ErrorPlaceholderImage
+import de.readeckapp.util.openUrlInCustomTab
 import de.readeckapp.ui.components.ShareBookmarkChooser
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
     val viewModel: BookmarkDetailViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
+    val openUrlEvent = viewModel.openUrlEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val onClickToggleFavorite: (String, Boolean) -> Unit =
         { id, isFavorite -> viewModel.onToggleFavorite(id, isFavorite) }
@@ -76,6 +87,8 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
     val onMarkRead: (String, Boolean) -> Unit =
         { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
+
+    val onClickOpenUrl: (String) -> Unit = { viewModel.onClickOpenUrl(it) }
     val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
@@ -90,6 +103,12 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
             }
             viewModel.onNavigationEventConsumed() // Consume the event
         }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(key1 = openUrlEvent.value){
+        openUrlInCustomTab(context, openUrlEvent.value)
+        viewModel.onOpenUrlEventConsumed()
     }
 
     when (uiState) {
@@ -123,7 +142,8 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onMarkRead = onMarkRead,
                 onClickShareBookmark = onClickShareBookmark,
                 onClickDeleteBookmark = onClickDeleteBookmark,
-                uiState = uiState
+                uiState = uiState,
+                onClickOpenUrl = onClickOpenUrl
             )
             // Consumes a shareIntent and creates the corresponding share dialog
             ShareBookmarkChooser(
@@ -159,8 +179,9 @@ fun BookmarkDetailScreen(
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
+    onClickDeleteBookmark: (String) -> Unit,
+    onClickOpenUrl: (String) -> Unit,
     onClickShareBookmark: (String) -> Unit,
-    onClickDeleteBookmark: (String) -> Unit
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -197,7 +218,8 @@ fun BookmarkDetailScreen(
     ) { padding ->
         BookmarkDetailContent(
             modifier = Modifier.padding(padding),
-            uiState = uiState
+            uiState = uiState,
+            onClickOpenUrl = onClickOpenUrl
         )
     }
 }
@@ -205,7 +227,8 @@ fun BookmarkDetailScreen(
 @Composable
 fun BookmarkDetailContent(
     modifier: Modifier = Modifier,
-    uiState: BookmarkDetailViewModel.UiState.Success
+    uiState: BookmarkDetailViewModel.UiState.Success,
+    onClickOpenUrl: (String) -> Unit
 ) {
     Column(
         modifier = modifier
@@ -213,8 +236,12 @@ fun BookmarkDetailContent(
             .verticalScroll(rememberScrollState()),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        BookmarkDetailHeader(modifier = Modifier, uiState = uiState)
-        if (uiState.bookmark.htmlContent != null) {
+        BookmarkDetailHeader(
+            modifier = Modifier,
+            uiState = uiState,
+            onClickOpenUrl = onClickOpenUrl
+        )
+        if (uiState.bookmark.articleContent != null) {
             BookmarkDetailArticle(modifier = Modifier, uiState = uiState)
         } else {
             EmptyBookmarkDetailArticle(
@@ -239,38 +266,58 @@ fun BookmarkDetailArticle(
     modifier: Modifier,
     uiState: BookmarkDetailViewModel.UiState.Success
 ) {
-    if (!LocalInspectionMode.current) {
-        AndroidView(
-            modifier = Modifier.padding(0.dp),
-            factory = { context ->
-                WebView(context).apply {
-                    settings.javaScriptEnabled = false
-                    settings.useWideViewPort = false
-                    settings.loadWithOverviewMode = false
-                    setLayerType(View.LAYER_TYPE_HARDWARE, null)
-                    settings.defaultTextEncodingName = "utf-8"
-                    isVerticalScrollBarEnabled = false
-                    isHorizontalScrollBarEnabled = false
-                }
+    val isSystemInDarkMode = isSystemInDarkTheme()
+    val content = remember(isSystemInDarkMode, uiState.template) {
+        mutableStateOf<String?>(null)
+    }
+    LaunchedEffect(isSystemInDarkMode, uiState.template) {
+        content.value = getTemplate(uiState, isSystemInDarkMode)
+    }
+    if (content.value != null) {
+        if (!LocalInspectionMode.current) {
+            AndroidView(
+                modifier = Modifier.padding(0.dp),
+                factory = { context ->
+                    WebView(context).apply {
+                        settings.javaScriptEnabled = false
+                        settings.useWideViewPort = false
+                        settings.loadWithOverviewMode = false
+                        setLayerType(View.LAYER_TYPE_HARDWARE, null)
+                        settings.defaultTextEncodingName = "utf-8"
+                        isVerticalScrollBarEnabled = false
+                        isHorizontalScrollBarEnabled = false
+                    }
 
-            },
-            update = {
-                it.loadDataWithBaseURL(
-                    null,
-                    uiState.bookmark.htmlContent!!,
-                    "text/html",
-                    "utf-8",
-                    null
-                )
-            }
-        )
+                },
+                update = {
+                    it.loadDataWithBaseURL(
+                        null,
+                        content.value!!,
+                        "text/html",
+                        "utf-8",
+                        null
+                    )
+                }
+            )
+        }
+
+    } else {
+        CircularProgressIndicator()
     }
 }
+
+suspend fun getTemplate(uiState: BookmarkDetailViewModel.UiState.Success, isSystemInDarkMode: Boolean): String? {
+    return withContext(Dispatchers.IO) {
+        uiState.bookmark.getContent(uiState.template, isSystemInDarkMode)
+    }
+}
+
 
 @Composable
 fun BookmarkDetailHeader(
     modifier: Modifier,
-    uiState: BookmarkDetailViewModel.UiState.Success
+    uiState: BookmarkDetailViewModel.UiState.Success,
+    onClickOpenUrl: (String) -> Unit
 ) {
     val msg = stringResource(R.string.authors)
     val author = MessageFormat.format(
@@ -318,13 +365,27 @@ fun BookmarkDetailHeader(
             style = MaterialTheme.typography.titleMedium,
             textAlign = TextAlign.Center,
         )
-        Text(
-            modifier = Modifier
-                .fillMaxWidth(),
-            text = uiState.bookmark.siteName,
-            style = MaterialTheme.typography.titleMedium,
-            textAlign = TextAlign.Center,
-        )
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Center,
+            modifier = Modifier.clickable {
+                onClickOpenUrl(uiState.bookmark.url)
+            }
+        ) {
+            Text(
+                text = uiState.bookmark.siteName,
+                style = MaterialTheme.typography.titleMedium,
+            )
+            Spacer(modifier = Modifier.width(8.dp))
+            Icon(
+                Icons.AutoMirrored.Filled.OpenInNew,
+                contentDescription = stringResource(R.string.action_open_in_browser),
+                modifier = Modifier
+                    .height(16.dp)
+                    .width(16.dp)
+            )
+        }
+
         Spacer(modifier = Modifier.height(16.dp))
         // Header Section End
     }
@@ -445,8 +506,10 @@ fun BookmarkDetailScreenPreview() {
         onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
-            updateBookmarkState = null
-        )
+            updateBookmarkState = null,
+            template = Template.SimpleTemplate("template")
+        ),
+        onClickOpenUrl = {}
     )
 }
 
@@ -458,8 +521,10 @@ private fun BookmarkDetailContentPreview() {
             modifier = Modifier,
             uiState = BookmarkDetailViewModel.UiState.Success(
                 bookmark = sampleBookmark,
-                updateBookmarkState = null
-            )
+                updateBookmarkState = null,
+                template = Template.SimpleTemplate("template")
+            ),
+            onClickOpenUrl = {}
         )
     }
 }
@@ -479,8 +544,10 @@ private fun BookmarkDetailHeaderPreview() {
         modifier = Modifier,
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
-            updateBookmarkState = null
-        )
+            updateBookmarkState = null,
+            template = Template.SimpleTemplate("template")
+        ),
+        onClickOpenUrl = {}
     )
 }
 
@@ -488,15 +555,14 @@ private fun BookmarkDetailHeaderPreview() {
 private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     bookmarkId = "1",
     createdDate = "2024-01-15T10:00:00",
-    url = "https://sample.url",
+    url = "https://example.com",
     title = "This is a very long title of a small sample bookmark",
     siteName = "Example",
     authors = listOf("John Doe"),
     imgSrc = "https://via.placeholder.com/150",
-    encodedHtmlContent = "encodedHtmlContent",
-    htmlContent = "htmlContent",
     isFavorite = false,
     isArchived = false,
     isRead = false,
-    type = BookmarkDetailViewModel.Bookmark.Type.ARTICLE
+    type = BookmarkDetailViewModel.Bookmark.Type.ARTICLE,
+    articleContent = "articleContent"
 )

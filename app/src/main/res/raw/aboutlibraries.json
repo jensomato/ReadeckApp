@@ -242,6 +242,31 @@
             ]
         },
         {
+            "uniqueId": "androidx.browser:browser",
+            "funding": [
+                
+            ],
+            "developers": [
+                {
+                    "name": "The Android Open Source Project"
+                }
+            ],
+            "artifactVersion": "1.8.0",
+            "description": "Provides support for embedding Custom Tabs in an app.",
+            "scm": {
+                "connection": "scm:git:https://android.googlesource.com/platform/frameworks/support",
+                "url": "https://cs.android.com/androidx/platform/frameworks/support"
+            },
+            "name": "Browser",
+            "website": "https://developer.android.com/jetpack/androidx/releases/browser#1.8.0",
+            "licenses": [
+                "Apache-2.0"
+            ],
+            "organization": {
+                "name": "The Android Open Source Project"
+            }
+        },
+        {
             "uniqueId": "androidx.cardview:cardview",
             "funding": [
                 

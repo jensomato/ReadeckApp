@@ -60,6 +60,15 @@ other{}
     <string name="log_view_no_log_file_found">No log file found</string>
     <string name="settings_sync">Synchronization</string>
     <string name="settings_sync_subtitle">Synchronization Settings</string>
+    <string name="settings_ui">User Interface</string>
+    <string name="settings_ui_subtitle">Appearance</string>
+    <string name="ui_settings_topbar_title">User Interface Settings</string>
+    <string name="ui_settings_theme_title">Theme</string>
+    <string name="theme_system">System default</string>
+    <string name="theme_light">Light</string>
+    <string name="theme_dark">Dark</string>
+    <string name="ui_settings_theme_heading">Theming</string>
+    <string name="ui_settings_theme_dialog_support_text">Which theme should be used?</string>
 
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorite</string>
@@ -67,6 +76,7 @@ other{}
     <string name="action_mark_read">Read</string>
     <string name="action_share">Share link</string>
     <string name="action_delete">Delete</string>
+    <string name="action_open_in_browser">Open in browser</string>
     <string name="error_no_article_content">Error, article content not available</string>
     <string name="update_successful">Update successful</string>
     <string name="notification_channel_sync_name">Synchronization Errors</string>

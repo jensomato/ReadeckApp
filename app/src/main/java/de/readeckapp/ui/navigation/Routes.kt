@@ -22,3 +22,6 @@ object LogViewRoute
 
 @Serializable
 object SyncSettingsRoute
+
+@Serializable
+object UiSettingsRoute

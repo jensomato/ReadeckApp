@@ -68,6 +68,7 @@ other{}
     <string name="action_mark_read">Gelesen</string>
     <string name="action_share">Link teilen</string>
     <string name="action_delete">Löschen</string>
+    <string name="action_open_in_browser">In Browser öffnen</string>
     <string name="error_no_article_content">Fehler, kein Artikelinhalt verfügbar</string>
     <string name="update_successful">Aktualisierung erfolgreich</string>
     <string name="notification_channel_sync_name">Synchronisierungsfehler</string>

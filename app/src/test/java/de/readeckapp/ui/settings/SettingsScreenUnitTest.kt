@@ -47,7 +47,8 @@ class SettingsScreenUnitTest {
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
                     onClickLogs = {},
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -65,7 +66,8 @@ class SettingsScreenUnitTest {
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
                     onClickLogs = {},
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -86,7 +88,8 @@ class SettingsScreenUnitTest {
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
                     onClickLogs = {},
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -113,7 +116,8 @@ class SettingsScreenUnitTest {
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
                     onClickLogs = {},
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -135,7 +139,8 @@ class SettingsScreenUnitTest {
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
                     onClickLogs = {},
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -154,7 +159,8 @@ class SettingsScreenUnitTest {
                     onClickBack = { backClicked = true },
                     onClickOpenSourceLibraries = {},
                     onClickLogs = {},
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -175,7 +181,8 @@ class SettingsScreenUnitTest {
                     onClickBack = {},
                     onClickOpenSourceLibraries = {},
                     onClickLogs = { logsClicked = true },
-                    onClickSync = {}
+                    onClickSync = {},
+                    onClickUi = {}
                 )
             }
         }
@@ -185,5 +192,29 @@ class SettingsScreenUnitTest {
             useUnmergedTree = true
         ).performClick()
         assertTrue(logsClicked)
+    }
+
+    @Test
+    fun settingsScreen_clickUi_callsOnClickUi() {
+        var uiClicked = false
+        composeTestRule.setContent {
+            ReadeckAppTheme {
+                SettingScreenView(
+                    settingsUiState = SettingsUiState(username = "test"),
+                    onClickAccount = {},
+                    onClickBack = {},
+                    onClickOpenSourceLibraries = {},
+                    onClickLogs = {},
+                    onClickSync = {},
+                    onClickUi = { uiClicked = true}
+                )
+            }
+        }
+
+        composeTestRule.onNodeWithTag(
+            "${SettingsScreenTestTags.SETTINGS_ITEM}.${SettingsScreenTestTags.SETTINGS_ITEM_UI}",
+            useUnmergedTree = true
+        ).performClick()
+        assertTrue(uiClicked)
     }
 }

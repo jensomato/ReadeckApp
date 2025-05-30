@@ -39,6 +39,9 @@ class BookmarkListViewModel @Inject constructor(
         MutableStateFlow<NavigationEvent?>(null) // Using StateFlow for navigation events
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
 
+    private val _openUrlEvent = MutableStateFlow<String>("")
+    val openUrlEvent = _openUrlEvent.asStateFlow()
+
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
@@ -174,8 +177,16 @@ class BookmarkListViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateToBookmarkDetail(bookmarkId) }
     }
 
+    fun onClickOpenInBrowser(url: String){
+        _openUrlEvent.value = url
+    }
+
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event
+    }
+
+    fun onOpenUrlEventConsumed() {
+        _openUrlEvent.value = ""
     }
 
     private fun loadBookmarks(initialLoad: Boolean = false) {

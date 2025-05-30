@@ -81,6 +81,7 @@ import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.ui.components.ShareBookmarkChooser
 import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.SettingsRoute
+import de.readeckapp.util.openUrlInCustomTab
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -89,6 +90,7 @@ import timber.log.Timber
 fun BookmarkListScreen(navHostController: NavHostController) {
     val viewModel: BookmarkListViewModel = hiltViewModel()
     val navigationEvent = viewModel.navigationEvent.collectAsState()
+    val openUrlEvent = viewModel.openUrlEvent.collectAsState()
     val uiState = viewModel.uiState.collectAsState().value
     val createBookmarkUiState = viewModel.createBookmarkUiState.collectAsState().value
 
@@ -116,6 +118,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val onClickMarkRead: (String, Boolean) -> Unit = { bookmarkId, isRead -> viewModel.onToggleMarkReadBookmark(bookmarkId, isRead) }
     val onClickFavorite: (String, Boolean) -> Unit = { bookmarkId, isFavorite -> viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite) }
     val onClickArchive: (String, Boolean) -> Unit = { bookmarkId, isArchived -> viewModel.onToggleArchiveBookmark(bookmarkId, isArchived) }
+    val onClickOpenInBrowser: (String) -> Unit = { url -> viewModel.onClickOpenInBrowser(url) }
     val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
 
     LaunchedEffect(key1 = navigationEvent.value) {
@@ -132,6 +135,12 @@ fun BookmarkListScreen(navHostController: NavHostController) {
             }
             viewModel.onNavigationEventConsumed() // Consume the event
         }
+    }
+
+    val context = LocalContext.current
+    LaunchedEffect(key1 = openUrlEvent.value) {
+        openUrlInCustomTab(context, openUrlEvent.value)
+        viewModel.onOpenUrlEventConsumed()
     }
 
     ModalNavigationDrawer(
@@ -271,6 +280,42 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                         "success"
                                     }
 
+                                is BookmarkListViewModel.UpdateBookmarkState.Error -> {
+                                    result.message
+                                }
+                            }
+                            snackbarHostState.showSnackbar(
+                                message = message,
+                                duration = SnackbarDuration.Short
+                            )
+                        }
+                    }
+                    if (uiState.bookmarks.isNotEmpty()) {
+                        BookmarkListView(
+                            modifier = Modifier.padding(padding),
+                            bookmarks = uiState.bookmarks,
+                            onClickBookmark = onClickBookmark,
+                            onClickDelete = onClickDelete,
+                            onClickArchive = onClickArchive,
+                            onClickFavorite = onClickFavorite,
+                            onClickMarkRead = onClickMarkRead,
+                            onClickOpenInBrowser = onClickOpenInBrowser,
+                            onClickShareBookmark = onClickShareBookmark
+                        )
+                        // Consumes a shareIntent and creates the corresponding share dialog
+                        ShareBookmarkChooser(
+                            context = LocalContext.current,
+                            intent = viewModel.shareIntent.collectAsState().value,
+                            onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
+                        )
+                    } else {
+                        EmptyScreen(modifier = Modifier.padding(padding))
+                    }
+                }
+
+                is BookmarkListViewModel.UiState.Loading -> {
+                    LoadingScreen(modifier = Modifier.padding(padding))
+                }
                                     is BookmarkListViewModel.UpdateBookmarkState.Error -> {
                                         result.message
                                     }
@@ -473,6 +518,7 @@ fun BookmarkListView(
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
+    onClickOpenInBrowser: (String) -> Unit,
     onClickShareBookmark: (String) -> Unit
 ) {
     LazyColumn(modifier = modifier) {
@@ -484,6 +530,7 @@ fun BookmarkListView(
                 onClickArchive = onClickArchive,
                 onClickFavorite = onClickFavorite,
                 onClickMarkRead = onClickMarkRead,
+                onClickOpenUrl = onClickOpenInBrowser,
                 onClickShareBookmark = onClickShareBookmark
             )
         }
@@ -513,7 +560,7 @@ fun EmptyScreenPreview() {
 fun BookmarkListViewPreview() {
     val sampleBookmark = BookmarkListItem(
         id = "1",
-        url = "https://sample.url",
+        url = "https://example.com",
         title = "Sample Bookmark",
         siteName = "Example",
         type = Bookmark.Type.Article,
@@ -543,6 +590,7 @@ fun BookmarkListViewPreview() {
         onClickArchive = { _, _ -> },
         onClickFavorite = { _, _ -> },
         onClickMarkRead = { _, _ -> },
+        onClickOpenInBrowser = {},
         onClickShareBookmark = {_ -> }
     )
 }
