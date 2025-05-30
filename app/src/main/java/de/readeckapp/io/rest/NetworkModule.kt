@@ -21,6 +21,7 @@ import retrofit2.Retrofit
 import retrofit2.converter.kotlinx.serialization.asConverterFactory
 import retrofit2.converter.scalars.ScalarsConverterFactory
 import retrofit2.create
+import java.util.concurrent.TimeUnit
 import javax.inject.Singleton
 
 @Module
@@ -34,6 +35,10 @@ object NetworkModule {
         baseUrlInterceptor: UrlInterceptor
     ): OkHttpClient {
         val builder = OkHttpClient.Builder()
+            .connectTimeout(2, TimeUnit.SECONDS)
+            .readTimeout(2, TimeUnit.SECONDS)
+            .writeTimeout(2, TimeUnit.SECONDS)
+            .callTimeout(4, TimeUnit.SECONDS)
             .addInterceptor(authInterceptor)
             .addInterceptor(baseUrlInterceptor)
 

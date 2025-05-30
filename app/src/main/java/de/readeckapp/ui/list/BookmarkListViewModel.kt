@@ -17,9 +17,11 @@ import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
@@ -40,11 +42,18 @@ class BookmarkListViewModel @Inject constructor(
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Success(bookmarks = emptyList(), updateBookmarkState = null))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
+
+    val isLoadingBookmarks: StateFlow<Boolean> = LoadBookmarksWorker.isRunning
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     // Add state for the CreateBookmarkDialog
     private val _createBookmarkUiState =
@@ -170,7 +179,6 @@ class BookmarkListViewModel @Inject constructor(
     }
 
     private fun loadBookmarks(initialLoad: Boolean = false) {
-        _uiState.value = UiState.Loading
         viewModelScope.launch {
             try {
                 LoadBookmarksWorker.enqueue(context, isInitialLoad = initialLoad) // Enqueue for incremental sync
@@ -196,6 +204,10 @@ class BookmarkListViewModel @Inject constructor(
     
     fun onClickLoadBookmarks() {
         loadBookmarks(true)
+    }
+
+    fun onPullToRefresh() {
+        loadBookmarks(false)
     }
 
     fun onDeleteBookmark(bookmarkId: String) {
@@ -320,7 +332,6 @@ class BookmarkListViewModel @Inject constructor(
             val updateBookmarkState: UpdateBookmarkState?
         ) : UiState()
 
-        data object Loading : UiState()
         data object Error : UiState()
     }
 

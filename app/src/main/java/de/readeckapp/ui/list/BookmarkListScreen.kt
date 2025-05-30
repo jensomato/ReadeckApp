@@ -13,21 +13,30 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
+import androidx.compose.material.icons.filled.CheckBox
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Grade
+import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Bookmarks
+import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Favorite
+import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Movie
-import androidx.compose.material.icons.outlined.OndemandVideo
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -50,9 +59,10 @@ import androidx.compose.material3.pulltorefresh.PullToRefreshBox
 import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -90,8 +100,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     val pullToRefreshState = rememberPullToRefreshState()
-    val isRefreshing = uiState is BookmarkListViewModel.UiState.Loading
-
+    val isLoading by viewModel.isLoadingBookmarks.collectAsState()
 
     // UI event handlers (pass filter update functions)
     val onClickAll = { viewModel.onClickAll() }
@@ -233,35 +242,26 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                 contentDescription = stringResource(id = R.string.menu)
                             )
                         }
-                    },
-                    actions = {
-                        IconButton(onClick = { viewModel.openCreateBookmarkDialog() }) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = stringResource(id = R.string.add_bookmark)
-                            )
-                        }
                     }
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { viewModel.onClickLoadBookmarks() }) {
+                FloatingActionButton(onClick = { viewModel.openCreateBookmarkDialog() }) {
                     Icon(
-                        Icons.Filled.Refresh,
-                        contentDescription = stringResource(id = R.string.refresh_bookmarks)
+                        Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.add_bookmark)
                     )
                 }
             }
         ) { padding ->
             PullToRefreshBox(
-                isRefreshing = isRefreshing,
-                onRefresh = { viewModel.onClickLoadBookmarks() },
+                isRefreshing = isLoading,
+                onRefresh = { viewModel.onPullToRefresh() },
                 state = pullToRefreshState,
                 modifier = Modifier
                     .padding(padding)
                     .fillMaxWidth()
             ) {
-                Timber.d("Refreshing $isRefreshing")
                 when (uiState) {
                     is BookmarkListViewModel.UiState.Success -> {
                         LaunchedEffect(key1 = uiState.updateBookmarkState) {
@@ -300,11 +300,6 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         } else {
                             EmptyScreen()
                         }
-                    }
-
-                    is BookmarkListViewModel.UiState.Loading -> {
-                        Timber.d("Entering loading state")
-                        // LoadingScreen()
                     }
 
                     is BookmarkListViewModel.UiState.Error -> {
