@@ -35,10 +35,6 @@ object NetworkModule {
         baseUrlInterceptor: UrlInterceptor
     ): OkHttpClient {
         val builder = OkHttpClient.Builder()
-            .connectTimeout(2, TimeUnit.SECONDS)
-            .readTimeout(2, TimeUnit.SECONDS)
-            .writeTimeout(2, TimeUnit.SECONDS)
-            .callTimeout(4, TimeUnit.SECONDS)
             .addInterceptor(authInterceptor)
             .addInterceptor(baseUrlInterceptor)
 
