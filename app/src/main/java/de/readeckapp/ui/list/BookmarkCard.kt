@@ -1,5 +1,6 @@
 package de.readeckapp.ui.list
 
+import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -11,6 +12,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.OpenInNew
 import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
@@ -19,6 +21,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
+import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
@@ -49,12 +52,13 @@ import coil3.ColorImage
 import coil3.compose.AsyncImage
 import coil3.compose.AsyncImagePreviewHandler
 import coil3.compose.LocalAsyncImagePreviewHandler
+import coil3.compose.SubcomposeAsyncImage
 import coil3.request.ImageRequest
 import coil3.request.crossfade
 import de.readeckapp.R
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkListItem
-import timber.log.Timber
+import de.readeckapp.ui.components.ErrorPlaceholderImage
 
 @Composable
 fun BookmarkCard(
@@ -63,9 +67,12 @@ fun BookmarkCard(
     onClickDelete: (String) -> Unit,
     onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
+    onClickShareBookmark: (String) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
+    onClickOpenUrl: (String) -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
+
     Card(
         modifier = Modifier
             .fillMaxWidth()
@@ -75,17 +82,20 @@ fun BookmarkCard(
     ) {
         Column {
             // Image
-            AsyncImage(
+            SubcomposeAsyncImage(
                 model = ImageRequest.Builder(LocalContext.current).data(bookmark.imageSrc)
                     .crossfade(true).build(),
-                contentDescription = "Bookmark Image",
-                contentScale = ContentScale.Crop,
+                contentDescription = stringResource(R.string.common_bookmark_image_content_description),
+                contentScale = ContentScale.FillWidth,
+                error = {
+                    ErrorPlaceholderImage(
+                        modifier = Modifier.fillMaxWidth().height(200.dp),
+                        imageContentDescription = stringResource(R.string.common_bookmark_image_content_description)
+                    )
+                },
                 modifier = Modifier
                     .fillMaxWidth()
-                    .height(150.dp),
-                onLoading = { Timber.d("loading ${bookmark.imageSrc}") },
-                onError = { Timber.d("error ${bookmark.imageSrc}") },
-                onSuccess = { Timber.d("success ${bookmark.imageSrc}") },
+                    .height(150.dp)
             )
 
             // Title, Date, and Labels
@@ -98,7 +108,10 @@ fun BookmarkCard(
 
                 )
                 HorizontalDivider(modifier = Modifier.padding(top = 8.dp, bottom = 8.dp))
-                Row(verticalAlignment = Alignment.CenterVertically) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    modifier = Modifier.clickable { onClickOpenUrl(bookmark.url) }
+                ) {
                     AsyncImage(
                         model = ImageRequest.Builder(LocalContext.current).data(bookmark.iconSrc)
                             .crossfade(true).build(),
@@ -110,6 +123,14 @@ fun BookmarkCard(
                     )
                     Spacer(Modifier.width(8.dp))
                     Text(text = bookmark.siteName, style = MaterialTheme.typography.titleSmall)
+                    Spacer(Modifier.width(8.dp))
+                    Icon(
+                        Icons.AutoMirrored.Filled.OpenInNew,
+                        contentDescription = stringResource(R.string.action_open_in_browser),
+                        modifier = Modifier
+                            .width(16.dp)
+                            .height(16.dp)
+                    )
 
                 }
 
@@ -197,6 +218,19 @@ fun BookmarkCard(
                                 }
                             )
                             DropdownMenuItem(
+                                text = { Text(stringResource(R.string.action_share)) },
+                                onClick = {
+                                    onClickShareBookmark(bookmark.url)
+                                    expanded = false
+                                },
+                                leadingIcon = {
+                                    Icon(
+                                        imageVector = Icons.Outlined.Share,
+                                        contentDescription = stringResource(R.string.action_share)
+                                    )
+                                }
+                            )
+                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_delete)) },
                                 onClick = {
                                     onClickDelete(bookmark.id)
@@ -226,6 +260,7 @@ fun BookmarkCardPreview() {
     }
     val sampleBookmark = BookmarkListItem(
         id = "1",
+        url = "https://example.com",
         title = "Sample Bookmark",
         siteName = "Example",
         type = Bookmark.Type.Article,
@@ -250,7 +285,9 @@ fun BookmarkCardPreview() {
             onClickDelete = {},
             onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
-            onClickArchive = { _, _ -> }
+            onClickArchive = { _, _ -> },
+            onClickOpenUrl = {},
+            onClickShareBookmark = {_ -> }
         )
     }
 }

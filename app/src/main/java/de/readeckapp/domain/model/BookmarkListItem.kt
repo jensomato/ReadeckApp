@@ -2,6 +2,7 @@ package de.readeckapp.domain.model
 
 data class BookmarkListItem(
     val id: String,
+    val url: String,
     val title: String,
     val siteName: String,
     val isMarked: Boolean,

@@ -3,8 +3,10 @@ package de.readeckapp.ui.detail
 import androidx.lifecycle.SavedStateHandle
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.Theme
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
+import de.readeckapp.io.prefs.SettingsDataStore
 import io.mockk.coEvery
 import io.mockk.coVerify
 import io.mockk.every
@@ -38,6 +40,7 @@ class BookmarkDetailViewModelTest {
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var viewModel: BookmarkDetailViewModel
     private lateinit var updateBookmarkUseCase: UpdateBookmarkUseCase
+    private lateinit var settingsDataStore: SettingsDataStore
 
     @Before
     fun setup() {
@@ -46,10 +49,12 @@ class BookmarkDetailViewModelTest {
         assetLoader = mockk()
         savedStateHandle = mockk()
         updateBookmarkUseCase = mockk()
+        settingsDataStore = mockk()
         every { bookmarkRepository.observeBookmark(any()) } returns MutableStateFlow(sampleBookmark)
-        every { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        every { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
         every { savedStateHandle.get<String>("bookmarkId") } returns "123"
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        every { settingsDataStore.themeFlow } returns MutableStateFlow(Theme.LIGHT.name)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
     }
 
     @After
@@ -100,10 +105,10 @@ class BookmarkDetailViewModelTest {
         )
 
         coEvery { bookmarkRepository.observeBookmark("123") } returns MutableStateFlow(bookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         val uiStates = viewModel.uiState.take(2).toList()
         val loading = uiStates[0]
         val success = uiStates[1]
@@ -156,10 +161,10 @@ class BookmarkDetailViewModelTest {
             thumbnail = Bookmark.ImageResource("", 0, 0)
         )
         coEvery { bookmarkRepository.observeBookmark("123") } returns MutableStateFlow(bookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns null
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns null
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         val uiStates = viewModel.uiState.take(2).toList()
         val loading = uiStates[0]
         val error = uiStates[1]
@@ -206,10 +211,10 @@ class BookmarkDetailViewModelTest {
             thumbnail = Bookmark.ImageResource("", 0, 0)
         ))
         coEvery { bookmarkRepository.observeBookmark("123") } returns bookmarkFlow
-        coEvery { assetLoader.loadAsset("html_template.html") } returns "template"
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns "template"
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
 
         // Assert
         assertEquals(BookmarkDetailViewModel.UiState.Loading, viewModel.uiState.value)
@@ -217,7 +222,7 @@ class BookmarkDetailViewModelTest {
 
     @Test
     fun `onNavigationEventConsumed should reset navigation event`() = runTest {
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onClickBack()
         viewModel.onNavigationEventConsumed()
         assertNull(viewModel.navigationEvent.first())
@@ -225,7 +230,7 @@ class BookmarkDetailViewModelTest {
 
     @Test
     fun `onClickBack should set NavigateBack navigation event`() = runTest {
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onClickBack()
         assertEquals(BookmarkDetailViewModel.NavigationEvent.NavigateBack, viewModel.navigationEvent.first())
     }
@@ -237,10 +242,10 @@ class BookmarkDetailViewModelTest {
         val isFavorite = true
         coEvery { updateBookmarkUseCase.updateIsFavorite(bookmarkId, isFavorite) } returns UpdateBookmarkUseCase.Result.Success
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleFavorite(bookmarkId, isFavorite)
         advanceUntilIdle()
 
@@ -261,10 +266,10 @@ class BookmarkDetailViewModelTest {
         val errorMessage = "Generic Error"
         coEvery { updateBookmarkUseCase.updateIsFavorite(bookmarkId, isFavorite) } returns UpdateBookmarkUseCase.Result.GenericError(errorMessage)
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleFavorite(bookmarkId, isFavorite)
         advanceUntilIdle()
 
@@ -286,10 +291,10 @@ class BookmarkDetailViewModelTest {
         val errorMessage = "Network Error"
         coEvery { updateBookmarkUseCase.updateIsFavorite(bookmarkId, isFavorite) } returns UpdateBookmarkUseCase.Result.NetworkError(errorMessage)
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleFavorite(bookmarkId, isFavorite)
         advanceUntilIdle()
 
@@ -310,10 +315,10 @@ class BookmarkDetailViewModelTest {
         val isArchived = true
         coEvery { updateBookmarkUseCase.updateIsArchived(bookmarkId, isArchived) } returns UpdateBookmarkUseCase.Result.Success
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleArchive(bookmarkId, isArchived)
         advanceUntilIdle()
 
@@ -334,10 +339,10 @@ class BookmarkDetailViewModelTest {
         val errorMessage = "Generic Error"
         coEvery { updateBookmarkUseCase.updateIsArchived(bookmarkId, isArchived) } returns UpdateBookmarkUseCase.Result.GenericError(errorMessage)
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleArchive(bookmarkId, isArchived)
         advanceUntilIdle()
 
@@ -359,10 +364,10 @@ class BookmarkDetailViewModelTest {
         val errorMessage = "Network Error"
         coEvery { updateBookmarkUseCase.updateIsArchived(bookmarkId, isArchived) } returns UpdateBookmarkUseCase.Result.NetworkError(errorMessage)
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleArchive(bookmarkId, isArchived)
         advanceUntilIdle()
 
@@ -382,10 +387,10 @@ class BookmarkDetailViewModelTest {
         val isRead = true
         coEvery { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) } returns UpdateBookmarkUseCase.Result.Success
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleMarkRead(bookmarkId, isRead)
         advanceUntilIdle()
 
@@ -406,10 +411,10 @@ class BookmarkDetailViewModelTest {
         val errorMessage = "Generic Error"
         coEvery { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) } returns UpdateBookmarkUseCase.Result.GenericError(errorMessage)
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleMarkRead(bookmarkId, isRead)
         advanceUntilIdle()
 
@@ -431,10 +436,10 @@ class BookmarkDetailViewModelTest {
         val errorMessage = "Network Error"
         coEvery { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) } returns UpdateBookmarkUseCase.Result.NetworkError(errorMessage)
         every { bookmarkRepository.observeBookmark(bookmarkId) } returns MutableStateFlow(sampleBookmark)
-        coEvery { assetLoader.loadAsset("html_template.html") } returns htmlTemplate
+        coEvery { assetLoader.loadAsset("html_template_light.html") } returns htmlTemplate
 
         // Act
-        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, savedStateHandle)
+        viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, savedStateHandle)
         viewModel.onToggleMarkRead(bookmarkId, isRead)
         advanceUntilIdle()
 

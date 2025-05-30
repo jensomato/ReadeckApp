@@ -25,8 +25,8 @@ android {
         applicationId = "de.readeckapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 400
-        versionName = "0.4.0"
+        versionCode = 500
+        versionName = "0.5.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
@@ -135,6 +135,7 @@ dependencies {
     implementation(libs.androidx.material3)
     implementation(libs.androidx.junit)
     implementation(libs.androidx.ui.test.junit4.android)
+    implementation(libs.androidx.browser)
     // hilt
     ksp(libs.dagger.hilt.android.compiler)
     ksp(libs.androidx.hilt.compiler)

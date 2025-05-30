@@ -7,13 +7,19 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.domain.model.AutoSyncTimeframe
+import de.readeckapp.domain.model.Theme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.datetime.Instant
 import timber.log.Timber
 import javax.inject.Inject
 import javax.inject.Singleton
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.SharingStarted
 
 @Singleton
 class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val context: Context) :
@@ -29,6 +35,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_INITIAL_SYNC_PERFORMED = "initial_sync_performed"
     private val KEY_AUTOSYNC_ENABLED = booleanPreferencesKey("autosync_enabled")
     private val KEY_AUTOSYNC_TIMEFRAME = stringPreferencesKey("autosync_timeframe")
+    private val KEY_THEME = stringPreferencesKey("theme")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -103,10 +110,23 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         }
     }
 
+    override suspend fun getTheme(): Theme {
+        return encryptedSharedPreferences.getString(KEY_THEME.name, Theme.SYSTEM.name)?.let {
+            Theme.valueOf(it)
+        } ?: Theme.SYSTEM
+    }
+
+    override suspend fun saveTheme(theme: Theme) {
+        encryptedSharedPreferences.edit {
+            putString(KEY_THEME.name, theme.name)
+        }
+    }
+
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)
     override val usernameFlow = getStringFlow(KEY_USERNAME.name, null)
     override val urlFlow = getStringFlow(KEY_URL.name, null)
     override val passwordFlow = getStringFlow(KEY_PASSWORD.name, null)
+    override val themeFlow = getStringFlow(KEY_THEME.name, Theme.SYSTEM.name)
     override suspend fun clearCredentials() {
         Timber.d("clearCredentials")
         encryptedSharedPreferences.edit(commit = true) {

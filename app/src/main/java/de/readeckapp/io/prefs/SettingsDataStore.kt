@@ -1,6 +1,8 @@
 package de.readeckapp.io.prefs
 
 import de.readeckapp.domain.model.AutoSyncTimeframe
+import de.readeckapp.domain.model.Theme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
 
@@ -9,6 +11,7 @@ interface SettingsDataStore {
     val usernameFlow: StateFlow<String?>
     val passwordFlow: StateFlow<String?>
     val urlFlow: StateFlow<String?>
+    val themeFlow: StateFlow<String?>
     fun saveUsername(username: String)
     fun savePassword(password: String)
     fun saveToken(token: String)
@@ -23,4 +26,6 @@ interface SettingsDataStore {
     suspend fun isAutoSyncEnabled(): Boolean
     suspend fun saveAutoSyncTimeframe(autoSyncTimeframe: AutoSyncTimeframe)
     suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe
+    suspend fun saveTheme(theme: Theme)
+    suspend fun getTheme(): Theme
 }
