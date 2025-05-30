@@ -13,30 +13,19 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
-import androidx.compose.material.icons.filled.CheckBox
-import androidx.compose.material.icons.filled.Delete
-import androidx.compose.material.icons.filled.Grade
-import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Bookmarks
-import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Favorite
-import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Image
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Movie
 import androidx.compose.material.icons.outlined.Settings
-import androidx.compose.material.icons.outlined.Share
 import androidx.compose.material.icons.outlined.TaskAlt
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DrawerValue
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.HorizontalDivider
@@ -62,7 +51,6 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
@@ -83,7 +71,6 @@ import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import de.readeckapp.util.openUrlInCustomTab
 import kotlinx.coroutines.launch
-import timber.log.Timber
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -280,42 +267,6 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                         "success"
                                     }
 
-                                is BookmarkListViewModel.UpdateBookmarkState.Error -> {
-                                    result.message
-                                }
-                            }
-                            snackbarHostState.showSnackbar(
-                                message = message,
-                                duration = SnackbarDuration.Short
-                            )
-                        }
-                    }
-                    if (uiState.bookmarks.isNotEmpty()) {
-                        BookmarkListView(
-                            modifier = Modifier.padding(padding),
-                            bookmarks = uiState.bookmarks,
-                            onClickBookmark = onClickBookmark,
-                            onClickDelete = onClickDelete,
-                            onClickArchive = onClickArchive,
-                            onClickFavorite = onClickFavorite,
-                            onClickMarkRead = onClickMarkRead,
-                            onClickOpenInBrowser = onClickOpenInBrowser,
-                            onClickShareBookmark = onClickShareBookmark
-                        )
-                        // Consumes a shareIntent and creates the corresponding share dialog
-                        ShareBookmarkChooser(
-                            context = LocalContext.current,
-                            intent = viewModel.shareIntent.collectAsState().value,
-                            onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
-                        )
-                    } else {
-                        EmptyScreen(modifier = Modifier.padding(padding))
-                    }
-                }
-
-                is BookmarkListViewModel.UiState.Loading -> {
-                    LoadingScreen(modifier = Modifier.padding(padding))
-                }
                                     is BookmarkListViewModel.UpdateBookmarkState.Error -> {
                                         result.message
                                     }
@@ -334,6 +285,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                 onClickArchive = onClickArchive,
                                 onClickFavorite = onClickFavorite,
                                 onClickMarkRead = onClickMarkRead,
+                                onClickOpenInBrowser = onClickOpenInBrowser,
                                 onClickShareBookmark = onClickShareBookmark
                             )
                             // Consumes a shareIntent and creates the corresponding share dialog
@@ -342,11 +294,11 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                 intent = viewModel.shareIntent.collectAsState().value,
                                 onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
                             )
-                        } else {
-                            EmptyScreen()
+                        }
+                        else {
+                            EmptyScreen(modifier = Modifier.padding(padding))
                         }
                     }
-
                     is BookmarkListViewModel.UiState.Error -> {
                         ErrorScreen()
                     }
