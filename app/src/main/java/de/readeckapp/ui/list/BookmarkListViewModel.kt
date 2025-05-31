@@ -45,7 +45,7 @@ class BookmarkListViewModel @Inject constructor(
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.Success(bookmarks = emptyList(), updateBookmarkState = null))
+    private val _uiState = MutableStateFlow<UiState>(UiState.Empty)
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
@@ -95,7 +95,11 @@ class BookmarkListViewModel @Inject constructor(
                     favorite = filterState.favorite,
                     state = Bookmark.State.LOADED
                 ).collectLatest {
-                    _uiState.value = UiState.Success(bookmarks = it, updateBookmarkState = null)
+                    _uiState.value = if (it.isEmpty()) {
+                        UiState.Empty
+                    } else {
+                        UiState.Success( bookmarks = it, updateBookmarkState = null)
+                    }
                 }
             }
 
@@ -263,7 +267,7 @@ class BookmarkListViewModel @Inject constructor(
             }
             _uiState.update {
                 when (it) {
-                     is UiState.Success -> it.copy(updateBookmarkState = state)
+                    is UiState.Success -> it.copy(updateBookmarkState = state)
                     else -> it
                 }
             }
@@ -344,6 +348,7 @@ class BookmarkListViewModel @Inject constructor(
         ) : UiState()
 
         data object Error : UiState()
+        data object Empty : UiState()
     }
 
     sealed class CreateBookmarkUiState {

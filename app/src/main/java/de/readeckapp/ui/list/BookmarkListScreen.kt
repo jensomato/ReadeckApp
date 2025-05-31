@@ -259,6 +259,12 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     .fillMaxWidth()
             ) {
                 when (uiState) {
+                    is BookmarkListViewModel.UiState.Empty -> {
+                        EmptyScreen()
+                    }
+                    is BookmarkListViewModel.UiState.Error -> {
+                        ErrorScreen()
+                    }
                     is BookmarkListViewModel.UiState.Success -> {
                         LaunchedEffect(key1 = uiState.updateBookmarkState) {
                             uiState.updateBookmarkState?.let { result ->
@@ -277,30 +283,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                 )
                             }
                         }
-                        if (uiState.bookmarks.isNotEmpty()) {
-                            BookmarkListView(
-                                bookmarks = uiState.bookmarks,
-                                onClickBookmark = onClickBookmark,
-                                onClickDelete = onClickDelete,
-                                onClickArchive = onClickArchive,
-                                onClickFavorite = onClickFavorite,
-                                onClickMarkRead = onClickMarkRead,
-                                onClickOpenInBrowser = onClickOpenInBrowser,
-                                onClickShareBookmark = onClickShareBookmark
-                            )
-                            // Consumes a shareIntent and creates the corresponding share dialog
-                            ShareBookmarkChooser(
-                                context = LocalContext.current,
-                                intent = viewModel.shareIntent.collectAsState().value,
-                                onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
-                            )
-                        }
-                        else {
-                            EmptyScreen(modifier = Modifier.padding(padding))
-                        }
-                    }
-                    is BookmarkListViewModel.UiState.Error -> {
-                        ErrorScreen()
+                        BookmarkListView(
+                            bookmarks = uiState.bookmarks,
+                            onClickBookmark = onClickBookmark,
+                            onClickDelete = onClickDelete,
+                            onClickArchive = onClickArchive,
+                            onClickFavorite = onClickFavorite,
+                            onClickMarkRead = onClickMarkRead,
+                            onClickOpenInBrowser = onClickOpenInBrowser,
+                            onClickShareBookmark = onClickShareBookmark
+                        )
+                        // Consumes a shareIntent and creates the corresponding share dialog
+                        ShareBookmarkChooser(
+                            context = LocalContext.current,
+                            intent = viewModel.shareIntent.collectAsState().value,
+                            onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
+                        )
                     }
                 }
             }
@@ -412,23 +410,6 @@ fun CreateBookmarkDialog(
     )
 }
 
-
-@Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            //verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            //CircularProgressIndicator()
-        }
-    }
-}
-
 @Composable
 fun ErrorScreen(modifier: Modifier = Modifier) {
     Surface(
@@ -493,12 +474,6 @@ fun BookmarkListView(
 @Composable
 fun ErrorScreenPreview() {
     ErrorScreen()
-}
-
-@Preview
-@Composable
-fun LoadingScreenPreview() {
-    LoadingScreen()
 }
 
 @Preview
