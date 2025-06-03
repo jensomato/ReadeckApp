@@ -1,3 +1,4 @@
+<?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="app_name">Readeck App</string>
     <string name="back">Volver</string>
@@ -13,7 +14,7 @@
     <string name="account_settings_password_label">Contraseña</string>
     <string name="account_settings_password_placeholder">contraseña</string>
     <string name="account_settings_login">Iniciar sesión</string>
-    <string name="account_settings_url_error">URL no válido</string>
+    <string name="account_settings_url_error">URL no válida</string>
     <string name="account_settings_username_error">Debes escribir el identificador</string>
     <string name="account_settings_password_error">Debes escribir una contraseña</string>
     <string name="authors" translatable="true">
@@ -24,7 +25,7 @@ many{de {author} y otros}
 other{}
 }
     </string>
-    <string name="settings_open_source_libraries">Open Source Libraries</string>
+    <string name="settings_open_source_libraries">Librerías de código abierto</string>
     <string name="settings_open_source_libraries_subtitle">Ver las bibliotecas de código abierto que usa esta app.</string>
     <string name="bookmarks">Marcadores</string>
     <string name="menu">Menú</string>
@@ -38,11 +39,11 @@ other{}
     <string name="pictures">Fotos</string>
     <string name="settings">Ajustes</string>
     <string name="an_error_occurred">Ha habido un fallo.</string>
-    <string name="no_bookmarks_found">No hai marcadores.</string>
+    <string name="no_bookmarks_found">No hay marcadores.</string>
     <string name="add_bookmark">Añadir marcador</string>
     <string name="title">Título (Opcional)</string>
     <string name="url">URL</string>
-    <string name="invalid_url">URL no válido</string>
+    <string name="invalid_url">URL no válida</string>
     <string name="save">Guardar</string>
     <string name="cancel">Cancelar</string>
     <string name="create_bookmark_error">Error al crear el marcador: %1$s</string>
@@ -57,7 +58,6 @@ other{}
     <string name="settings_logs_subtitle">Ver y enviar registros</string>
     <string name="log_view_share_title">Enviar registro</string>
     <string name="log_view_no_log_file_found">No hai fichero de registro</string>
-
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorito</string>
     <string name="action_archive">Archivo</string>
@@ -69,4 +69,42 @@ other{}
     <string name="notification_channel_sync_description">Errores en la sincronización</string>
     <string name="notification_authentication_error_title">Se requiere autenticación</string>
     <string name="notification_authentication_error_message">Por favor comprueba tus credenciales.</string>
+    <string name="action_share">Compartir enlace</string>
+    <string name="common_bookmark_image_content_description">Imagen del marcador</string>
+    <string name="auto_sync_notification_rationale_dialog_title">Se requiere permisos de Notificación</string>
+    <string name="auto_sync_notification_rationale_dialog_text">Para avisarte acerca de los fallos de la sincronización en segundo plano, necesitamos permiso para enviar notificaciones. Por favor acepta el permiso.</string>
+    <string name="settings_ui_subtitle">Apariencia</string>
+    <string name="ui_settings_theme_title">Tema</string>
+    <string name="theme_system">Predeterminado del sistema</string>
+    <string name="theme_light">Claro</string>
+    <string name="theme_dark">Oscuro</string>
+    <string name="ui_settings_theme_heading">Temas</string>
+    <string name="ui_settings_theme_dialog_support_text">¿Qué tema se debe usar?</string>
+    <string name="action_open_in_browser">Abrir en el navegador</string>
+    <string name="detail_view_no_content">No se encontró contenido del artículo</string>
+    <string name="auto_sync_notification_rationale_dialog_grant_button">Dar permiso</string>
+    <string name="ui_settings_topbar_title">Opciones de la interfaz de usuario</string>
+    <string name="settings_ui">Interfaz de usuario</string>
+    <string name="sync_settings_topbar_title">Opciones de sincronización</string>
+    <string name="settings_sync">Sincronización</string>
+    <string name="settings_sync_subtitle">Opciones de sincronización</string>
+    <string name="settings_sync_full_sync_heading">Sincronización en segundo plano</string>
+    <string name="settings_sync_auto_full_sync_title">Sincronización en segundo plano</string>
+    <string name="settings_sync_auto_full_button">Sincronizar ahora</string>
+    <string name="settings_sync_support_text">Para mantener la lista de tus marcadores actualizada, la aplicación verifica ocasionalmente y borra marcadores que hayas borrado en el servidor de Readeck. Como este proceso requiere descargar toda la información de los marcadores, corre automáticamente en segundo plano. Esto ayuda a que la aplicación refleje los marcadores actuales de Readeck sin que tengas que borrarlos manualmente.</string>
+    <string name="settings_sync_dialog_support_text">¿Cuan seguido debe realizarse la sincronización en segundo plano?</string>
+    <string name="auto_sync_timeframe_manual">Manual</string>
+    <string name="auto_sync_timeframe_01_hours">Cada hora</string>
+    <string name="auto_sync_timeframe_06_hours">Cada 6 horas</string>
+    <string name="auto_sync_timeframe_12_hours">Cada 12 horas</string>
+    <string name="auto_sync_timeframe_07_days">Cada 7 días</string>
+    <string name="auto_sync_timeframe_01_days">Una vez al día</string>
+    <string name="auto_sync_timeframe_14_days">Cada 14 días</string>
+    <string name="auto_sync_timeframe_30_days">Cada 30 días</string>
+    <string name="auto_sync_next_run">La próxima sincronización será en %1$s</string>
+    <string name="auto_sync_next_run_null">No hay sincronizaciones planeadas</string>
+    <string name="auto_sync_notification_success">La sincronización en segundo plano fue correcta. Se borraron %1$d marcadores.</string>
+    <string name="auto_sync_notification_failure">Falló la sincronización en segundo plano.</string>
+    <string name="auto_sync_notification_running">La sincronización en segundo plano está en proceso.</string>
+    <string name="auto_sync_notification_channel">Sincronización en segundo plano</string>
 </resources>
