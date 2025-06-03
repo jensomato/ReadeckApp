@@ -16,6 +16,7 @@
     <string name="account_settings_url_error">Invalid URL</string>
     <string name="account_settings_username_error">Username cannot be empty</string>
     <string name="account_settings_password_error">Password cannot be empty</string>
+    <string name="account_settings_allow_unencrypted">Allow unencrypted connections</string>
     <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,

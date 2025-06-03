@@ -24,7 +24,7 @@ class AccountSettingsViewModel @Inject constructor(
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
     private val _uiState =
-        MutableStateFlow(AccountSettingsUiState("", "", "", false, null, null, null, null))
+        MutableStateFlow(AccountSettingsUiState("", "", "", false, null, null, null, null, false))
     val uiState = _uiState.asStateFlow()
 
     init {
@@ -32,16 +32,16 @@ class AccountSettingsViewModel @Inject constructor(
             val url = settingsDataStore.urlFlow.value
             val username = settingsDataStore.usernameFlow.value
             val password = settingsDataStore.passwordFlow.value
-            val isValidUrl = url.isValidUrl()
             _uiState.value = AccountSettingsUiState(
                 url = url,
                 username = username,
                 password = password,
-                loginEnabled = isValidUrl && !username.isNullOrBlank() && !password.isNullOrBlank(),
+                loginEnabled = isValidUrl(url) && !username.isNullOrBlank() && !password.isNullOrBlank(),
                 urlError = null,
                 usernameError = null,
                 passwordError = null,
-                authenticationResult = null
+                authenticationResult = null,
+                allowUnencryptedConnection = false
             )
         }
     }
@@ -65,8 +65,19 @@ class AccountSettingsViewModel @Inject constructor(
         }
     }
 
+    fun onAllowUnencryptedConnectionChanged(allow: Boolean) {
+        _uiState.update {
+            it.copy(allowUnencryptedConnection = allow)
+        }
+        uiState.value.url?.apply { validateUrl(this) }
+    }
+
     fun onUrlChanged(value: String) {
-        val isValidUrl = value.isValidUrl()
+        validateUrl(value)
+    }
+
+    private fun validateUrl(value: String) {
+        val isValidUrl = isValidUrl(value)
         val urlError = if (!isValidUrl && value.isNotEmpty()) {
             R.string.account_settings_url_error // Use resource ID
         } else {
@@ -92,7 +103,7 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 username = value,
                 usernameError = usernameError,
-                loginEnabled = uiState.value.url.isValidUrl() && !value.isBlank() && !it.password.isNullOrBlank(),
+                loginEnabled = isValidUrl(uiState.value.url) && !value.isBlank() && !it.password.isNullOrBlank(),
                 authenticationResult = null // Clear any previous result
             )
         }
@@ -108,7 +119,7 @@ class AccountSettingsViewModel @Inject constructor(
             it.copy(
                 password = value,
                 passwordError = passwordError,
-                loginEnabled = uiState.value.url.isValidUrl() && !it.username.isNullOrBlank() && !value.isBlank(),
+                loginEnabled = isValidUrl(uiState.value.url) && !it.username.isNullOrBlank() && !value.isBlank(),
                 authenticationResult = null // Clear any previous result
             )
         }
@@ -126,6 +137,15 @@ class AccountSettingsViewModel @Inject constructor(
         data object NavigateBack : NavigationEvent()
     }
 
+    private fun isValidUrl(url: String?): Boolean {
+        val allowUnencrypted = _uiState.value.allowUnencryptedConnection
+        return if (allowUnencrypted) {
+            url.isValidUrl() // Any URL is valid if unencrypted is allowed
+        } else {
+            url?.startsWith("https://") == true && url.isValidUrl() // Must be HTTPS if unencrypted is not allowed
+        }
+    }
+
 }
 
 data class AccountSettingsUiState(
@@ -136,5 +156,6 @@ data class AccountSettingsUiState(
     val urlError: Int?,
     val usernameError: Int?,
     val passwordError: Int?,
-    val authenticationResult: AuthenticationResult?
+    val authenticationResult: AuthenticationResult?,
+    val allowUnencryptedConnection: Boolean = false
 )
