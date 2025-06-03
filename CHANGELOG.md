@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added the option to allow unencrypted connections (HTTP) for the Readeck server URL. This option is disabled by default and requires explicit user consent via a checkbox in the account settings.  This allows users to connect to servers that do not have HTTPS enabled, but it is strongly discouraged for security reasons. Closes #98.
+
 ## [0.5.0] - 2025-05-30
 
 ### Added
