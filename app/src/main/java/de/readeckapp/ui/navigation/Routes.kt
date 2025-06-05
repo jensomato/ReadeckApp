@@ -25,3 +25,7 @@ object SyncSettingsRoute
 
 @Serializable
 object UiSettingsRoute
+
+@Serializable
+object LoginRoute
+

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.readeckapp.domain.model.Theme
 import de.readeckapp.ui.detail.BookmarkDetailScreen
 import de.readeckapp.ui.list.BookmarkListScreen
+import de.readeckapp.ui.login.LoginScreen
 import de.readeckapp.ui.navigation.AccountSettingsRoute
 import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.BookmarkListRoute
@@ -35,6 +37,7 @@ import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import de.readeckapp.ui.navigation.SyncSettingsRoute
 import de.readeckapp.ui.navigation.UiSettingsRoute
+import de.readeckapp.ui.navigation.LoginRoute
 import de.readeckapp.ui.settings.AccountSettingsScreen
 import de.readeckapp.ui.settings.LogViewScreen
 import de.readeckapp.ui.settings.OpenSourceLibrariesScreen
@@ -51,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var intentState: MutableState<Intent?>
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -62,6 +66,8 @@ class MainActivity : ComponentActivity() {
             val scope = rememberCoroutineScope()
             val context = LocalContext.current
             val noValidUrlMessage = stringResource(id = R.string.not_valid_url)
+
+            val startDestination by viewModel.startDestination.collectAsState()
 
             LaunchedEffect(intentState.value) {
                 intentState.value?.let { newIntent ->
@@ -92,7 +98,10 @@ class MainActivity : ComponentActivity() {
             }
 
             ReadeckAppTheme(darkTheme = darkTheme) {
-                ReadeckNavHost(navController)
+                ReadeckNavHost(
+                    navController = navController,
+                    startDestination = startDestination
+                )
             }
         }
     }
@@ -105,8 +114,8 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("WrongStartDestinationType")
 @Composable
-fun ReadeckNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = BookmarkListRoute(sharedUrl = null)) {
+fun ReadeckNavHost(navController: NavHostController, startDestination: Any) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable<BookmarkListRoute> { BookmarkListScreen(navController) }
         composable<SettingsRoute> { SettingsScreen(navController) }
         composable<AccountSettingsRoute> { AccountSettingsScreen(navController) }
@@ -128,6 +137,9 @@ fun ReadeckNavHost(navController: NavHostController) {
         }
         composable<UiSettingsRoute> {
             UiSettingsScreen(navHostController = navController)
+        }
+        composable<LoginRoute> {
+            LoginScreen(navHostController = navController)
         }
     }
 }
