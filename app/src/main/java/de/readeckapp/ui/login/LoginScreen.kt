@@ -18,6 +18,7 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.Login
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Password
@@ -78,7 +79,7 @@ fun LoginScreen(navHostController: NavHostController) {
                 ExtendedFloatingActionButton(
                     onClick = { /*TODO*/ },
                     text = { Text("Login") },
-                    icon = { /*Icon(Icons.Outlined.Cloud, "Login")*/ }
+                    icon = { Icon(Icons.AutoMirrored.Default.Login, "Login") }
                 )
             }
         }
