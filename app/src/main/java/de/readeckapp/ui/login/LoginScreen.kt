@@ -1,13 +1,18 @@
 package de.readeckapp.ui.login
 
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
+import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
@@ -19,6 +24,7 @@ import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.Button
+import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
@@ -27,8 +33,15 @@ import androidx.navigation.NavHostController
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.derivedStateOf
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.readeckapp.ui.components.AdaptiveReadeckIcon
@@ -51,7 +64,25 @@ fun LoginScreen(navHostController: NavHostController) {
     val onToggleShowPassword: () -> Unit = { viewModel.onToggleShowPassword() }
     val onToggleAllowUnencryptedConnection: () -> Unit = { viewModel.onToggleAllowUnencryptedConnection() }
 
-    Scaffold() { padding ->
+    val passwordVisual = if(uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation()
+    val urlPrefix = if(uiState.allowUnencryptedConnection) "http://" else "https://"
+
+    Scaffold(
+        floatingActionButton = {
+            Box(
+                contentAlignment = Alignment.BottomCenter,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .offset(x = 16.dp)
+            ) {
+                ExtendedFloatingActionButton(
+                    onClick = { /*TODO*/ },
+                    text = { Text("Login") },
+                    icon = { /*Icon(Icons.Outlined.Cloud, "Login")*/ }
+                )
+            }
+        }
+    ) { padding ->
 
         Column(
             modifier = Modifier
@@ -82,7 +113,7 @@ fun LoginScreen(navHostController: NavHostController) {
                     value = uiState.url,
                     onValueChange = { onUrlChanged(it) },
                     label = { Text("Instance URL *") },
-                    prefix = { Text("https://") },
+                    prefix = { Text(urlPrefix) },
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Outlined.Cloud,
@@ -113,6 +144,8 @@ fun LoginScreen(navHostController: NavHostController) {
                     value = uiState.password,
                     onValueChange = { onPasswordChanged(it) },
                     label = { Text("Password *") },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
+                    visualTransformation = passwordVisual,
                     leadingIcon = {
                         Icon(
                             imageVector = Icons.Outlined.Password,
@@ -167,13 +200,13 @@ fun LoginScreen(navHostController: NavHostController) {
                 }
             }
 
-            Spacer(modifier = Modifier.weight(1f))
+            /*Spacer(modifier = Modifier.weight(1f))
 
             Button(
                 onClick = {}
             ) {
                 Text("Login")
-            }
+            }*/
         }
     }
 }

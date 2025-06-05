@@ -24,15 +24,21 @@ class LoginScreenViewModel @Inject constructor (
     val uiState = _uiState.asStateFlow()
 
     fun onUrlChanged(url: String) {
-
+        _uiState.update {
+            it.copy(url = url)
+        }
     }
 
     fun onUsernameChanged(username: String) {
-
+        _uiState.update {
+            it.copy(username = username)
+        }
     }
 
     fun onPasswordChanged(password: String) {
-
+        _uiState.update {
+            it.copy(password = password)
+        }
     }
 
     fun onToggleShowPassword() {
