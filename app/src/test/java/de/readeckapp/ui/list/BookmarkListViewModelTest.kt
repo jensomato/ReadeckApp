@@ -2,6 +2,7 @@ package de.readeckapp.ui.list
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.work.WorkInfo
 import androidx.work.WorkManager
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
@@ -15,6 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -45,6 +47,8 @@ class BookmarkListViewModelTest {
     private lateinit var updateBookmarkUseCase: UpdateBookmarkUseCase
     private lateinit var workManager : WorkManager
 
+    private lateinit var workInfoFlow: Flow<List<WorkInfo>>
+
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
@@ -55,12 +59,15 @@ class BookmarkListViewModelTest {
         updateBookmarkUseCase = mockk()
         workManager = mockk()
 
+        workInfoFlow = flowOf(emptyList())
+
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
         every { bookmarkRepository.observeBookmarkListItems(any(), any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
         every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns workInfoFlow
     }
 
     @After
