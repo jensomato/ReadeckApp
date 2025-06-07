@@ -14,7 +14,7 @@ import kotlinx.coroutines.flow.map
 import timber.log.Timber
 import javax.inject.Inject
 
-class FullSyncUseCase @Inject constructor(
+class  FullSyncUseCase @Inject constructor(
     private val workManager: WorkManager
 ) {
     val workInfoFlow = workManager.getWorkInfosForUniqueWorkFlow(FullSyncWorker.UNIQUE_NAME_AUTO)

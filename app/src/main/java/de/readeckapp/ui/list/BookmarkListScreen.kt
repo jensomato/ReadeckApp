@@ -89,7 +89,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val snackbarHostState = remember { SnackbarHostState() }
 
     val pullToRefreshState = rememberPullToRefreshState()
-    val isLoading by viewModel.isLoadingBookmarks.collectAsState()
+    val isLoading by viewModel.loadBookmarksIsRunning.collectAsState()
 
     // UI event handlers (pass filter update functions)
     val onClickAll = { viewModel.onClickAll() }
@@ -260,10 +260,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
             ) {
                 when (uiState) {
                     is BookmarkListViewModel.UiState.Empty -> {
-                        EmptyScreen()
-                    }
-                    is BookmarkListViewModel.UiState.Error -> {
-                        ErrorScreen()
+                        EmptyScreen(messageResource = uiState.messageResource)
                     }
                     is BookmarkListViewModel.UiState.Success -> {
                         LaunchedEffect(key1 = uiState.updateBookmarkState) {
@@ -410,7 +407,7 @@ fun CreateBookmarkDialog(
     )
 }
 
-@Composable
+/*@Composable
 fun ErrorScreen(modifier: Modifier = Modifier) {
     Surface(
         modifier = modifier.fillMaxSize(),
@@ -424,10 +421,13 @@ fun ErrorScreen(modifier: Modifier = Modifier) {
             Text(stringResource(id = R.string.an_error_occurred))
         }
     }
-}
+}*/
 
 @Composable
-fun EmptyScreen(modifier: Modifier = Modifier) {
+fun EmptyScreen(
+    modifier: Modifier = Modifier,
+    messageResource: Int
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surface
@@ -437,7 +437,7 @@ fun EmptyScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            Text(stringResource(id = R.string.no_bookmarks_found))
+            Text(stringResource(id = messageResource))
         }
     }
 }
@@ -470,16 +470,16 @@ fun BookmarkListView(
     }
 }
 
-@Preview
+/*@Preview
 @Composable
 fun ErrorScreenPreview() {
     ErrorScreen()
-}
+}*/
 
 @Preview
 @Composable
 fun EmptyScreenPreview() {
-    EmptyScreen()
+    EmptyScreen(messageResource = R.string.list_view_empty_nothing_to_see)
 }
 
 @Preview(showBackground = true)

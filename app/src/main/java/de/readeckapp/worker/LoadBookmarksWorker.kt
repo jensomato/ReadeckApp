@@ -18,9 +18,6 @@ import de.readeckapp.domain.usecase.LoadBookmarksUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
-import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.datetime.Instant
 import timber.log.Timber
 
@@ -55,12 +52,10 @@ class LoadBookmarksWorker @AssistedInject constructor(
 
         return when (val result = loadBookmarksUseCase.execute()) {
             is LoadBookmarksUseCase.UseCaseResult.Success -> {
-                if(!isAnotherWorkerRunning()) _isRunning.value = false
                 Result.success()
             }
             is LoadBookmarksUseCase.UseCaseResult.Error -> {
                 Timber.e(result.exception, "Error loading bookmarks")
-                if(!isAnotherWorkerRunning()) _isRunning.value = false
                 Result.failure() // Or Result.retry() depending on the error
             }
         }
@@ -83,9 +78,6 @@ class LoadBookmarksWorker @AssistedInject constructor(
         const val PARAM_IS_INITIAL_LOAD = "isInitialLoad"
         const val UNIQUE_WORK_NAME = "LoadBookmarksSync"
 
-        private val _isRunning = MutableStateFlow(false)
-        val isRunning: StateFlow<Boolean> = _isRunning.asStateFlow()
-
         fun enqueue(context: Context, isInitialLoad: Boolean = false) {
             val data = Data.Builder().putBoolean(PARAM_IS_INITIAL_LOAD, isInitialLoad).build()
 
@@ -101,7 +93,6 @@ class LoadBookmarksWorker @AssistedInject constructor(
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(UNIQUE_WORK_NAME, ExistingWorkPolicy.KEEP, request)
 
-            _isRunning.value = true
         }
     }
 }
