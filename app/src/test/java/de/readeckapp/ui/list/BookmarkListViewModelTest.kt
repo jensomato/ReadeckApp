@@ -103,7 +103,7 @@ class BookmarkListViewModelTest {
             savedStateHandle
         )
         // Just verify that it doesn't throw an exception for now
-        viewModel.onClickLoadBookmarks()
+        viewModel.onPullToRefresh()
     }
 
     @Test

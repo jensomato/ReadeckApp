@@ -55,10 +55,9 @@ class BookmarkListViewModel @Inject constructor(
     private val _shareIntent = MutableStateFlow<Intent?>(null)
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
 
-    private val _loadBookmarksIsRunning = workManager.getWorkInfosForUniqueWorkFlow(LoadBookmarksWorker.UNIQUE_WORK_NAME)
-        .map { it.any { it.state == WorkInfo.State.RUNNING}}
-
-    val loadBookmarksIsRunning: StateFlow<Boolean> = _loadBookmarksIsRunning
+    val loadBookmarksIsRunning: StateFlow<Boolean> = workManager.getWorkInfosForUniqueWorkFlow(
+        LoadBookmarksWorker.UNIQUE_WORK_NAME
+    ).map { it.any { it.state == WorkInfo.State.RUNNING}}
         .stateIn(
             scope = viewModelScope,
             started = SharingStarted.WhileSubscribed(5000),
@@ -224,10 +223,6 @@ class BookmarkListViewModel @Inject constructor(
     fun onShareIntentConsumed() {
         _shareIntent.value = null
     }
-    
-    fun onClickLoadBookmarks() {
-        loadBookmarks(true)
-    }
 
     fun onPullToRefresh() {
         loadBookmarks(false)
@@ -358,9 +353,6 @@ class BookmarkListViewModel @Inject constructor(
         data class Empty(
             val messageResource: Int
         ) : UiState()
-
-        //data object Error : UiState()
-        //data object Empty : UiState()
     }
 
     sealed class CreateBookmarkUiState {

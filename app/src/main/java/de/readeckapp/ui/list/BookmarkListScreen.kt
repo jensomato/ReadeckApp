@@ -407,22 +407,6 @@ fun CreateBookmarkDialog(
     )
 }
 
-/*@Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(stringResource(id = R.string.an_error_occurred))
-        }
-    }
-}*/
-
 @Composable
 fun EmptyScreen(
     modifier: Modifier = Modifier,
@@ -469,12 +453,6 @@ fun BookmarkListView(
         }
     }
 }
-
-/*@Preview
-@Composable
-fun ErrorScreenPreview() {
-    ErrorScreen()
-}*/
 
 @Preview
 @Composable

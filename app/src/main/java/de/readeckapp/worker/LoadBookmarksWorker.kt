@@ -61,7 +61,7 @@ class LoadBookmarksWorker @AssistedInject constructor(
         }
     }
 
-    suspend fun isAnotherWorkerRunning(): Boolean {
+    private suspend fun isAnotherWorkerRunning(): Boolean {
         return withContext(Dispatchers.IO) {
             val workInfos = WorkManager.getInstance(applicationContext)
                 .getWorkInfosForUniqueWork(UNIQUE_WORK_NAME)
