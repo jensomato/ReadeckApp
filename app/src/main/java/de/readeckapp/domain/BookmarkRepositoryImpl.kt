@@ -264,6 +264,37 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
+    override suspend fun performFullSyncV2(): BookmarkRepository.SyncResult = withContext(dispatcher) {
+        try {
+            bookmarkDao.clearRemoteBookmarkIds()
+            val response = readeckApi.syncBookmarks()
+            if (response.isSuccessful) {
+                val remoteBookmarks = response.body() ?: emptyList()
+                // Save remote bookmark IDs to the temporary table
+                val remoteBookmarkIdEntities = remoteBookmarks.map { RemoteBookmarkIdEntity(it.id) }
+                bookmarkDao.insertRemoteBookmarkIds(remoteBookmarkIdEntities)
+            } else {
+                Timber.e("Full sync failed with code: ${response.code()}")
+                return@withContext BookmarkRepository.SyncResult.Error(
+                    errorMessage = "Full sync failed",
+                    code = response.code(),
+                    ex = null
+                )
+            }
+
+            // After fetching all remote IDs, find local bookmarks to delete
+            val deleted = bookmarkDao.removeDeletedBookmars()
+            Timber.i("Deleted bookmarks: $deleted")
+
+            bookmarkDao.clearRemoteBookmarkIds() // Clean up the temporary table
+
+            BookmarkRepository.SyncResult.Success(countDeleted = deleted)
+        } catch (e: Exception) {
+            Timber.e(e, "Full sync failed")
+            BookmarkRepository.SyncResult.NetworkError(errorMessage = "Network error during full sync", ex = e)
+        }
+    }
+
     override suspend fun performFullSync(): BookmarkRepository.SyncResult = withContext(dispatcher) {
         try {
             bookmarkDao.clearRemoteBookmarkIds() // Clear any previous sync data

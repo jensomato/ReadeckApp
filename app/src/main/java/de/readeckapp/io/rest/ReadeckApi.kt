@@ -9,6 +9,7 @@ import de.readeckapp.io.rest.model.StatusMessageDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkErrorDto
 import de.readeckapp.io.rest.model.EditBookmarkResponseDto
+import de.readeckapp.io.rest.model.BookmarkSyncDto
 import kotlinx.datetime.Instant
 import retrofit2.Response
 import retrofit2.http.GET
@@ -56,6 +57,9 @@ interface ReadeckApi {
     @Headers("Accept: application/json")
     @DELETE("bookmarks/{id}")
     suspend fun deleteBookmark(@Path("id") id: String): Response<Unit>
+
+    @GET("bookmarks/sync")
+    suspend fun syncBookmarks(): Response<List<BookmarkSyncDto>>
 
     data class SortOrder(val sort: Sort, val order: Order = Order.Ascending) {
         override fun toString(): String {

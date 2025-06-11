@@ -34,7 +34,7 @@ class FullSyncWorker @AssistedInject constructor(
     override suspend fun doWork(): Result {
         try {
             Timber.d("Start Work")
-            val syncResult = bookmarkRepository.performFullSync()
+            val syncResult = bookmarkRepository.performFullSyncV2()
             val workResult = when (syncResult) {
                 is SyncResult.Error -> Result.failure()
                 is SyncResult.NetworkError -> Result.retry()

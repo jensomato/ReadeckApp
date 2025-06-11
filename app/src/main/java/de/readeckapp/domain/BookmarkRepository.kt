@@ -29,6 +29,7 @@ interface BookmarkRepository {
     suspend fun createBookmark(title: String, url: String): String
     suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): UpdateResult
     suspend fun performFullSync(): SyncResult
+    suspend fun performFullSyncV2(): SyncResult
     sealed class UpdateResult {
         data object Success: UpdateResult()
         data class Error(val errorMessage: String, val code: Int? = null, val ex: Exception? = null): UpdateResult()
