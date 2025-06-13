@@ -1,12 +1,10 @@
 package de.readeckapp.ui.login
 
-import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxHeight
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -24,7 +22,6 @@ import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VisibilityOff
-import androidx.compose.material3.Button
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
@@ -34,12 +31,9 @@ import androidx.navigation.NavHostController
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.TextField
 import androidx.compose.runtime.collectAsState
-import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
@@ -47,7 +41,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.readeckapp.ui.components.AdaptiveReadeckIcon
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LoginScreen(navHostController: NavHostController) {
 
@@ -63,10 +56,13 @@ fun LoginScreen(navHostController: NavHostController) {
     val onUsernameChanged: (String) -> Unit = { viewModel.onUsernameChanged(it) }
     val onPasswordChanged: (String) -> Unit = { viewModel.onPasswordChanged(it) }
     val onToggleShowPassword: () -> Unit = { viewModel.onToggleShowPassword() }
+    val onToggleUseApiToken: () -> Unit = { viewModel.onToggleUseApiToken() }
     val onToggleAllowUnencryptedConnection: () -> Unit = { viewModel.onToggleAllowUnencryptedConnection() }
+    val onClickLogin: () -> Unit = { viewModel.onClickLogin() }
 
     val passwordVisual = if(uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation()
     val urlPrefix = if(uiState.allowUnencryptedConnection) "http://" else "https://"
+    val authTokenText = if(uiState.useApiToken) "API-Token *" else "Password *"
 
     Scaffold(
         floatingActionButton = {
@@ -77,9 +73,10 @@ fun LoginScreen(navHostController: NavHostController) {
                     .offset(x = 16.dp)
             ) {
                 ExtendedFloatingActionButton(
-                    onClick = { /*TODO*/ },
+                    onClick = { onClickLogin() },
                     text = { Text("Login") },
-                    icon = { Icon(Icons.AutoMirrored.Default.Login, "Login") }
+                    icon = { Icon(Icons.AutoMirrored.Default.Login, "Login") },
+
                 )
             }
         }
@@ -122,29 +119,39 @@ fun LoginScreen(navHostController: NavHostController) {
                         )
                     },
                     isError = uiState.urlError != null,
-                    supportingText = { Text("") },
+                    supportingText = {
+                        uiState.urlError?.let {
+                            Text(stringResource(it))
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
                 )
 
-                TextField(
-                    value = uiState.username,
-                    onValueChange = { onUsernameChanged(it) },
-                    label = { Text("Username *") },
-                    leadingIcon = {
-                        Icon(
-                            imageVector = Icons.Outlined.Person,
-                            contentDescription = null,
-                        )
-                    },
-                    isError = uiState.usernameError != null,
-                    supportingText = { Text("") },
-                    modifier = Modifier.fillMaxWidth()
-                )
+                if(!uiState.useApiToken){
+                    TextField(
+                        value = uiState.username,
+                        onValueChange = { onUsernameChanged(it) },
+                        label = { Text("Username *") },
+                        leadingIcon = {
+                            Icon(
+                                imageVector = Icons.Outlined.Person,
+                                contentDescription = null,
+                            )
+                        },
+                        isError = uiState.usernameError != null,
+                        supportingText = {
+                            uiState.usernameError?.let {
+                                Text(stringResource(it))
+                            }
+                        },
+                        modifier = Modifier.fillMaxWidth()
+                    )
+                }
 
                 TextField(
                     value = uiState.password,
                     onValueChange = { onPasswordChanged(it) },
-                    label = { Text("Password *") },
+                    label = { Text(authTokenText) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
                     visualTransformation = passwordVisual,
                     leadingIcon = {
@@ -168,8 +175,29 @@ fun LoginScreen(navHostController: NavHostController) {
                         )
                     },
                     isError = uiState.passwordError != null,
-                    supportingText = { Text("") },
+                    supportingText = {
+                        uiState.passwordError?.let {
+                            Text(stringResource(it))
+                        }
+                    },
                     modifier = Modifier.fillMaxWidth()
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ){
+                Text(
+                    text = "Use API-token",
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = horizontalSpacing)
+                )
+                Switch(
+                    checked = uiState.useApiToken,
+                    onCheckedChange = { onToggleUseApiToken() }
                 )
             }
 
@@ -200,14 +228,6 @@ fun LoginScreen(navHostController: NavHostController) {
                     )
                 }
             }
-
-            /*Spacer(modifier = Modifier.weight(1f))
-
-            Button(
-                onClick = {}
-            ) {
-                Text("Login")
-            }*/
         }
     }
 }
