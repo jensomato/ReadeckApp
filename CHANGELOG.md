@@ -9,12 +9,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added pull-to-refresh in bookmark list screen. Contributed by @sockenklaus
 - Added the ability to select the theme in the settings. The theme selection is now also considered when displaying content in the bookmark details. Dynamic changing of the dark mode when using the system theme is also supported. Closes #77
 - Added the ability to open original url in browser. Closes #74. Contributed by @sockenklaus
 - Added the ability to share links to bookmarks from list view and datail view. Closes #45. Contributed by @sockenklaus
 
 ### Changed
 
+- The floating action button now adds new bookmarks instead of refreshing the list. Contributed by @sockenklaus
+- The "Add Bookmark" action has been removed from the top action bar. Contributed by @sockenklaus
 - Show placeholder images on image load failure in main list view. Closes #81
 - Allow cleartext traffic for tor onion services. Closes #92
 
