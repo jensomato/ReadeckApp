@@ -9,8 +9,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added pull-to-refresh in bookmark list screen. Contributed by @sockenklaus
 - Added trust anchors for system and user certificates in `network_security_config.xml`. This allows the app to trust self-signed certificates. Exercise caution when adding user certificates. Malicious certificates can compromise your security. Only add certificates from sources you fully trust. Closes #105. Contributed by @ffminus
 - Added the option to allow unencrypted connections (HTTP) for the Readeck server URL. This option is disabled by default and requires explicit user consent via a checkbox in the account settings.  This allows users to connect to servers that do not have HTTPS enabled, but it is strongly discouraged for security reasons. Closes #98.
+
+### Changed
+
+- The floating action button now adds new bookmarks instead of refreshing the list. Contributed by @sockenklaus
+- The "Add Bookmark" action has been removed from the top action bar. Contributed by @sockenklaus
 
 ## [0.5.0] - 2025-05-30
 

@@ -2,6 +2,8 @@ package de.readeckapp.ui.list
 
 import android.content.Context
 import androidx.lifecycle.SavedStateHandle
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
@@ -14,6 +16,7 @@ import io.mockk.every
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.flowOf
@@ -42,6 +45,9 @@ class BookmarkListViewModelTest {
     private lateinit var viewModel: BookmarkListViewModel
     private lateinit var savedStateHandle: SavedStateHandle
     private lateinit var updateBookmarkUseCase: UpdateBookmarkUseCase
+    private lateinit var workManager : WorkManager
+
+    private lateinit var workInfoFlow: Flow<List<WorkInfo>>
 
     @Before
     fun setup() {
@@ -51,6 +57,9 @@ class BookmarkListViewModelTest {
         context = mockk()
         savedStateHandle = mockk()
         updateBookmarkUseCase = mockk()
+        workManager = mockk()
+
+        workInfoFlow = flowOf(emptyList())
 
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
@@ -58,6 +67,7 @@ class BookmarkListViewModelTest {
             emptyList()
         ) // No bookmarks initially
         every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
+        every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns workInfoFlow
     }
 
     @After
@@ -66,16 +76,17 @@ class BookmarkListViewModelTest {
     }
 
     @Test
-    fun `initial uiState is Loading`() {
+    fun `initial uiState is Empty`() {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
-            savedStateHandle
+            savedStateHandle,
         )
-        assertEquals(BookmarkListViewModel.UiState.Loading, viewModel.uiState.value)
+        assertEquals(BookmarkListViewModel.UiState.Empty(R.string.list_view_empty_not_loaded_yet), viewModel.uiState.value)
     }
 
     @Test
@@ -85,13 +96,14 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
             savedStateHandle
         )
         // Just verify that it doesn't throw an exception for now
-        viewModel.onClickLoadBookmarks()
+        viewModel.onPullToRefresh()
     }
 
     @Test
@@ -99,6 +111,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -113,6 +126,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -130,6 +144,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -147,6 +162,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -164,6 +180,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -181,6 +198,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -198,6 +216,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -215,6 +234,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -232,6 +252,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -250,6 +271,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -293,6 +315,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -303,10 +326,10 @@ class BookmarkListViewModelTest {
         viewModel.onClickUnread()
 
         val uiStates = viewModel.uiState.take(2).toList()
-        val loading = uiStates[0]
+        val empty = uiStates[0]
         val success = uiStates[1]
         // Assert initial state
-        assert(loading is BookmarkListViewModel.UiState.Loading)
+        assert(empty is BookmarkListViewModel.UiState.Empty)
         // Assert success state
         assertEquals(
             BookmarkListViewModel.UiState.Success(expectedBookmarks, null),
@@ -319,6 +342,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -333,6 +357,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -349,6 +374,7 @@ class BookmarkListViewModelTest {
             coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -373,6 +399,7 @@ class BookmarkListViewModelTest {
             coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -396,6 +423,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -417,6 +445,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -443,6 +472,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -475,6 +505,7 @@ class BookmarkListViewModelTest {
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
             updateBookmarkUseCase,
+            workManager,
             bookmarkRepository,
             context,
             settingsDataStore,
@@ -497,6 +528,7 @@ class BookmarkListViewModelTest {
             coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -537,6 +569,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -544,10 +577,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -601,6 +634,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -608,10 +642,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -665,6 +699,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -672,10 +707,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -728,6 +763,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -735,10 +771,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -792,6 +828,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -799,10 +836,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -856,6 +893,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -863,10 +901,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -920,6 +958,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -927,10 +966,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -984,6 +1023,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -991,10 +1031,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
@@ -1048,6 +1088,7 @@ class BookmarkListViewModelTest {
 
             viewModel = BookmarkListViewModel(
                 updateBookmarkUseCase,
+                workManager,
                 bookmarkRepository,
                 context,
                 settingsDataStore,
@@ -1055,10 +1096,10 @@ class BookmarkListViewModelTest {
             )
 
             val uiStates = viewModel.uiState.take(2).toList()
-            val loadingState = uiStates[0]
+            val emptyState = uiStates[0]
             val successState = uiStates[1]
             // Assert initial state
-            assert(loadingState is BookmarkListViewModel.UiState.Loading)
+            assert(emptyState is BookmarkListViewModel.UiState.Empty)
             // Assert success state
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
