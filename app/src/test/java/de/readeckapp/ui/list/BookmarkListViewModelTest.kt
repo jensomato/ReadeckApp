@@ -7,6 +7,7 @@ import androidx.work.WorkManager
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
@@ -68,6 +69,7 @@ class BookmarkListViewModelTest {
         ) // No bookmarks initially
         every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
         every { workManager.getWorkInfosForUniqueWorkFlow(any()) } returns workInfoFlow
+        every { bookmarkRepository.observeAllBookmarkCounts() } returns flowOf(BookmarkCounts())
     }
 
     @After

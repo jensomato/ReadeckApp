@@ -17,6 +17,7 @@ import de.readeckapp.io.db.model.ArticleContentEntity
 import de.readeckapp.io.db.model.BookmarkWithArticleContent
 import de.readeckapp.io.db.model.BookmarkListItemEntity
 import de.readeckapp.io.db.model.RemoteBookmarkIdEntity
+import de.readeckapp.io.db.model.BookmarkCountsEntity
 
 @Dao
 interface BookmarkDao {
@@ -207,4 +208,20 @@ interface BookmarkDao {
         """
     )
     suspend fun removeDeletedBookmars(): Int
+
+    @Query(
+        """
+        SELECT
+            (SELECT COUNT(*) FROM bookmarks WHERE readProgress < 100 AND state = 0) AS unread_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE isArchived = 1 AND state = 0) AS archived_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE isMarked = 1 AND state = 0) AS favorite_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE type = 'article' AND state = 0) AS article_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE type = 'video' AND state = 0) AS video_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE type = 'photo' AND state = 0) AS picture_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE state = 0) AS total_count
+        FROM bookmarks
+        LIMIT 1
+        """
+    )
+    fun observeAllBookmarkCounts(): Flow<BookmarkCountsEntity?>
 }
