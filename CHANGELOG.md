@@ -10,14 +10,24 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 
 - Added pull-to-refresh in bookmark list screen. Contributed by @sockenklaus
+- Added trust anchors for system and user certificates in `network_security_config.xml`. This allows the app to trust self-signed certificates. Exercise caution when adding user certificates. Malicious certificates can compromise your security. Only add certificates from sources you fully trust. Closes #105. Contributed by @ffminus
+- Added the option to allow unencrypted connections (HTTP) for the Readeck server URL. This option is disabled by default and requires explicit user consent via a checkbox in the account settings.  This allows users to connect to servers that do not have HTTPS enabled, but it is strongly discouraged for security reasons. Closes #98.
+
+### Changed
+
+- The floating action button now adds new bookmarks instead of refreshing the list. Contributed by @sockenklaus
+- The "Add Bookmark" action has been removed from the top action bar. Contributed by @sockenklaus
+
+## [0.5.0] - 2025-05-30
+
+### Added
+
 - Added the ability to select the theme in the settings. The theme selection is now also considered when displaying content in the bookmark details. Dynamic changing of the dark mode when using the system theme is also supported. Closes #77
 - Added the ability to open original url in browser. Closes #74. Contributed by @sockenklaus
 - Added the ability to share links to bookmarks from list view and datail view. Closes #45. Contributed by @sockenklaus
 
 ### Changed
 
-- The floating action button now adds new bookmarks instead of refreshing the list. Contributed by @sockenklaus
-- The "Add Bookmark" action has been removed from the top action bar. Contributed by @sockenklaus
 - Show placeholder images on image load failure in main list view. Closes #81
 - Allow cleartext traffic for tor onion services. Closes #92
 

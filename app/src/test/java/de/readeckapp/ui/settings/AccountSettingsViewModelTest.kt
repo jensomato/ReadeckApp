@@ -63,6 +63,7 @@ class AccountSettingsViewModelTest {
         assertEquals("https://example.com", uiState.url)
         assertEquals("testUser", uiState.username)
         assertEquals("testPassword", uiState.password)
+        assertFalse(uiState.allowUnencryptedConnection)
     }
 
     private fun assertInitialUiState(settingsUiState: AccountSettingsUiState) {
@@ -74,6 +75,7 @@ class AccountSettingsViewModelTest {
         assertNull(settingsUiState.passwordError)
         assertNull(settingsUiState.authenticationResult)
         assertFalse(settingsUiState.loginEnabled)
+        assertFalse(settingsUiState.allowUnencryptedConnection)
     }
 
     @Test
@@ -242,5 +244,63 @@ class AccountSettingsViewModelTest {
         viewModel.onUsernameChanged("test")
         viewModel.onPasswordChanged("test")
         assertTrue(viewModel.uiState.first().loginEnabled)
+    }
+
+    @Test
+    fun `onAllowUnencryptedConnectionChanged should update allowUnencryptedConnection in uiState`() = runTest {
+        viewModel.onAllowUnencryptedConnectionChanged(true)
+        val uiState = viewModel.uiState.first()
+        assertTrue(uiState.allowUnencryptedConnection)
+
+        viewModel.onAllowUnencryptedConnectionChanged(false)
+        val uiState2 = viewModel.uiState.first()
+        assertFalse(uiState2.allowUnencryptedConnection)
+    }
+
+    @Test
+    fun `onUrlChanged with http URL and allowUnencryptedConnection false should set urlError`() = runTest {
+        viewModel.onAllowUnencryptedConnectionChanged(false)
+        viewModel.onUrlChanged("http://validurl.com")
+        advanceUntilIdle()
+        val uiState = viewModel.uiState.first()
+        assertEquals(R.string.account_settings_url_error, uiState.urlError)
+    }
+
+    @Test
+    fun `onUrlChanged with https URL and allowUnencryptedConnection false should not set urlError`() = runTest {
+        viewModel.onAllowUnencryptedConnectionChanged(false)
+        viewModel.onUrlChanged("https://validurl.com")
+        advanceUntilIdle()
+        val uiState = viewModel.uiState.first()
+        assertNull(uiState.urlError)
+    }
+
+    @Test
+    fun `onUrlChanged with http URL and allowUnencryptedConnection true should not set urlError`() = runTest {
+        viewModel.onAllowUnencryptedConnectionChanged(true)
+        viewModel.onUrlChanged("http://validurl.com")
+        advanceUntilIdle()
+        val uiState = viewModel.uiState.first()
+        assertNull(uiState.urlError)
+    }
+
+    @Test
+    fun `loginEnabled should be true when url is http and allowUnencryptedConnection is true and username and password are valid`() = runTest {
+        viewModel.onAllowUnencryptedConnectionChanged(true)
+        viewModel.onUrlChanged("http://validurl.com")
+        viewModel.onUsernameChanged("test")
+        viewModel.onPasswordChanged("test")
+        advanceUntilIdle()
+        assertTrue(viewModel.uiState.first().loginEnabled)
+    }
+
+    @Test
+    fun `loginEnabled should be false when url is http and allowUnencryptedConnection is false and username and password are valid`() = runTest {
+        viewModel.onAllowUnencryptedConnectionChanged(false)
+        viewModel.onUrlChanged("http://validurl.com")
+        viewModel.onUsernameChanged("test")
+        viewModel.onPasswordChanged("test")
+        advanceUntilIdle()
+        assertFalse(viewModel.uiState.first().loginEnabled)
     }
 }
