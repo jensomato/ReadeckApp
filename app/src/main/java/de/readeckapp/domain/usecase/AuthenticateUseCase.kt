@@ -32,7 +32,13 @@ class AuthenticateUseCase @Inject constructor(
                 settingsDataStore.setInitialSyncPerformed(true)
                 AuthenticationResult.Success
             }
-            is UserRepository.LoginResult.Error -> AuthenticationResult.GenericError(loginResult.errorMessage)
+            is UserRepository.LoginResult.Error -> {
+
+                // 403 = Authentication failed
+                if(loginResult.code == 403){
+                    AuthenticationResult.AuthenticationFailed(loginResult.errorMessage)
+                } else AuthenticationResult.GenericError(loginResult.errorMessage)
+            }
             is UserRepository.LoginResult.NetworkError -> AuthenticationResult.NetworkError(loginResult.errorMessage)
         }
     }

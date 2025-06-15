@@ -19,6 +19,8 @@
     <string name="account_settings_password_error">Password cannot be empty</string>
     <string name="account_settings_apitoken_error">API-token cannot be empty</string>
     <string name="account_settings_allow_unencrypted">Use unencrypted connections</string>
+    <string name="account_settings_authentication_failed">Username or password wrong</string>
+    <string name="account_settings_network_error">Can\'t reach Readeck instance. Check URL or internet connection.</string>
     <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,

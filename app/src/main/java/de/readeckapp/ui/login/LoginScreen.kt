@@ -11,7 +11,6 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Text
 import androidx.compose.material3.Icon
 import androidx.compose.material3.Switch
@@ -23,14 +22,20 @@ import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VisibilityOff
 import androidx.compose.material3.ExtendedFloatingActionButton
+import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.navigation.NavHostController
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarDuration
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.TextField
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -39,7 +44,9 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.ui.components.AdaptiveReadeckIcon
+import timber.log.Timber
 
 @Composable
 fun LoginScreen(navHostController: NavHostController) {
@@ -49,6 +56,8 @@ fun LoginScreen(navHostController: NavHostController) {
     val viewModel: LoginScreenViewModel = hiltViewModel()
     val uiState = viewModel.uiState.collectAsState().value
 
+    val snackbarHostState = remember { SnackbarHostState() }
+
     /**
      * Define events
      */
@@ -57,29 +66,38 @@ fun LoginScreen(navHostController: NavHostController) {
     val onPasswordChanged: (String) -> Unit = { viewModel.onPasswordChanged(it) }
     val onToggleShowPassword: () -> Unit = { viewModel.onToggleShowPassword() }
     val onToggleUseApiToken: () -> Unit = { viewModel.onToggleUseApiToken() }
-    val onToggleAllowUnencryptedConnection: () -> Unit = { viewModel.onToggleAllowUnencryptedConnection() }
+    val onToggleAllowUnencryptedConnection: () -> Unit = { viewModel.onToggleUseUnencryptedConnection() }
     val onClickLogin: () -> Unit = { viewModel.onClickLogin() }
+    val onAuthenticationResultConsumed: () -> Unit = { viewModel.onAuthenticationResultConsumed() }
 
     val passwordVisual = if(uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation()
-    val urlPrefix = if(uiState.allowUnencryptedConnection) "http://" else "https://"
+    val urlPrefix = if(uiState.useUnencryptedConnection) "http://" else "https://"
     val authTokenText = if(uiState.useApiToken) "API-Token *" else "Password *"
 
-    Scaffold(
-        floatingActionButton = {
-            Box(
-                contentAlignment = Alignment.BottomCenter,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .offset(x = 16.dp)
-            ) {
-                ExtendedFloatingActionButton(
-                    onClick = { onClickLogin() },
-                    text = { Text("Login") },
-                    icon = { Icon(Icons.AutoMirrored.Default.Login, "Login") },
+    LaunchedEffect(key1 = uiState.authenticationResult) {
 
+        uiState.authenticationResult?.let { result ->
+            if(result is AuthenticationResult.GenericError) {
+                snackbarHostState.showSnackbar(
+                    message = result.message,
+                    duration = SnackbarDuration.Long,
+                    withDismissAction = true
                 )
+                onAuthenticationResultConsumed()
             }
         }
+    }
+
+    Scaffold(
+        snackbarHost = { SnackbarHost(snackbarHostState) },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { onClickLogin() },
+                text = { Text("Login") },
+                icon = { Icon(Icons.AutoMirrored.Default.Login, "Login") },
+            )
+        },
+        floatingActionButtonPosition = FabPosition.Center
     ) { padding ->
 
         Column(
@@ -207,18 +225,18 @@ fun LoginScreen(navHostController: NavHostController) {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Allow unencrypted connection",
+                    text = "Use unencrypted connection",
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = horizontalSpacing)
                 )
                 Switch(
-                    checked = uiState.allowUnencryptedConnection,
+                    checked = uiState.useUnencryptedConnection,
                     onCheckedChange = { onToggleAllowUnencryptedConnection() }
                 )
             }
 
-            if(uiState.allowUnencryptedConnection) {
+            if(uiState.useUnencryptedConnection) {
                 Row(
                     horizontalArrangement = Arrangement.Start
                 ) {

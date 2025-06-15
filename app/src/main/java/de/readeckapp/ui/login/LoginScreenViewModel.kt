@@ -2,6 +2,7 @@ package de.readeckapp.ui.login
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
+import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
@@ -10,6 +11,8 @@ import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.launch
+import timber.log.Timber
 import javax.inject.Inject
 
 @HiltViewModel
@@ -55,22 +58,100 @@ class LoginScreenViewModel @Inject constructor (
         }
     }
 
-    fun onToggleAllowUnencryptedConnection() {
+    fun onToggleUseUnencryptedConnection() {
         _uiState.update {
-            it.copy(allowUnencryptedConnection = !it.allowUnencryptedConnection)
+            it.copy(useUnencryptedConnection = !it.useUnencryptedConnection)
         }
     }
 
     fun onToggleUseApiToken() {
         _uiState.update {
-            val passwordError = validatePassword(it.password, !it.useApiToken)
-            it.copy(useApiToken = !it.useApiToken, showPassword = !it.useApiToken, passwordError = passwordError)
+            it.copy(
+                useApiToken = !it.useApiToken,
+                showPassword = !it.useApiToken,
+                username = "",
+                usernameError = null,
+                password = "",
+                passwordError = null
+            )
+        }
+    }
+
+    fun onAuthenticationResultConsumed() {
+        _uiState.update {
+            it.copy(authenticationResult = null)
         }
     }
 
     fun onClickLogin(){
-        if(!_uiState.value.loginEnabled) {
-            return
+        val urlError = validateUrl(_uiState.value.url)
+        val usernameError = validateUsername(_uiState.value.username)
+        val passwordError = validatePassword(_uiState.value.password, _uiState.value.useApiToken)
+
+        _uiState.update {
+            it.copy(urlError = urlError, usernameError = usernameError, passwordError = passwordError)
+        }
+
+        if (!_uiState.value.loginEnabled) return
+
+        val urlPrefix = if(_uiState.value.useUnencryptedConnection) {
+            "http://"
+        } else "https://"
+
+        _uiState.value.url.also { url ->
+            if (!url.endsWith("/api")) {
+                _uiState.update { it.copy(url = "$url/api") }
+            }
+        }
+
+        viewModelScope.launch {
+            when(_uiState.value.useApiToken) {
+                true -> {
+                    // TODO
+                }
+                false -> {
+                    val result = authenticateUseCase.execute(
+                        url = "$urlPrefix${_uiState.value.url}",
+                        username = _uiState.value.username,
+                        password = _uiState.value.password
+                    )
+
+                    when(result){
+                        is AuthenticationResult.Success -> {
+                            _uiState.update {
+                                it.copy(authenticationResult = result)
+                            }
+                        }
+                        is AuthenticationResult.AuthenticationFailed -> {
+                            _uiState.update {
+                                it.copy(
+                                    usernameError = R.string.account_settings_authentication_failed,
+                                    passwordError = R.string.account_settings_authentication_failed,
+                                    authenticationResult = result
+                                )
+                            }
+                        }
+                        is AuthenticationResult.NetworkError -> {
+                            _uiState.update {
+                                it.copy(
+                                    urlError = R.string.account_settings_network_error,
+                                    authenticationResult = result
+                                )
+                            }
+                        }
+                        is AuthenticationResult.GenericError -> {
+                            _uiState.update {
+                                it.copy(
+                                    authenticationResult = result
+                                )
+                            }
+                        }
+                    }
+
+                    Timber.d("result=$result")
+
+                }
+            }
         }
     }
 
@@ -109,9 +190,9 @@ data class LoginUiState(
     val passwordError: Int? = null,
     val authenticationResult: AuthenticationResult? = null,
     val useApiToken: Boolean = false,
-    val allowUnencryptedConnection: Boolean = false,
+    val useUnencryptedConnection: Boolean = false,
     val showPassword: Boolean = false,
 ) {
     val loginEnabled: Boolean
-        get() = urlError == null && usernameError == null && passwordError == null
+        get() = urlError == null && passwordError == null && (usernameError == null || useApiToken)
 }
