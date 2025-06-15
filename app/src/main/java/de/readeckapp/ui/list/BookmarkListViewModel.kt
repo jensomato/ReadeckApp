@@ -5,6 +5,8 @@ import android.content.Intent
 import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import androidx.work.WorkInfo
+import androidx.work.WorkManager
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.R
@@ -17,10 +19,13 @@ import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.CoroutineExceptionHandler
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.flow.update
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
@@ -28,6 +33,7 @@ import javax.inject.Inject
 @HiltViewModel
 class BookmarkListViewModel @Inject constructor(
     private val updateBookmarkUseCase: UpdateBookmarkUseCase,
+    workManager: WorkManager,
     private val bookmarkRepository: BookmarkRepository,
     @ApplicationContext private val context: Context, // Inject Context
     private val settingsDataStore: SettingsDataStore, // Inject SettingsDataStore
@@ -43,11 +49,20 @@ class BookmarkListViewModel @Inject constructor(
     private val _filterState = MutableStateFlow(FilterState())
     val filterState: StateFlow<FilterState> = _filterState.asStateFlow()
 
-    private val _uiState = MutableStateFlow<UiState>(UiState.Loading)
+    private val _uiState = MutableStateFlow<UiState>(UiState.Empty(R.string.list_view_empty_not_loaded_yet))
     val uiState: StateFlow<UiState> = _uiState.asStateFlow()
 
     private val _shareIntent = MutableStateFlow<Intent?>(null)
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
+
+    val loadBookmarksIsRunning: StateFlow<Boolean> = workManager.getWorkInfosForUniqueWorkFlow(
+        LoadBookmarksWorker.UNIQUE_WORK_NAME
+    ).map { it.any { it.state == WorkInfo.State.RUNNING}}
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = false
+        )
 
     // Add state for the CreateBookmarkDialog
     private val _createBookmarkUiState =
@@ -57,7 +72,7 @@ class BookmarkListViewModel @Inject constructor(
 
     val loadBookmarkExceptionHandler = CoroutineExceptionHandler { _, ex ->
         Timber.e(ex, "Error loading bookmarks")
-        _uiState.value = UiState.Error
+        _uiState.value = UiState.Empty(R.string.list_view_empty_error_loading_bookmarks)
     }
 
     init {
@@ -86,7 +101,11 @@ class BookmarkListViewModel @Inject constructor(
                     favorite = filterState.favorite,
                     state = Bookmark.State.LOADED
                 ).collectLatest {
-                    _uiState.value = UiState.Success(bookmarks = it, updateBookmarkState = null)
+                    _uiState.value = if (it.isEmpty()) {
+                        UiState.Empty(R.string.list_view_empty_nothing_to_see)
+                    } else {
+                        UiState.Success( bookmarks = it, updateBookmarkState = null)
+                    }
                 }
             }
 
@@ -186,6 +205,7 @@ class BookmarkListViewModel @Inject constructor(
                 LoadBookmarksWorker.enqueue(context, isInitialLoad = initialLoad) // Enqueue for incremental sync
             } catch (e: Exception) {
                 // Handle errors (e.g., show error message)
+                _uiState.value = UiState.Empty(R.string.list_view_empty_error_loading_bookmarks)
                 println("Error loading bookmarks: ${e.message}")
             }
         }
@@ -203,9 +223,9 @@ class BookmarkListViewModel @Inject constructor(
     fun onShareIntentConsumed() {
         _shareIntent.value = null
     }
-    
-    fun onClickLoadBookmarks() {
-        loadBookmarks(true)
+
+    fun onPullToRefresh() {
+        loadBookmarks(false)
     }
 
     fun onDeleteBookmark(bookmarkId: String) {
@@ -250,7 +270,7 @@ class BookmarkListViewModel @Inject constructor(
             }
             _uiState.update {
                 when (it) {
-                     is UiState.Success -> it.copy(updateBookmarkState = state)
+                    is UiState.Success -> it.copy(updateBookmarkState = state)
                     else -> it
                 }
             }
@@ -330,8 +350,9 @@ class BookmarkListViewModel @Inject constructor(
             val updateBookmarkState: UpdateBookmarkState?
         ) : UiState()
 
-        data object Loading : UiState()
-        data object Error : UiState()
+        data class Empty(
+            val messageResource: Int
+        ) : UiState()
     }
 
     sealed class CreateBookmarkUiState {
