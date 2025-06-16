@@ -1,6 +1,7 @@
 package de.readeckapp.domain
 
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkCounts
 import kotlinx.coroutines.flow.Flow
 import de.readeckapp.domain.model.BookmarkListItem
 
@@ -29,6 +30,7 @@ interface BookmarkRepository {
     suspend fun createBookmark(title: String, url: String): String
     suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): UpdateResult
     suspend fun performFullSync(): SyncResult
+    fun observeAllBookmarkCounts(): Flow<BookmarkCounts>
     sealed class UpdateResult {
         data object Success: UpdateResult()
         data class Error(val errorMessage: String, val code: Int? = null, val ex: Exception? = null): UpdateResult()

@@ -12,6 +12,7 @@ import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.R
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
@@ -29,6 +30,7 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class BookmarkListViewModel @Inject constructor(
@@ -74,6 +76,13 @@ class BookmarkListViewModel @Inject constructor(
         Timber.e(ex, "Error loading bookmarks")
         _uiState.value = UiState.Empty(R.string.list_view_empty_error_loading_bookmarks)
     }
+
+    val bookmarkCounts: StateFlow<BookmarkCounts> = bookmarkRepository.observeAllBookmarkCounts()
+        .stateIn(
+            scope = viewModelScope,
+            started = SharingStarted.WhileSubscribed(5000),
+            initialValue = BookmarkCounts()
+        )
 
     init {
         val sharedUrl = savedStateHandle.get<String>("sharedUrl")
