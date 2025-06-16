@@ -7,10 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.6.0] - 2025-06-16
+
 ### Added
 
 - Added badges to navigation drawer items showing the count of unread, archived, favorite, article, video, and picture bookmarks.
 - Added pull-to-refresh in bookmark list screen. Contributed by @sockenklaus
+- Added translation for Chinese by Poesty Li
+- Added translation for Spanish by Guillermo
 - Added trust anchors for system and user certificates in `network_security_config.xml`. This allows the app to trust self-signed certificates. Exercise caution when adding user certificates. Malicious certificates can compromise your security. Only add certificates from sources you fully trust. Closes #105. Contributed by @ffminus
 - Added the option to allow unencrypted connections (HTTP) for the Readeck server URL. This option is disabled by default and requires explicit user consent via a checkbox in the account settings.  This allows users to connect to servers that do not have HTTPS enabled, but it is strongly discouraged for security reasons. Closes #98.
 
