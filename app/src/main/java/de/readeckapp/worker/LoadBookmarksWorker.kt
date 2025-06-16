@@ -51,7 +51,9 @@ class LoadBookmarksWorker @AssistedInject constructor(
         }
 
         return when (val result = loadBookmarksUseCase.execute()) {
-            is LoadBookmarksUseCase.UseCaseResult.Success -> Result.success()
+            is LoadBookmarksUseCase.UseCaseResult.Success -> {
+                Result.success()
+            }
             is LoadBookmarksUseCase.UseCaseResult.Error -> {
                 Timber.e(result.exception, "Error loading bookmarks")
                 Result.failure() // Or Result.retry() depending on the error
@@ -90,6 +92,7 @@ class LoadBookmarksWorker @AssistedInject constructor(
 
             WorkManager.getInstance(context)
                 .enqueueUniqueWork(UNIQUE_WORK_NAME, ExistingWorkPolicy.KEEP, request)
+
         }
     }
 }

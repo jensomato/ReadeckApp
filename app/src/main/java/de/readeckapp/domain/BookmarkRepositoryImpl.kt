@@ -4,6 +4,7 @@ import de.readeckapp.coroutine.IoDispatcher
 import de.readeckapp.domain.mapper.toDomain
 import de.readeckapp.domain.mapper.toEntity
 import de.readeckapp.domain.model.Bookmark
+import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.io.db.dao.BookmarkDao
 import de.readeckapp.io.db.model.BookmarkEntity
@@ -327,4 +328,21 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
+    override fun observeAllBookmarkCounts(): Flow<BookmarkCounts> {
+        return bookmarkDao.observeAllBookmarkCounts().map { entity ->
+            if (entity != null) {
+                BookmarkCounts(
+                    unread = entity.unread,
+                    archived = entity.archived,
+                    favorite = entity.favorite,
+                    article = entity.article,
+                    video = entity.video,
+                    picture = entity.picture,
+                    total = entity.total
+                )
+            } else {
+                BookmarkCounts()
+            }
+        }
+    }
 }

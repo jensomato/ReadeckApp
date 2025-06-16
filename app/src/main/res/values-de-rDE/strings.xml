@@ -17,6 +17,7 @@
     <string name="account_settings_url_error">Ungültige URL</string>
     <string name="account_settings_username_error">Benutzername darf nicht leer sein</string>
     <string name="account_settings_password_error">Passwort darf nicht leer sein</string>
+    <string name="account_settings_allow_unencrypted">Unverschlüsselte Verbindunge erlauben</string>
     <string name="sync_settings_topbar_title">Synchronisierungseinstellungen</string>
     <string name="authors" translatable="true">
 {count, plural,

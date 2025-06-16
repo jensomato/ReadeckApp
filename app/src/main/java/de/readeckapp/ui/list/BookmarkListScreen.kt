@@ -4,6 +4,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
@@ -13,7 +14,6 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Menu
-import androidx.compose.material.icons.filled.Refresh
 import androidx.compose.material.icons.outlined.Bookmarks
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Favorite
@@ -44,8 +44,11 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.pulltorefresh.PullToRefreshBox
+import androidx.compose.material3.pulltorefresh.rememberPullToRefreshState
 import androidx.compose.material3.rememberDrawerState
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
@@ -68,6 +71,8 @@ import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import de.readeckapp.util.openUrlInCustomTab
 import kotlinx.coroutines.launch
+import androidx.compose.material3.Badge
+import de.readeckapp.ui.theme.Typography
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -77,6 +82,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val openUrlEvent = viewModel.openUrlEvent.collectAsState()
     val uiState = viewModel.uiState.collectAsState().value
     val createBookmarkUiState = viewModel.createBookmarkUiState.collectAsState().value
+    val bookmarkCounts = viewModel.bookmarkCounts.collectAsState()
 
     // Collect filter states
     val filterState = viewModel.filterState.collectAsState()
@@ -84,6 +90,9 @@ fun BookmarkListScreen(navHostController: NavHostController) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     val snackbarHostState = remember { SnackbarHostState() }
+
+    val pullToRefreshState = rememberPullToRefreshState()
+    val isLoading by viewModel.loadBookmarksIsRunning.collectAsState()
 
     // UI event handlers (pass filter update functions)
     val onClickAll = { viewModel.onClickAll() }
@@ -141,8 +150,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.all)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.all)
+                        ) },
                         icon = { Icon(Icons.Outlined.Bookmarks, contentDescription = null) },
+                        badge = {
+                            bookmarkCounts.value.total.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value == BookmarkListViewModel.FilterState(),
                         onClick = {
                             onClickAll()
@@ -150,8 +173,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.unread)) },
-                        icon = {Icon(Icons.Outlined.TaskAlt, contentDescription = null)},
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.unread)
+                        ) },
+                        icon = { Icon(Icons.Outlined.TaskAlt, contentDescription = null)},
+                        badge = {
+                            bookmarkCounts.value.unread.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value.unread == true,
                         onClick = {
                             onClickFilterUnread()
@@ -159,8 +196,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.archive)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.archive)
+                        ) },
                         icon = { Icon(Icons.Outlined.Inventory2, contentDescription = null) },
+                        badge = {
+                            bookmarkCounts.value.archived.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value.archived == true,
                         onClick = {
                             onClickFilterArchive()
@@ -168,8 +219,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.favorites)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.favorites)
+                        ) },
                         icon = { Icon(Icons.Outlined.Favorite, contentDescription = null) },
+                        badge = {
+                            bookmarkCounts.value.favorite.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value.favorite == true,
                         onClick = {
                             onClickFilterFavorite()
@@ -178,8 +243,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.articles)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.articles)
+                        ) },
                         icon = { Icon(Icons.Outlined.Description, contentDescription = null) },
+                        badge = {
+                            bookmarkCounts.value.article.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value.type == Bookmark.Type.Article,
                         onClick = {
                             onClickFilterArticles()
@@ -187,8 +266,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.videos)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.videos)
+                        ) },
                         icon = { Icon(Icons.Outlined.Movie, contentDescription = null) },
+                        badge = {
+                            bookmarkCounts.value.video.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value.type == Bookmark.Type.Video,
                         onClick = {
                             onClickFilterVideos()
@@ -196,8 +289,22 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         }
                     )
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.pictures)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.pictures)
+                        ) },
                         icon = { Icon(Icons.Outlined.Image, contentDescription = null) },
+                        badge = {
+                            bookmarkCounts.value.picture.let { count ->
+                                if (count > 0) {
+                                    Badge(containerColor = MaterialTheme.colorScheme.secondaryContainer) {
+                                        Text(
+                                            text = count.toString()
+                                        )
+                                    }
+                                }
+                            }
+                        },
                         selected = filterState.value.type == Bookmark.Type.Picture,
                         onClick = {
                             onClickFilterPictures()
@@ -206,7 +313,10 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                     )
                     HorizontalDivider()
                     NavigationDrawerItem(
-                        label = { Text(text = stringResource(id = R.string.settings)) },
+                        label = { Text(
+                            style = Typography.labelLarge,
+                            text = stringResource(id = R.string.settings)
+                        ) },
                         icon = { Icon(Icons.Outlined.Settings, contentDescription = null) },
                         selected = false,
                         onClick = {
@@ -232,48 +342,49 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                                 contentDescription = stringResource(id = R.string.menu)
                             )
                         }
-                    },
-                    actions = {
-                        IconButton(onClick = { viewModel.openCreateBookmarkDialog() }) {
-                            Icon(
-                                imageVector = Icons.Filled.Add,
-                                contentDescription = stringResource(id = R.string.add_bookmark)
-                            )
-                        }
                     }
                 )
             },
             floatingActionButton = {
-                FloatingActionButton(onClick = { viewModel.onClickLoadBookmarks() }) {
+                FloatingActionButton(onClick = { viewModel.openCreateBookmarkDialog() }) {
                     Icon(
-                        Icons.Filled.Refresh,
-                        contentDescription = stringResource(id = R.string.refresh_bookmarks)
+                        Icons.Filled.Add,
+                        contentDescription = stringResource(id = R.string.add_bookmark)
                     )
                 }
             }
         ) { padding ->
-            when (uiState) {
-                is BookmarkListViewModel.UiState.Success -> {
-                    LaunchedEffect(key1 = uiState.updateBookmarkState) {
-                        uiState.updateBookmarkState?.let { result ->
-                            val message = when (result) {
-                                is BookmarkListViewModel.UpdateBookmarkState.Success -> {
-                                    "success"
-                                }
-
-                                is BookmarkListViewModel.UpdateBookmarkState.Error -> {
-                                    result.message
-                                }
-                            }
-                            snackbarHostState.showSnackbar(
-                                message = message,
-                                duration = SnackbarDuration.Short
-                            )
-                        }
+            PullToRefreshBox(
+                isRefreshing = isLoading,
+                onRefresh = { viewModel.onPullToRefresh() },
+                state = pullToRefreshState,
+                modifier = Modifier
+                    .padding(padding)
+                    .fillMaxWidth()
+            ) {
+                when (uiState) {
+                    is BookmarkListViewModel.UiState.Empty -> {
+                        EmptyScreen(messageResource = uiState.messageResource)
                     }
-                    if (uiState.bookmarks.isNotEmpty()) {
+                    is BookmarkListViewModel.UiState.Success -> {
+                        LaunchedEffect(key1 = uiState.updateBookmarkState) {
+                            uiState.updateBookmarkState?.let { result ->
+                                val message = when (result) {
+                                    is BookmarkListViewModel.UpdateBookmarkState.Success -> {
+                                        "success"
+                                    }
+
+                                    is BookmarkListViewModel.UpdateBookmarkState.Error -> {
+                                        result.message
+                                    }
+                                }
+                                snackbarHostState.showSnackbar(
+                                    message = message,
+                                    duration = SnackbarDuration.Short
+                                )
+                            }
+                        }
                         BookmarkListView(
-                            modifier = Modifier.padding(padding),
                             bookmarks = uiState.bookmarks,
                             onClickBookmark = onClickBookmark,
                             onClickDelete = onClickDelete,
@@ -289,17 +400,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                             intent = viewModel.shareIntent.collectAsState().value,
                             onShareIntentConsumed = { viewModel.onShareIntentConsumed() }
                         )
-                    } else {
-                        EmptyScreen(modifier = Modifier.padding(padding))
                     }
-                }
-
-                is BookmarkListViewModel.UiState.Loading -> {
-                    LoadingScreen(modifier = Modifier.padding(padding))
-                }
-
-                is BookmarkListViewModel.UiState.Error -> {
-                    ErrorScreen(modifier = Modifier.padding(padding))
                 }
             }
 
@@ -410,9 +511,11 @@ fun CreateBookmarkDialog(
     )
 }
 
-
 @Composable
-fun LoadingScreen(modifier: Modifier = Modifier) {
+fun EmptyScreen(
+    modifier: Modifier = Modifier,
+    messageResource: Int
+) {
     Surface(
         modifier = modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.surface
@@ -422,39 +525,7 @@ fun LoadingScreen(modifier: Modifier = Modifier) {
             verticalArrangement = Arrangement.Center,
             modifier = Modifier.fillMaxSize()
         ) {
-            CircularProgressIndicator()
-        }
-    }
-}
-
-@Composable
-fun ErrorScreen(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(stringResource(id = R.string.an_error_occurred))
-        }
-    }
-}
-
-@Composable
-fun EmptyScreen(modifier: Modifier = Modifier) {
-    Surface(
-        modifier = modifier.fillMaxSize(),
-        color = MaterialTheme.colorScheme.surface
-    ) {
-        Column(
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.Center,
-            modifier = Modifier.fillMaxSize()
-        ) {
-            Text(stringResource(id = R.string.no_bookmarks_found))
+            Text(stringResource(id = messageResource))
         }
     }
 }
@@ -489,20 +560,8 @@ fun BookmarkListView(
 
 @Preview
 @Composable
-fun ErrorScreenPreview() {
-    ErrorScreen()
-}
-
-@Preview
-@Composable
-fun LoadingScreenPreview() {
-    LoadingScreen()
-}
-
-@Preview
-@Composable
 fun EmptyScreenPreview() {
-    EmptyScreen()
+    EmptyScreen(messageResource = R.string.list_view_empty_nothing_to_see)
 }
 
 @Preview(showBackground = true)

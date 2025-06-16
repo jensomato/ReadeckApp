@@ -1,6 +1,7 @@
 package de.readeckapp.ui.settings
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
@@ -11,6 +12,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
@@ -31,6 +33,7 @@ fun AccountSettingsScreen(
     val onUsernameChanged: (String) -> Unit = { username -> viewModel.onUsernameChanged(username) }
     val onPasswordChanged: (String) -> Unit = { password -> viewModel.onPasswordChanged(password) }
     val onLoginClicked: () -> Unit = { viewModel.login() }
+    val onAllowUnencryptedConnectionChanged: (Boolean) -> Unit = { allow -> viewModel.onAllowUnencryptedConnectionChanged(allow) }
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -88,7 +91,8 @@ fun AccountSettingsScreen(
         onUsernameChanged = onUsernameChanged,
         onPasswordChanged = onPasswordChanged,
         onLoginClicked = onLoginClicked,
-        onClickBack = onClickBack
+        onClickBack = onClickBack,
+        onAllowUnencryptedConnectionChanged = onAllowUnencryptedConnectionChanged
     )
 }
 
@@ -102,7 +106,8 @@ fun AccountSettingsView(
     onUsernameChanged: (String) -> Unit,
     onPasswordChanged: (String) -> Unit,
     onLoginClicked: () -> Unit,
-    onClickBack: () -> Unit
+    onClickBack: () -> Unit,
+    onAllowUnencryptedConnectionChanged: (Boolean) -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Scaffold(
@@ -174,6 +179,23 @@ fun AccountSettingsView(
                     }
                 }
             )
+            Row(
+                modifier = Modifier
+                    .height(56.dp)
+                    .selectable(
+                        selected = settingsUiState.allowUnencryptedConnection,
+                        onClick = { onAllowUnencryptedConnectionChanged(settingsUiState.allowUnencryptedConnection.not()) },
+                        role = Role.Checkbox
+                    ),
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(4.dp)
+            ) {
+                Checkbox(
+                    checked = settingsUiState.allowUnencryptedConnection,
+                    onCheckedChange = null
+                )
+                Text(text = stringResource(R.string.account_settings_allow_unencrypted))
+            }
             Button(
                 onClick = {
                     keyboardController?.hide()
@@ -208,7 +230,8 @@ fun AccountSettingsScreenViewPreview() {
         onUsernameChanged = {},
         onPasswordChanged = {},
         onLoginClicked = {},
-        onClickBack = {}
+        onClickBack = {},
+        onAllowUnencryptedConnectionChanged = {}
     )
 }
 

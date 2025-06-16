@@ -283,4 +283,19 @@ class BookmarkDaoTest {
             }
         }
     }
+
+    @RunWith(RobolectricTestRunner::class)
+    internal class GetCountsTest : BaseTest() {
+        @Test
+        fun testObserveAllBookmarkCounts() = runTest(testDispatcher) {
+            val counts = bookmarkDao.observeAllBookmarkCounts().first()
+            assertEquals(24, counts?.unread)
+            assertEquals(0, counts?.archived)
+            assertEquals(0, counts?.favorite)
+            assertEquals(8, counts?.article)
+            assertEquals(8, counts?.video)
+            assertEquals(8, counts?.picture)
+            assertEquals(24, counts?.total)
+        }
+    }
 }

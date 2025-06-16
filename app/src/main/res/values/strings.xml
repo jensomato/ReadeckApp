@@ -16,6 +16,7 @@
     <string name="account_settings_url_error">Invalid URL</string>
     <string name="account_settings_username_error">Username cannot be empty</string>
     <string name="account_settings_password_error">Password cannot be empty</string>
+    <string name="account_settings_allow_unencrypted">Allow unencrypted connections</string>
     <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,
@@ -107,4 +108,7 @@ other{}
     <string name="auto_sync_notification_rationale_dialog_title">Notification Permission Required</string>
     <string name="auto_sync_notification_rationale_dialog_text">To notify you about background sync failures, we need permission to send notifications.  Please grant this permission.</string>
     <string name="auto_sync_notification_rationale_dialog_grant_button">Grant Permission</string>
+    <string name="list_view_empty_not_loaded_yet">Bookmarks have not been loaded yet.</string>
+    <string name="list_view_empty_error_loading_bookmarks">An error has occurred while loading bookmarks.</string>
+    <string name="list_view_empty_nothing_to_see">No bookmarks have been found.</string>
 </resources>
