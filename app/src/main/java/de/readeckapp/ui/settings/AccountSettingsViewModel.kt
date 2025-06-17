@@ -65,6 +65,10 @@ class AccountSettingsViewModel @Inject constructor(
         }
     }
 
+    fun logout() {
+
+    }
+
     fun onAllowUnencryptedConnectionChanged(allow: Boolean) {
         _uiState.update {
             it.copy(allowUnencryptedConnection = allow)
@@ -157,5 +161,6 @@ data class AccountSettingsUiState(
     val usernameError: Int?,
     val passwordError: Int?,
     val authenticationResult: AuthenticationResult?,
-    val allowUnencryptedConnection: Boolean = false
+    val allowUnencryptedConnection: Boolean = false,
+    val useApiToken: Boolean = false
 )

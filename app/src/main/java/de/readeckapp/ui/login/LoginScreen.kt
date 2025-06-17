@@ -2,13 +2,10 @@ package de.readeckapp.ui.login
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxHeight
-import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
-import androidx.compose.foundation.layout.offset
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material3.Text
@@ -21,13 +18,12 @@ import androidx.compose.material.icons.outlined.Cloud
 import androidx.compose.material.icons.outlined.Password
 import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material.icons.outlined.VisibilityOff
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExtendedFloatingActionButton
 import androidx.compose.material3.FabPosition
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.runtime.Composable
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.tooling.preview.Preview
-import androidx.navigation.NavHostController
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
@@ -46,10 +42,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.ui.components.AdaptiveReadeckIcon
-import timber.log.Timber
 
 @Composable
-fun LoginScreen(navHostController: NavHostController) {
+fun LoginScreen() {
 
     val horizontalSpacing = 16.dp
 
@@ -93,8 +88,21 @@ fun LoginScreen(navHostController: NavHostController) {
         floatingActionButton = {
             ExtendedFloatingActionButton(
                 onClick = { onClickLogin() },
-                text = { Text("Login") },
-                icon = { Icon(Icons.AutoMirrored.Default.Login, "Login") },
+                icon = {
+                    when(uiState.isLoading){
+                        true -> CircularProgressIndicator(
+                            color = MaterialTheme.colorScheme.onPrimaryContainer
+                        )
+                        false -> Icon(Icons.AutoMirrored.Default.Login, "Login")
+                    }
+                },
+                text = {
+                    when(uiState.isLoading){
+                        true -> {}
+                        false -> Text("Login")
+                    }
+                },
+                expanded = !uiState.isLoading
             )
         },
         floatingActionButtonPosition = FabPosition.Center
@@ -253,5 +261,5 @@ fun LoginScreen(navHostController: NavHostController) {
 @Composable
 @Preview
 fun LoginScreenPreview() {
-    LoginScreen(navHostController = NavHostController(LocalContext.current))
+    LoginScreen()
 }

@@ -7,7 +7,6 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.domain.usecase.AuthenticationResult
-import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
@@ -17,7 +16,6 @@ import javax.inject.Inject
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor (
-    private val settingsDataStore: SettingsDataStore,
     private val authenticateUseCase: AuthenticateUseCase
 
 ) : ViewModel() {
@@ -105,6 +103,10 @@ class LoginScreenViewModel @Inject constructor (
         }
 
         viewModelScope.launch {
+            _uiState.update {
+                it.copy(isLoading = true)
+            }
+
             when(_uiState.value.useApiToken) {
                 true -> {
                     // TODO
@@ -149,8 +151,10 @@ class LoginScreenViewModel @Inject constructor (
                     }
 
                     Timber.d("result=$result")
-
                 }
+            }
+            _uiState.update {
+                it.copy(isLoading = false)
             }
         }
     }
@@ -192,6 +196,7 @@ data class LoginUiState(
     val useApiToken: Boolean = false,
     val useUnencryptedConnection: Boolean = false,
     val showPassword: Boolean = false,
+    val isLoading: Boolean = false
 ) {
     val loginEnabled: Boolean
         get() = urlError == null && passwordError == null && (usernameError == null || useApiToken)

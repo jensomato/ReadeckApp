@@ -10,9 +10,12 @@
     <string name="account_settings_url_label">Readeck URL</string>
     <string name="account_settings_username_placeholder">username</string>
     <string name="account_settings_username_label">Username</string>
+    <string name="account_settings_apitoken_label">API-Token</string>
     <string name="account_settings_password_label">Password</string>
+    <string name="account_settings_use_apitoken">Use API-Token</string>
     <string name="account_settings_password_placeholder">password</string>
     <string name="account_settings_login">Login</string>
+    <string name="account_settings_logout">Logout</string>
     <string name="account_settings_url_empty_error">URL cannot be empty</string>
     <string name="account_settings_url_error">Invalid URL</string>
     <string name="account_settings_username_error">Username cannot be empty</string>

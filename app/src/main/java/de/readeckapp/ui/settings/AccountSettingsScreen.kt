@@ -1,20 +1,18 @@
 package de.readeckapp.ui.settings
 
 import androidx.compose.foundation.layout.*
-import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.automirrored.outlined.Logout
+import androidx.compose.material.icons.outlined.Cloud
+import androidx.compose.material.icons.outlined.Password
+import androidx.compose.material.icons.outlined.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,11 +27,7 @@ fun AccountSettingsScreen(
     val viewModel: AccountSettingsViewModel = hiltViewModel()
     val settingsUiState = viewModel.uiState.collectAsState().value
     val navigationEvent = viewModel.navigationEvent.collectAsState()
-    val onUrlChanged: (String) -> Unit = { url -> viewModel.onUrlChanged(url) }
-    val onUsernameChanged: (String) -> Unit = { username -> viewModel.onUsernameChanged(username) }
-    val onPasswordChanged: (String) -> Unit = { password -> viewModel.onPasswordChanged(password) }
-    val onLoginClicked: () -> Unit = { viewModel.login() }
-    val onAllowUnencryptedConnectionChanged: (Boolean) -> Unit = { allow -> viewModel.onAllowUnencryptedConnectionChanged(allow) }
+    val onLogoutClicked: () -> Unit = { viewModel.logout() }
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
@@ -87,12 +81,8 @@ fun AccountSettingsScreen(
         modifier = Modifier,
         snackbarHostState = snackbarHostState,
         settingsUiState = settingsUiState,
-        onUrlChanged = onUrlChanged,
-        onUsernameChanged = onUsernameChanged,
-        onPasswordChanged = onPasswordChanged,
-        onLoginClicked = onLoginClicked,
+        onLogoutClicked = onLogoutClicked,
         onClickBack = onClickBack,
-        onAllowUnencryptedConnectionChanged = onAllowUnencryptedConnectionChanged
     )
 }
 
@@ -102,14 +92,9 @@ fun AccountSettingsView(
     modifier: Modifier = Modifier,
     snackbarHostState: SnackbarHostState,
     settingsUiState: AccountSettingsUiState,
-    onUrlChanged: (String) -> Unit,
-    onUsernameChanged: (String) -> Unit,
-    onPasswordChanged: (String) -> Unit,
-    onLoginClicked: () -> Unit,
+    onLogoutClicked: () -> Unit,
     onClickBack: () -> Unit,
-    onAllowUnencryptedConnectionChanged: (Boolean) -> Unit
 ) {
-    val keyboardController = LocalSoftwareKeyboardController.current
     Scaffold(
         modifier = modifier,
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -128,82 +113,138 @@ fun AccountSettingsView(
                     }
                 }
             )
-        }
+        },
+        floatingActionButton = {
+            ExtendedFloatingActionButton(
+                onClick = { onLogoutClicked() },
+                icon = {
+                    Icon(
+                        imageVector = Icons.AutoMirrored.Outlined.Logout,
+                        contentDescription = "Logout"
+                    )
+                },
+                text = {
+                    Text(stringResource(R.string.account_settings_logout))
+                }
+            )
+        },
+        floatingActionButtonPosition = FabPosition.Center,
     ) { padding ->
         Column(
             modifier = Modifier
                 .padding(padding)
-                .padding(16.dp)
-                .fillMaxSize(),
-            horizontalAlignment = Alignment.CenterHorizontally,
-            verticalArrangement = Arrangement.spacedBy(8.dp)
+                .padding(16.dp),
+            horizontalAlignment = Alignment.Start,
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            OutlinedTextField(
-                value = settingsUiState.url ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_url_placeholder)) },
-                onValueChange = { onUrlChanged(it) },
-                label = { Text(stringResource(R.string.account_settings_url_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                isError = settingsUiState.urlError != null,
-                supportingText = {
-                    settingsUiState.urlError?.let {
-                        Text(text = stringResource(it))
-                    }
-                }
-            )
-            OutlinedTextField(
-                value = settingsUiState.username ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_username_placeholder)) },
-                onValueChange = { onUsernameChanged(it) },
-                label = { Text(stringResource(R.string.account_settings_username_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                isError = settingsUiState.usernameError != null,
-                supportingText = {
-                    settingsUiState.usernameError?.let {
-                        Text(text = stringResource(it))
-                    }
-                }
-            )
-            OutlinedTextField(
-                value = settingsUiState.password ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_password_placeholder)) },
-                onValueChange = { onPasswordChanged(it) },
-                label = { Text(stringResource(R.string.account_settings_password_label)) },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth(),
-                isError = settingsUiState.passwordError != null,
-                supportingText = {
-                    settingsUiState.passwordError?.let {
-                        Text(text = stringResource(it))
-                    }
-                }
-            )
+
             Row(
-                modifier = Modifier
-                    .height(56.dp)
-                    .selectable(
-                        selected = settingsUiState.allowUnencryptedConnection,
-                        onClick = { onAllowUnencryptedConnectionChanged(settingsUiState.allowUnencryptedConnection.not()) },
-                        role = Role.Checkbox
-                    ),
                 verticalAlignment = Alignment.CenterVertically,
-                horizontalArrangement = Arrangement.spacedBy(4.dp)
-            ) {
-                Checkbox(
-                    checked = settingsUiState.allowUnencryptedConnection,
-                    onCheckedChange = null
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ){
+                Icon(
+                    imageVector = Icons.Outlined.Cloud,
+                    contentDescription = "URL"
                 )
-                Text(text = stringResource(R.string.account_settings_allow_unencrypted))
+                Column(){
+                    Text(
+                        text = stringResource(R.string.account_settings_url_label),
+                        style = MaterialTheme.typography.titleMedium,)
+                    Text(
+                        text = settingsUiState.url ?: "",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
             }
-            Button(
-                onClick = {
-                    keyboardController?.hide()
-                    onLoginClicked.invoke()
-                },
-                enabled = settingsUiState.loginEnabled
+
+            if(!settingsUiState.useApiToken) {
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(16.dp)
+                ){
+                    Icon(
+                        imageVector = Icons.Outlined.Person,
+                        contentDescription = "Username"
+                    )
+                    Column(){
+                        Text(
+                            text = stringResource(R.string.account_settings_username_label),
+                            style = MaterialTheme.typography.titleMedium
+                        )
+                        Text(
+                            text = settingsUiState.username ?: "",
+                            style = MaterialTheme.typography.bodyMedium
+                        )
+                    }
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
+            ){
+                Icon(
+                    imageVector = Icons.Outlined.Password,
+                    contentDescription = "Password"
+                )
+                Column(){
+                    Text(
+                        text = stringResource(
+                            when(settingsUiState.useApiToken) {
+                                true -> R.string.account_settings_apitoken_label
+                                false -> R.string.account_settings_username_label
+                            }
+                        ),
+                        style = MaterialTheme.typography.titleMedium
+                    )
+                    Text(
+                        text = (settingsUiState.password ?: "").let {
+                            when(settingsUiState.useApiToken) {
+                                true -> it
+                                false -> it.replace(Regex("."), "\u2022")
+                            }
+                        },
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Text(stringResource(R.string.account_settings_login))
+                Text(
+                    text = stringResource(R.string.account_settings_use_apitoken),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 16.dp),
+                )
+                Switch(
+                    checked = settingsUiState.useApiToken,
+                    onCheckedChange = null,
+                    enabled = false
+                )
+            }
+
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Text(
+                    text = stringResource(R.string.account_settings_allow_unencrypted),
+                    style = MaterialTheme.typography.bodyMedium,
+                    modifier = Modifier
+                        .weight(1f)
+                        .padding(end = 16.dp),
+                )
+                Switch(
+                    checked = settingsUiState.allowUnencryptedConnection,
+                    onCheckedChange = null,
+                    enabled = false
+                )
             }
         }
     }
@@ -226,12 +267,8 @@ fun AccountSettingsScreenViewPreview() {
         modifier = Modifier,
         snackbarHostState = SnackbarHostState(),
         settingsUiState = settingsUiState,
-        onUrlChanged = {},
-        onUsernameChanged = {},
-        onPasswordChanged = {},
-        onLoginClicked = {},
+        onLogoutClicked = {},
         onClickBack = {},
-        onAllowUnencryptedConnectionChanged = {}
     )
 }
 
