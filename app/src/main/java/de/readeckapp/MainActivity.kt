@@ -98,10 +98,12 @@ class MainActivity : ComponentActivity() {
             }
 
             ReadeckAppTheme(darkTheme = darkTheme) {
-                ReadeckNavHost(
-                    navController = navController,
-                    startDestination = startDestination
-                )
+                startDestination?.let {
+                    ReadeckNavHost(
+                        navController = navController,
+                        startDestination = it
+                    )
+                }
             }
         }
     }
@@ -139,7 +141,7 @@ fun ReadeckNavHost(navController: NavHostController, startDestination: Any) {
             UiSettingsScreen(navHostController = navController)
         }
         composable<LoginRoute> {
-            LoginScreen(navHostController = navController)
+            LoginScreen()
         }
     }
 }

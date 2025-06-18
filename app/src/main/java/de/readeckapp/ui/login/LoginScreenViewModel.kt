@@ -199,5 +199,5 @@ data class LoginUiState(
     val isLoading: Boolean = false
 ) {
     val loginEnabled: Boolean
-        get() = urlError == null && passwordError == null && (usernameError == null || useApiToken)
+        get() = url.isNotEmpty() && password.isNotEmpty() && urlError == null && passwordError == null && (useApiToken || (username.isNotEmpty() && usernameError == null))
 }

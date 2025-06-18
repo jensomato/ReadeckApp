@@ -6,6 +6,7 @@ import dagger.hilt.android.lifecycle.HiltViewModel
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.domain.usecase.AuthenticationResult
+import de.readeckapp.domain.usecase.LogoutUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -19,7 +20,8 @@ import javax.inject.Inject
 @HiltViewModel
 class AccountSettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
-    private val authenticateUseCase: AuthenticateUseCase
+    private val authenticateUseCase: AuthenticateUseCase,
+    private val logoutUseCase: LogoutUseCase
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
@@ -66,7 +68,9 @@ class AccountSettingsViewModel @Inject constructor(
     }
 
     fun logout() {
-
+        viewModelScope.launch {
+            logoutUseCase.execute()
+        }
     }
 
     fun onAllowUnencryptedConnectionChanged(allow: Boolean) {
