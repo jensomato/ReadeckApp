@@ -48,8 +48,8 @@ data class Resources(
     val article: Resource? = null,
     val icon: ImageResource? = null,
     val image: ImageResource? = null,
-    val log: Resource,
-    val props: Resource,
+    val log: Resource? = null,
+    val props: Resource? = null,
     val thumbnail: ImageResource? = null
 )
 
