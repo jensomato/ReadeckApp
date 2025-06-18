@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed a parsing error where `log` and `props` fields could be null in the server response. Closes #110
+
 ## [0.6.0] - 2025-06-16
 
 ### Added

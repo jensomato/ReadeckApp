@@ -93,5 +93,42 @@
     },
     "word_count": 247,
     "reading_time": 1
+  },
+  {
+    "id": "fwAYQFVx2VNAKvR5jtQ8cr",
+    "href": "https://readeck.example.com/api/bookmarks/fwAYQFVx2VNAKvR5jtQ8cr",
+    "created": "2025-04-02T22:46:17.187719941Z",
+    "updated": "2025-04-04T14:00:01.410961714Z",
+    "state": 0,
+    "loaded": true,
+    "url": "http://example.org/example-read_progress",
+    "title": "Example without read_progress",
+    "site_name": "example.org",
+    "site": "example.org",
+    "authors": [
+      "John Dow"
+    ],
+    "lang": "en",
+    "text_direction": "",
+    "document_type": "article",
+    "type": "article",
+    "has_article": true,
+    "description": "Examples",
+    "is_deleted": false,
+    "is_marked": false,
+    "is_archived": false,
+    "labels": [],
+    "resources": {
+      "article": {
+        "src": "https://readeck.example.com/api/bookmarks/fwAYQFVx2VNBKvR5jtQ8cr/article"
+      },
+      "icon": {
+        "src": "https://readeck.example.com/bm/fw/fwAYQFVx2VNBKvR5jtQ8cr/img/icon.png",
+        "width": 48,
+        "height": 48
+      }
+    },
+    "word_count": 247,
+    "reading_time": 1
   }
 ]
