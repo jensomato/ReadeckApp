@@ -13,11 +13,11 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
+import kotlin.text.Regex
 
 @HiltViewModel
 class LoginScreenViewModel @Inject constructor (
     private val authenticateUseCase: AuthenticateUseCase
-
 ) : ViewModel() {
 
     /**
@@ -42,15 +42,15 @@ class LoginScreenViewModel @Inject constructor (
         }
     }
 
-    fun onPasswordChanged(password: String) {
-        val passwordError = validatePassword(password, _uiState.value.useApiToken)
+    fun onPasswordOrApiTokenChanged(password: String) {
+        val passwordError = validatePasswordOrApiToken(password, uiState.value.useApiToken)
 
         _uiState.update {
-            it.copy(password = password, passwordError = passwordError)
+            it.copy(passwordOrApiToken = password, passwordOrApiTokenError = passwordError)
         }
     }
 
-    fun onToggleShowPassword() {
+    fun onToggleShowPasswordOrApiToken() {
         _uiState.update {
             it.copy(showPassword = !it.showPassword)
         }
@@ -69,8 +69,8 @@ class LoginScreenViewModel @Inject constructor (
                 showPassword = !it.useApiToken,
                 username = "",
                 usernameError = null,
-                password = "",
-                passwordError = null
+                passwordOrApiToken = "",
+                passwordOrApiTokenError = null
             )
         }
     }
@@ -82,40 +82,44 @@ class LoginScreenViewModel @Inject constructor (
     }
 
     fun onClickLogin(){
-        val urlError = validateUrl(_uiState.value.url)
-        val usernameError = validateUsername(_uiState.value.username)
-        val passwordError = validatePassword(_uiState.value.password, _uiState.value.useApiToken)
+        val urlError = validateUrl(uiState.value.url)
+        val usernameError = validateUsername(uiState.value.username)
+        val passwordOrApiTokenError = validatePasswordOrApiToken(uiState.value.passwordOrApiToken, uiState.value.useApiToken)
 
-        _uiState.update {
-            it.copy(urlError = urlError, usernameError = usernameError, passwordError = passwordError)
-        }
-
-        if (!_uiState.value.loginEnabled) return
-
-        val urlPrefix = if(_uiState.value.useUnencryptedConnection) {
+        val urlPrefix = if(uiState.value.useUnencryptedConnection) {
             "http://"
         } else "https://"
 
-        _uiState.value.url.also { url ->
-            if (!url.endsWith("/api")) {
-                _uiState.update { it.copy(url = "$url/api") }
-            }
+        val urlSuffix = if(!uiState.value.url.endsWith("/api")) {
+            "/api"
+        } else ""
+
+        _uiState.update {
+            it.copy(
+                // Remove schema if user entered one...
+                url = "${it.url}$urlSuffix".replace(Regex("^https?://", RegexOption.IGNORE_CASE), ""),
+                urlError = urlError,
+                usernameError = usernameError,
+                passwordOrApiTokenError = passwordOrApiTokenError
+            )
         }
+
+        if (!uiState.value.loginEnabled) return
 
         viewModelScope.launch {
             _uiState.update {
                 it.copy(isLoading = true)
             }
 
-            when(_uiState.value.useApiToken) {
+            when(uiState.value.useApiToken) {
                 true -> {
                     // TODO
                 }
                 false -> {
                     val result = authenticateUseCase.execute(
-                        url = "$urlPrefix${_uiState.value.url}",
-                        username = _uiState.value.username,
-                        password = _uiState.value.password
+                        url = "$urlPrefix${uiState.value.url}",
+                        username = uiState.value.username,
+                        password = uiState.value.passwordOrApiToken
                     )
 
                     when(result){
@@ -127,8 +131,8 @@ class LoginScreenViewModel @Inject constructor (
                         is AuthenticationResult.AuthenticationFailed -> {
                             _uiState.update {
                                 it.copy(
-                                    usernameError = R.string.account_settings_authentication_failed,
-                                    passwordError = R.string.account_settings_authentication_failed,
+                                    usernameError = R.string.login_authentication_failed,
+                                    passwordOrApiTokenError = R.string.login_authentication_failed,
                                     authenticationResult = result
                                 )
                             }
@@ -136,7 +140,7 @@ class LoginScreenViewModel @Inject constructor (
                         is AuthenticationResult.NetworkError -> {
                             _uiState.update {
                                 it.copy(
-                                    urlError = R.string.account_settings_network_error,
+                                    urlError = R.string.login_network_error,
                                     authenticationResult = result
                                 )
                             }
@@ -162,23 +166,23 @@ class LoginScreenViewModel @Inject constructor (
     // I intentionally don't use Util.isValidUrl because Util... checks for an URI (with schema) but I only need a URL (without schema)
     private fun validateUrl(url: String): Int? {
         return if(url.isBlank()) {
-            R.string.account_settings_url_empty_error
+            R.string.login_url_empty_error
         } else if (!Patterns.WEB_URL.matcher(url).matches()) {
-            R.string.account_settings_url_error
+            R.string.login_url_invalid_error
         } else null
     }
 
     private fun validateUsername(username: String): Int? {
         return if(username.isBlank()) {
-            R.string.account_settings_username_error
+            R.string.login_username_empty_error
         } else null
     }
 
-    private fun validatePassword(password: String, useApiToken: Boolean): Int?{
+    private fun validatePasswordOrApiToken(password: String, useApiToken: Boolean): Int?{
         return if(password.isBlank()) {
             when(useApiToken){
-                true -> R.string.account_settings_apitoken_error
-                false -> R.string.account_settings_password_error
+                true -> R.string.login_apitoken_empty_error
+                false -> R.string.login_password_empty_error
             }
         } else null
     }
@@ -188,10 +192,10 @@ class LoginScreenViewModel @Inject constructor (
 data class LoginUiState(
     val url: String = "",
     val username: String = "",
-    val password: String = "",
+    val passwordOrApiToken: String = "",
     val urlError: Int? = null,
     val usernameError: Int? = null,
-    val passwordError: Int? = null,
+    val passwordOrApiTokenError: Int? = null,
     val authenticationResult: AuthenticationResult? = null,
     val useApiToken: Boolean = false,
     val useUnencryptedConnection: Boolean = false,
@@ -199,5 +203,5 @@ data class LoginUiState(
     val isLoading: Boolean = false
 ) {
     val loginEnabled: Boolean
-        get() = url.isNotEmpty() && password.isNotEmpty() && urlError == null && passwordError == null && (useApiToken || (username.isNotEmpty() && usernameError == null))
+        get() = url.isNotEmpty() && passwordOrApiToken.isNotEmpty() && urlError == null && passwordOrApiTokenError == null && (useApiToken || (username.isNotEmpty() && usernameError == null))
 }

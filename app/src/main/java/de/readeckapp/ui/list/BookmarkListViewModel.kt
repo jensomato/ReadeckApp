@@ -80,7 +80,7 @@ class BookmarkListViewModel @Inject constructor(
 
         if (sharedUrl != null) {
             val urlError = if (!sharedUrl.isValidUrl()) {
-                R.string.account_settings_url_error // Use resource ID
+                R.string.list_view_invalid_url_error // Use resource ID
             } else {
                 null
             }
@@ -303,7 +303,7 @@ class BookmarkListViewModel @Inject constructor(
     fun updateCreateBookmarkUrl(url: String) {
         val isValidUrl = url.isValidUrl()
         val urlError = if (!isValidUrl && url.isNotEmpty()) {
-            R.string.account_settings_url_error // Use resource ID
+            R.string.list_view_invalid_url_error // Use resource ID
         } else {
             null
         }

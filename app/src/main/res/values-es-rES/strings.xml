@@ -7,16 +7,9 @@
     <string name="settings_account_subtitle_default">Sesión no iniciada</string>
     <string name="accountsettings_topbar_title">Cuenta</string>
     <string name="account_settings_topbar_title">URL de Readeck</string>
-    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
     <string name="account_settings_url_label">URL de Readeck</string>
-    <string name="account_settings_username_placeholder">identificador</string>
     <string name="account_settings_username_label">Identificador</string>
     <string name="account_settings_password_label">Contraseña</string>
-    <string name="account_settings_password_placeholder">contraseña</string>
-    <string name="account_settings_login">Iniciar sesión</string>
-    <string name="account_settings_url_error">URL no válida</string>
-    <string name="account_settings_username_error">Debes escribir el identificador</string>
-    <string name="account_settings_password_error">Debes escribir una contraseña</string>
     <string name="authors" translatable="true">
 {count, plural,
 zero{}

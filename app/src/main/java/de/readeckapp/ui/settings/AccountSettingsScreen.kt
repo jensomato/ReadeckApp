@@ -18,7 +18,6 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import de.readeckapp.R
-import de.readeckapp.domain.usecase.AuthenticationResult
 
 @Composable
 fun AccountSettingsScreen(
@@ -40,40 +39,6 @@ fun AccountSettingsScreen(
                 }
             }
             viewModel.onNavigationEventConsumed() // Consume the event
-        }
-    }
-
-    LaunchedEffect(key1 = settingsUiState.authenticationResult) {
-        settingsUiState.authenticationResult?.let { result ->
-            when (result) {
-                is AuthenticationResult.Success -> {
-                    snackbarHostState.showSnackbar(
-                        message = "Success",
-                        duration = SnackbarDuration.Short
-                    )
-                }
-
-                is AuthenticationResult.AuthenticationFailed -> {
-                    snackbarHostState.showSnackbar(
-                        message = result.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-
-                is AuthenticationResult.NetworkError -> {
-                    snackbarHostState.showSnackbar(
-                        message = result.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-
-                is AuthenticationResult.GenericError -> {
-                    snackbarHostState.showSnackbar(
-                        message = result.message,
-                        duration = SnackbarDuration.Short
-                    )
-                }
-            }
         }
     }
 
@@ -120,7 +85,7 @@ fun AccountSettingsView(
                 icon = {
                     Icon(
                         imageVector = Icons.AutoMirrored.Outlined.Logout,
-                        contentDescription = "Logout"
+                        contentDescription = null
                     )
                 },
                 text = {
@@ -144,7 +109,7 @@ fun AccountSettingsView(
             ){
                 Icon(
                     imageVector = Icons.Outlined.Cloud,
-                    contentDescription = "URL"
+                    contentDescription = null
                 )
                 Column(){
                     Text(
@@ -164,7 +129,7 @@ fun AccountSettingsView(
                 ){
                     Icon(
                         imageVector = Icons.Outlined.Person,
-                        contentDescription = "Username"
+                        contentDescription = null
                     )
                     Column(){
                         Text(
@@ -185,14 +150,14 @@ fun AccountSettingsView(
             ){
                 Icon(
                     imageVector = Icons.Outlined.Password,
-                    contentDescription = "Password"
+                    contentDescription = null
                 )
                 Column(){
                     Text(
                         text = stringResource(
                             when(settingsUiState.useApiToken) {
                                 true -> R.string.account_settings_apitoken_label
-                                false -> R.string.account_settings_username_label
+                                false -> R.string.account_settings_password_label
                             }
                         ),
                         style = MaterialTheme.typography.titleMedium
@@ -257,11 +222,8 @@ fun AccountSettingsScreenViewPreview() {
         url = "https://example.com",
         username = "user",
         password = "pass",
-        loginEnabled = true,
-        urlError = R.string.account_settings_url_error,
-        usernameError = null,
-        passwordError = null,
-        authenticationResult = null
+        allowUnencryptedConnection = false,
+        useApiToken = false
     )
     AccountSettingsView(
         modifier = Modifier,

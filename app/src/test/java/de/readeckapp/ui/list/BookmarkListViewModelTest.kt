@@ -436,7 +436,7 @@ class BookmarkListViewModelTest {
 
         val state =
             viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
-        assertEquals(R.string.account_settings_url_error, state.urlError)
+        assertEquals(R.string.list_view_invalid_url_error, state.urlError)
         assertFalse(state.isCreateEnabled)
     }
 
@@ -538,7 +538,7 @@ class BookmarkListViewModelTest {
             val state =
                 viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
             assertEquals(sharedUrl, state.url)
-            assertEquals(R.string.account_settings_url_error, state.urlError)
+            assertEquals(R.string.list_view_invalid_url_error, state.urlError)
             assertFalse(state.isCreateEnabled)
         }
 

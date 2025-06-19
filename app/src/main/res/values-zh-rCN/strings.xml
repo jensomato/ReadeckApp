@@ -1,9 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <string name="account_settings_password_label">密码</string>
-    <string name="account_settings_password_placeholder">密码</string>
-    <string name="account_settings_login">登录</string>
-    <string name="account_settings_url_error">无效的 URL</string>
     <string name="favorites">收藏</string>
     <string name="url">URL</string>
     <string name="detail_view_no_content">未找到文章内容</string>
@@ -17,12 +14,8 @@
     <string name="settings_account_subtitle_default">未登录</string>
     <string name="accountsettings_topbar_title">账号</string>
     <string name="account_settings_topbar_title">Readeck URL</string>
-    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
     <string name="account_settings_url_label">Readeck URL</string>
-    <string name="account_settings_username_placeholder">用户名</string>
     <string name="account_settings_username_label">用户名</string>
-    <string name="account_settings_username_error">用户名不能为空</string>
-    <string name="account_settings_password_error">密码不能为空</string>
     <string name="account_settings_allow_unencrypted">允许未加密连接</string>
     <string name="sync_settings_topbar_title">同步设置</string>
     <string name="authors" translatable="true">{count, plural, zero{} one{来自 {author}} many{来自 {author} 等} other{} }</string>

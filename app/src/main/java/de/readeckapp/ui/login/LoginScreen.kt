@@ -34,12 +34,16 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.autofill.ContentType
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.semantics.contentType
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.ui.components.AdaptiveReadeckIcon
 
@@ -58,8 +62,8 @@ fun LoginScreen() {
      */
     val onUrlChanged: (String) -> Unit = { viewModel.onUrlChanged(it) }
     val onUsernameChanged: (String) -> Unit = { viewModel.onUsernameChanged(it) }
-    val onPasswordChanged: (String) -> Unit = { viewModel.onPasswordChanged(it) }
-    val onToggleShowPassword: () -> Unit = { viewModel.onToggleShowPassword() }
+    val onPasswordChanged: (String) -> Unit = { viewModel.onPasswordOrApiTokenChanged(it) }
+    val onToggleShowPassword: () -> Unit = { viewModel.onToggleShowPasswordOrApiToken() }
     val onToggleUseApiToken: () -> Unit = { viewModel.onToggleUseApiToken() }
     val onToggleAllowUnencryptedConnection: () -> Unit = { viewModel.onToggleUseUnencryptedConnection() }
     val onClickLogin: () -> Unit = { viewModel.onClickLogin() }
@@ -67,7 +71,7 @@ fun LoginScreen() {
 
     val passwordVisual = if(uiState.showPassword) VisualTransformation.None else PasswordVisualTransformation()
     val urlPrefix = if(uiState.useUnencryptedConnection) "http://" else "https://"
-    val authTokenText = if(uiState.useApiToken) "API-Token *" else "Password *"
+    val authTokenText = if(uiState.useApiToken) stringResource(R.string.login_apitoken_label) else stringResource(R.string.login_password_label)
 
     LaunchedEffect(key1 = uiState.authenticationResult) {
 
@@ -93,13 +97,13 @@ fun LoginScreen() {
                         true -> CircularProgressIndicator(
                             color = MaterialTheme.colorScheme.onPrimaryContainer
                         )
-                        false -> Icon(Icons.AutoMirrored.Default.Login, "Login")
+                        false -> Icon(Icons.AutoMirrored.Default.Login, null)
                     }
                 },
                 text = {
                     when(uiState.isLoading){
                         true -> {}
-                        false -> Text("Login")
+                        false -> Text(stringResource(R.string.login_button_label))
                     }
                 },
                 expanded = !uiState.isLoading
@@ -121,22 +125,22 @@ fun LoginScreen() {
             AdaptiveReadeckIcon(128.dp)
 
             Text(
-                text = "Welcome to ReadeckApp",
+                text = stringResource(R.string.login_welcome),
                 style = MaterialTheme.typography.headlineMedium,
                 modifier = Modifier.padding(top = 16.dp)
             )
 
             Text(
-                text = "Please log in to your Readeck instance.",
+                text = stringResource(R.string.login_please_log_in),
                 style = MaterialTheme.typography.bodyLarge,
             )
 
-            Column(){
+            Column {
 
                 TextField(
                     value = uiState.url,
                     onValueChange = { onUrlChanged(it) },
-                    label = { Text("Instance URL *") },
+                    label = { Text(stringResource(R.string.login_url_label)) },
                     prefix = { Text(urlPrefix) },
                     leadingIcon = {
                         Icon(
@@ -150,14 +154,15 @@ fun LoginScreen() {
                             Text(stringResource(it))
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
                 )
 
                 if(!uiState.useApiToken){
                     TextField(
                         value = uiState.username,
                         onValueChange = { onUsernameChanged(it) },
-                        label = { Text("Username *") },
+                        label = { Text(stringResource(R.string.login_username_label)) },
                         leadingIcon = {
                             Icon(
                                 imageVector = Icons.Outlined.Person,
@@ -170,12 +175,14 @@ fun LoginScreen() {
                                 Text(stringResource(it))
                             }
                         },
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .semantics { contentType = ContentType.Username }
                     )
                 }
 
                 TextField(
-                    value = uiState.password,
+                    value = uiState.passwordOrApiToken,
                     onValueChange = { onPasswordChanged(it) },
                     label = { Text(authTokenText) },
                     keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
@@ -200,13 +207,15 @@ fun LoginScreen() {
                             )
                         )
                     },
-                    isError = uiState.passwordError != null,
+                    isError = uiState.passwordOrApiTokenError != null,
                     supportingText = {
-                        uiState.passwordError?.let {
+                        uiState.passwordOrApiTokenError?.let {
                             Text(stringResource(it))
                         }
                     },
-                    modifier = Modifier.fillMaxWidth()
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .semantics { contentType = ContentType.Password }
                 )
             }
 
@@ -216,7 +225,7 @@ fun LoginScreen() {
                 modifier = Modifier.fillMaxWidth()
             ){
                 Text(
-                    text = "Use API-token",
+                    text = stringResource(R.string.login_use_apitoken_label),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = horizontalSpacing)
@@ -233,7 +242,7 @@ fun LoginScreen() {
                 modifier = Modifier.fillMaxWidth()
             ) {
                 Text(
-                    text = "Use unencrypted connection",
+                    text = stringResource(R.string.login_use_unencrypted_label),
                     modifier = Modifier
                         .weight(1f)
                         .padding(end = horizontalSpacing)
@@ -249,7 +258,7 @@ fun LoginScreen() {
                     horizontalArrangement = Arrangement.Start
                 ) {
                     Text(
-                        text = "Unencrypted connections via HTTP are not recommended. Your credentials may be exposed!",
+                        text = stringResource(R.string.login_use_unencrypted_description),
                         color = MaterialTheme.colorScheme.error
                     )
                 }
