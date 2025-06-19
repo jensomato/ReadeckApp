@@ -7,16 +7,9 @@
     <string name="settings_account_subtitle_default">Nicht eingeloggt</string>
     <string name="accountsettings_topbar_title">Konto</string>
     <string name="account_settings_topbar_title">Readeck URL</string>
-    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
     <string name="account_settings_url_label">Readeck URL</string>
-    <string name="account_settings_username_placeholder">Benutzername</string>
     <string name="account_settings_username_label">Benutzername</string>
     <string name="account_settings_password_label">Passwort</string>
-    <string name="account_settings_password_placeholder">Passwort</string>
-    <string name="account_settings_login">Einloggen</string>
-    <string name="account_settings_url_error">Ungültige URL</string>
-    <string name="account_settings_username_error">Benutzername darf nicht leer sein</string>
-    <string name="account_settings_password_error">Passwort darf nicht leer sein</string>
     <string name="account_settings_allow_unencrypted">Unverschlüsselte Verbindunge erlauben</string>
     <string name="sync_settings_topbar_title">Synchronisierungseinstellungen</string>
     <string name="authors" translatable="true">
