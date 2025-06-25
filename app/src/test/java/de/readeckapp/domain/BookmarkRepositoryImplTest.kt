@@ -112,7 +112,7 @@ class BookmarkRepositoryImplTest {
         // Arrange
         val bookmarkId = "123"
         val isFavorite = true
-        val statusMessageDto = StatusMessageDto(400, "Bad Request")
+        val statusMessageDto = StatusMessageDto(statusField = 400, message = "Bad Request")
         val errorResponse = Response.error<EditBookmarkResponseDto>(
             400,
             json.encodeToString(StatusMessageDto.serializer(), statusMessageDto).toResponseBody()
@@ -317,7 +317,7 @@ class BookmarkRepositoryImplTest {
     fun `deleteBookmark failure 404`() = runTest {
         // Arrange
         val bookmarkId = "123"
-        val statusMessageDto = StatusMessageDto(404, "Not Found")
+        val statusMessageDto = StatusMessageDto(statusField = 404, message = "Not Found")
         val errorResponse = Response.error<Unit>(
             404,
             json.encodeToString(StatusMessageDto.serializer(), statusMessageDto).toResponseBody()

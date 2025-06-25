@@ -132,7 +132,7 @@ class UserRepositoryImplTest {
         val password = "testpassword"
         val errorMessage = "Invalid credentials"
         val errorCode = 401
-        val errorBody = StatusMessageDto(errorCode, errorMessage)
+        val errorBody = StatusMessageDto(statusField = errorCode, message = errorMessage)
         val errorResponse = Response.error<AuthenticationResponseDto>(errorCode, json.encodeToString(StatusMessageDto.serializer(), errorBody).toResponseBody(null))
 
         coEvery { readeckApi.authenticate(AuthenticationRequestDto(username, password, "readeck-app")) } returns errorResponse
@@ -197,8 +197,8 @@ class UserRepositoryImplTest {
         val result = userRepository.login(url, username, password)
 
         // Assert
-        assert(result is UserRepository.LoginResult.Error)
-        assert((result as UserRepository.LoginResult.Error).errorMessage.startsWith("Network error"))
+        assert(result is UserRepository.LoginResult.NetworkError)
+        assert((result as UserRepository.LoginResult.NetworkError).errorMessage.startsWith("Network error"))
         coVerify { settingsDataStore.clearCredentials() }
     }
 

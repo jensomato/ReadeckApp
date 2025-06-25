@@ -53,6 +53,7 @@ class UserRepositoryImpl @Inject constructor(
                         "readeck-app"
                     )
                 )
+
                 if (response.isSuccessful && response.body() != null) {
                     response.body()?.let {
                         settingsDataStore.saveCredentials(url, username, password, it.token)
@@ -60,17 +61,18 @@ class UserRepositoryImpl @Inject constructor(
                     } ?: UserRepository.LoginResult.Error("Empty response body")
                 } else {
                     val errorBodyString = response.errorBody()?.string()
+
                     val errorState: StatusMessageDto = if (!errorBodyString.isNullOrBlank()) {
                         try {
                             json.decodeFromString<StatusMessageDto>(errorBodyString) // Use json.decodeFromString
                         } catch (e: SerializationException) { // Catch SerializationException
                             StatusMessageDto(
                                 response.code(),
-                                "Failed to parse error: ${e.message}"
+                                message = "Failed to parse error: ${e.message}"
                             )
                         }
                     } else {
-                        StatusMessageDto(response.code(), "Empty error body")
+                        StatusMessageDto(response.code(), message = "Empty error body")
                     }
                     UserRepository.LoginResult.Error(
                         errorMessage = errorState.message,
@@ -78,7 +80,7 @@ class UserRepositoryImpl @Inject constructor(
                     )
                 }
             } catch (e: IOException) {
-                UserRepository.LoginResult.Error("Network error: ${e.message}", ex = e)
+                UserRepository.LoginResult.NetworkError("Network error: ${e.message}")
             } catch (e: Exception) {
                 UserRepository.LoginResult.Error(
                     "An unexpected error occurred: ${e.message}",

@@ -6,17 +6,13 @@
     <string name="settings_account_subtitle_default">Not logged in</string>
     <string name="accountsettings_topbar_title">Account</string>
     <string name="account_settings_topbar_title">Readeck URL</string>
-    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
     <string name="account_settings_url_label">Readeck URL</string>
-    <string name="account_settings_username_placeholder">username</string>
     <string name="account_settings_username_label">Username</string>
+    <string name="account_settings_apitoken_label">API-Token</string>
     <string name="account_settings_password_label">Password</string>
-    <string name="account_settings_password_placeholder">password</string>
-    <string name="account_settings_login">Login</string>
-    <string name="account_settings_url_error">Invalid URL</string>
-    <string name="account_settings_username_error">Username cannot be empty</string>
-    <string name="account_settings_password_error">Password cannot be empty</string>
-    <string name="account_settings_allow_unencrypted">Allow unencrypted connections</string>
+    <string name="account_settings_use_apitoken">Use API-Token</string>
+    <string name="account_settings_logout">Logout</string>
+    <string name="account_settings_allow_unencrypted">Use unencrypted connections</string>
     <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,
@@ -108,7 +104,29 @@ other{}
     <string name="auto_sync_notification_rationale_dialog_title">Notification Permission Required</string>
     <string name="auto_sync_notification_rationale_dialog_text">To notify you about background sync failures, we need permission to send notifications.  Please grant this permission.</string>
     <string name="auto_sync_notification_rationale_dialog_grant_button">Grant Permission</string>
+
+    <!-- Bookmarks List View -->
     <string name="list_view_empty_not_loaded_yet">Bookmarks have not been loaded yet.</string>
     <string name="list_view_empty_error_loading_bookmarks">An error has occurred while loading bookmarks.</string>
     <string name="list_view_empty_nothing_to_see">No bookmarks have been found.</string>
+    <string name="list_view_invalid_url_error">Invalid URL</string>
+
+    <!--LoginScreen -->
+    <string name="login_apitoken_label">API-Token *</string>
+    <string name="login_password_label">Password *</string>
+    <string name="login_url_label">Instance URL *</string>
+    <string name="login_username_label">Username *</string>
+    <string name="login_use_apitoken_label">Use API-token</string>
+    <string name="login_use_unencrypted_label">Use unencrypted connection</string>
+    <string name="login_use_unencrypted_description">Unencrypted connections via HTTP are not recommended. Your credentials may be exposed!</string>
+    <string name="login_button_label">Login</string>
+    <string name="login_welcome">Welcome to ReadeckApp</string>
+    <string name="login_please_log_in">Please log in to your Readeck instance.</string>
+    <string name="login_authentication_failed">Username or password wrong.</string>
+    <string name="login_network_error">Can\'t reach Readeck instance. Check URL or internet connection.</string>
+    <string name="login_url_empty_error">Instance URL cannot be empty.</string>
+    <string name="login_url_invalid_error">URL is invalid.</string>
+    <string name="login_username_empty_error">Username cannot be empty.</string>
+    <string name="login_apitoken_empty_error">API-token cannot be empty.</string>
+    <string name="login_password_empty_error">Password cannot be empty.</string>
 </resources>

@@ -12,6 +12,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -27,6 +28,7 @@ import dagger.hilt.android.AndroidEntryPoint
 import de.readeckapp.domain.model.Theme
 import de.readeckapp.ui.detail.BookmarkDetailScreen
 import de.readeckapp.ui.list.BookmarkListScreen
+import de.readeckapp.ui.login.LoginScreen
 import de.readeckapp.ui.navigation.AccountSettingsRoute
 import de.readeckapp.ui.navigation.BookmarkDetailRoute
 import de.readeckapp.ui.navigation.BookmarkListRoute
@@ -35,6 +37,7 @@ import de.readeckapp.ui.navigation.OpenSourceLibrariesRoute
 import de.readeckapp.ui.navigation.SettingsRoute
 import de.readeckapp.ui.navigation.SyncSettingsRoute
 import de.readeckapp.ui.navigation.UiSettingsRoute
+import de.readeckapp.ui.navigation.LoginRoute
 import de.readeckapp.ui.settings.AccountSettingsScreen
 import de.readeckapp.ui.settings.LogViewScreen
 import de.readeckapp.ui.settings.OpenSourceLibrariesScreen
@@ -51,6 +54,7 @@ class MainActivity : ComponentActivity() {
 
     private lateinit var intentState: MutableState<Intent?>
 
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
@@ -63,27 +67,8 @@ class MainActivity : ComponentActivity() {
             val context = LocalContext.current
             val noValidUrlMessage = stringResource(id = R.string.not_valid_url)
 
-            LaunchedEffect(intentState.value) {
-                intentState.value?.let { newIntent ->
-                    if (newIntent.action == Intent.ACTION_SEND && newIntent.type == "text/plain") {
-                        val sharedUrl = newIntent.getStringExtra(Intent.EXTRA_TEXT)
-                        if (sharedUrl.isValidUrl()) {
-                            navController.navigate(BookmarkListRoute(sharedUrl = sharedUrl))
-                        } else {
-                            scope.launch {
-                                Toast.makeText(context, noValidUrlMessage, Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    }
-                    if (newIntent.hasExtra("navigateToAccountSettings")) {
-                        Timber.d("Navigating to AccountSettingsScreen")
-                        newIntent.removeExtra("navigateToAccountSettings") // Prevent re-navigation
-                        navController.navigate(AccountSettingsRoute)
-                    }
-                    // Consume the intent after processing
-                    intentState.value = null
-                }
-            }
+            val startDestination by viewModel.startDestination.collectAsState()
+            val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 
             val darkTheme = when (theme.value) {
                 Theme.LIGHT -> false
@@ -92,7 +77,34 @@ class MainActivity : ComponentActivity() {
             }
 
             ReadeckAppTheme(darkTheme = darkTheme) {
-                ReadeckNavHost(navController)
+                startDestination?.also {
+                    LaunchedEffect(intentState.value) {
+                        intentState.value?.let { newIntent ->
+                            if (newIntent.action == Intent.ACTION_SEND && newIntent.type == "text/plain" && isLoggedIn) {
+                                val sharedUrl = newIntent.getStringExtra(Intent.EXTRA_TEXT)
+                                if (sharedUrl.isValidUrl()) {
+                                    navController.navigate(BookmarkListRoute(sharedUrl = sharedUrl))
+                                } else {
+                                    scope.launch {
+                                        Toast.makeText(context, noValidUrlMessage, Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                            if (newIntent.hasExtra("navigateToAccountSettings")) {
+                                Timber.d("Navigating to AccountSettingsScreen")
+                                newIntent.removeExtra("navigateToAccountSettings") // Prevent re-navigation
+                                navController.navigate(AccountSettingsRoute)
+                            }
+                            // Consume the intent after processing
+                            intentState.value = null
+                        }
+                    }
+
+                    ReadeckNavHost(
+                        navController = navController,
+                        startDestination = it
+                    )
+                }
             }
         }
     }
@@ -105,8 +117,8 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("WrongStartDestinationType")
 @Composable
-fun ReadeckNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = BookmarkListRoute(sharedUrl = null)) {
+fun ReadeckNavHost(navController: NavHostController, startDestination: Any) {
+    NavHost(navController = navController, startDestination = startDestination) {
         composable<BookmarkListRoute> { BookmarkListScreen(navController) }
         composable<SettingsRoute> { SettingsScreen(navController) }
         composable<AccountSettingsRoute> { AccountSettingsScreen(navController) }
@@ -128,6 +140,9 @@ fun ReadeckNavHost(navController: NavHostController) {
         }
         composable<UiSettingsRoute> {
             UiSettingsScreen(navHostController = navController)
+        }
+        composable<LoginRoute> {
+            LoginScreen()
         }
     }
 }
