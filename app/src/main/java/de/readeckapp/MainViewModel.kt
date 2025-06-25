@@ -32,6 +32,12 @@ class MainViewModel @Inject constructor(
         initialValue = null
     )
 
+    val isLoggedIn: StateFlow<Boolean> = userRepository.observeIsLoggedIn().stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
+
     val theme = settingsDataStore.themeFlow.map {
         it?.let { Theme.valueOf(it) } ?: Theme.SYSTEM
     }.stateIn(

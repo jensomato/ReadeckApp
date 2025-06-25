@@ -68,28 +68,7 @@ class MainActivity : ComponentActivity() {
             val noValidUrlMessage = stringResource(id = R.string.not_valid_url)
 
             val startDestination by viewModel.startDestination.collectAsState()
-
-            LaunchedEffect(intentState.value) {
-                intentState.value?.let { newIntent ->
-                    if (newIntent.action == Intent.ACTION_SEND && newIntent.type == "text/plain") {
-                        val sharedUrl = newIntent.getStringExtra(Intent.EXTRA_TEXT)
-                        if (sharedUrl.isValidUrl()) {
-                            navController.navigate(BookmarkListRoute(sharedUrl = sharedUrl))
-                        } else {
-                            scope.launch {
-                                Toast.makeText(context, noValidUrlMessage, Toast.LENGTH_LONG).show()
-                            }
-                        }
-                    }
-                    if (newIntent.hasExtra("navigateToAccountSettings")) {
-                        Timber.d("Navigating to AccountSettingsScreen")
-                        newIntent.removeExtra("navigateToAccountSettings") // Prevent re-navigation
-                        navController.navigate(AccountSettingsRoute)
-                    }
-                    // Consume the intent after processing
-                    intentState.value = null
-                }
-            }
+            val isLoggedIn by viewModel.isLoggedIn.collectAsState()
 
             val darkTheme = when (theme.value) {
                 Theme.LIGHT -> false
@@ -98,7 +77,29 @@ class MainActivity : ComponentActivity() {
             }
 
             ReadeckAppTheme(darkTheme = darkTheme) {
-                startDestination?.let {
+                startDestination?.also {
+                    LaunchedEffect(intentState.value) {
+                        intentState.value?.let { newIntent ->
+                            if (newIntent.action == Intent.ACTION_SEND && newIntent.type == "text/plain" && isLoggedIn) {
+                                val sharedUrl = newIntent.getStringExtra(Intent.EXTRA_TEXT)
+                                if (sharedUrl.isValidUrl()) {
+                                    navController.navigate(BookmarkListRoute(sharedUrl = sharedUrl))
+                                } else {
+                                    scope.launch {
+                                        Toast.makeText(context, noValidUrlMessage, Toast.LENGTH_LONG).show()
+                                    }
+                                }
+                            }
+                            if (newIntent.hasExtra("navigateToAccountSettings")) {
+                                Timber.d("Navigating to AccountSettingsScreen")
+                                newIntent.removeExtra("navigateToAccountSettings") // Prevent re-navigation
+                                navController.navigate(AccountSettingsRoute)
+                            }
+                            // Consume the intent after processing
+                            intentState.value = null
+                        }
+                    }
+
                     ReadeckNavHost(
                         navController = navController,
                         startDestination = it
