@@ -42,7 +42,6 @@ import de.readeckapp.ui.settings.SettingsScreen
 import de.readeckapp.ui.settings.SyncSettingsScreen
 import de.readeckapp.ui.settings.UiSettingsScreen
 import de.readeckapp.ui.theme.ReadeckAppTheme
-import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.launch
 import timber.log.Timber
 
@@ -66,13 +65,13 @@ class MainActivity : ComponentActivity() {
             LaunchedEffect(intentState.value) {
                 intentState.value?.let { newIntent ->
                     if (newIntent.action == Intent.ACTION_SEND && newIntent.type == "text/plain") {
-                        val sharedUrl = newIntent.getStringExtra(Intent.EXTRA_TEXT)
-                        if (sharedUrl.isValidUrl()) {
-                            navController.navigate(BookmarkListRoute(sharedUrl = sharedUrl))
-                        } else {
+                        val sharedText = newIntent.getStringExtra(Intent.EXTRA_TEXT)
+                        if (sharedText.isNullOrBlank()) {
                             scope.launch {
                                 Toast.makeText(context, noValidUrlMessage, Toast.LENGTH_LONG).show()
                             }
+                        } else {
+                            navController.navigate(BookmarkListRoute(sharedText = sharedText))
                         }
                     }
                     if (newIntent.hasExtra("navigateToAccountSettings")) {
@@ -106,7 +105,7 @@ class MainActivity : ComponentActivity() {
 @SuppressLint("WrongStartDestinationType")
 @Composable
 fun ReadeckNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = BookmarkListRoute(sharedUrl = null)) {
+    NavHost(navController = navController, startDestination = BookmarkListRoute()) {
         composable<BookmarkListRoute> { BookmarkListScreen(navController) }
         composable<SettingsRoute> { SettingsScreen(navController) }
         composable<AccountSettingsRoute> { AccountSettingsScreen(navController) }

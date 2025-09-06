@@ -16,6 +16,7 @@ import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.util.extractUrlAndTitle
 import de.readeckapp.util.isValidUrl
 import de.readeckapp.worker.LoadBookmarksWorker
 import kotlinx.coroutines.CoroutineExceptionHandler
@@ -30,7 +31,6 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.launch
 import timber.log.Timber
 import javax.inject.Inject
-import kotlinx.coroutines.flow.stateIn
 
 @HiltViewModel
 class BookmarkListViewModel @Inject constructor(
@@ -85,19 +85,19 @@ class BookmarkListViewModel @Inject constructor(
         )
 
     init {
-        val sharedUrl = savedStateHandle.get<String>("sharedUrl")
-
-        if (sharedUrl != null) {
-            val urlError = if (!sharedUrl.isValidUrl()) {
+        savedStateHandle.get<String>("sharedText").takeIf { it != null }?.let {
+            val sharedText = it.extractUrlAndTitle()
+            val urlError = if (sharedText == null) {
                 R.string.account_settings_url_error // Use resource ID
             } else {
                 null
             }
+
             _createBookmarkUiState.value = CreateBookmarkUiState.Open(
-                title = "",
-                url = sharedUrl,
+                title = sharedText?.title ?: "",
+                url = sharedText?.url ?: "",
                 urlError = urlError,
-                isCreateEnabled = sharedUrl.isValidUrl()
+                isCreateEnabled = urlError == null
             )
         }
 
