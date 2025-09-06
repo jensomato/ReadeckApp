@@ -500,9 +500,9 @@ class BookmarkListViewModelTest {
     }
 
     @Test
-    fun `init sets CreateBookmarkUiState to Open with sharedUrl if present and valid`() = runTest {
+    fun `init sets CreateBookmarkUiState to Open with sharedText if present and valid`() = runTest {
         val sharedUrl = "https://example.com"
-        every { savedStateHandle.get<String>("sharedUrl") } returns sharedUrl
+        every { savedStateHandle.get<String>("sharedText") } returns sharedUrl
 
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
         viewModel = BookmarkListViewModel(
@@ -522,10 +522,10 @@ class BookmarkListViewModelTest {
     }
 
     @Test
-    fun `init sets CreateBookmarkUiState to Open with sharedUrl and urlError if present and invalid`() =
+    fun `init sets CreateBookmarkUiState to Open with sharedText and urlError if present and invalid`() =
         runTest {
-            val sharedUrl = "invalid-url"
-            every { savedStateHandle.get<String>("sharedUrl") } returns sharedUrl
+            val sharedText = "invalid-url"
+            every { savedStateHandle.get<String>("sharedText") } returns sharedText
 
             coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
             viewModel = BookmarkListViewModel(
@@ -539,7 +539,7 @@ class BookmarkListViewModelTest {
 
             val state =
                 viewModel.createBookmarkUiState.first() as BookmarkListViewModel.CreateBookmarkUiState.Open
-            assertEquals(sharedUrl, state.url)
+            assertEquals("", state.url)
             assertEquals(R.string.account_settings_url_error, state.urlError)
             assertFalse(state.isCreateEnabled)
         }
