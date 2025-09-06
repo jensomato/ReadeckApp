@@ -5,5 +5,5 @@ import kotlinx.serialization.Serializable
 @Serializable
 data class SharedText(
     val url: String,
-    val title: String?
+    val title: String? = null
 )
