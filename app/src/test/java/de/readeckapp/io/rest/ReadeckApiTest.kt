@@ -163,7 +163,7 @@ class ReadeckApiTest {
 
         assertTrue(response.isSuccessful)
         assertEquals(200, response.code())
-        assertEquals(3, response.body()?.size)
+        assertEquals(4, response.body()?.size)
     }
 
     @Test

@@ -17,7 +17,7 @@ data class BookmarkDto(
     @SerialName("site_name")
     val siteName: String,
     val site: String,
-    val authors: List<String>,
+    val authors: List<String>?,
     val lang: String,
     @SerialName("text_direction")
     val textDirection: String,

@@ -130,5 +130,57 @@
     },
     "word_count": 247,
     "reading_time": 1
+  },
+  {
+    "id": "GywTWpgMHr6Yqsv8Jviuwd",
+    "href": "https://readeck.example.com/api/bookmarks/GywTWpgMHr6Yqsv8Jviuwd",
+    "created": "2025-09-10T19:00:13.646333268Z",
+    "updated": "2025-09-10T14:09:22.615018537Z",
+    "state": 0,
+    "loaded": true,
+    "url": "https://example.com/blog/example_authors_null",
+    "title": "Example Authors null",
+    "site_name": "example.com",
+    "site": "example.com",
+    "authors": null,
+    "lang": "",
+    "text_direction": "",
+    "document_type": "article",
+    "type": "article",
+    "has_article": true,
+    "description": "Learn how examples work",
+    "is_deleted": false,
+    "is_marked": false,
+    "is_archived": false,
+    "labels": [],
+    "read_progress": 100,
+    "resources": {
+      "article": {
+        "src": "https://readeck.example.com/api/bookmarks/GywTWpgMHr6Yqsv8Jviuwd/article"
+      },
+      "icon": {
+        "src": "https://readeck.example.com/bm/Gy/GywTWpgMHr6Yqsv8Jviuwd/img/icon.png",
+        "width": 48,
+        "height": 48
+      },
+      "image": {
+        "src": "https://readeck.example.com/bm/Gy/GywTWpgMHr6Yqsv8Jviuwd/img/image.png",
+        "width": 800,
+        "height": 400
+      },
+      "log": {
+        "src": "https://readeck.example.com/api/bookmarks/GywTWpgMHr6Yqsv8Jviuwd/x/log"
+      },
+      "props": {
+        "src": "https://readeck.example.com/api/bookmarks/GywTWpgMHr6Yqsv8Jviuwd/x/props.json"
+      },
+      "thumbnail": {
+        "src": "https://readeck.example.com/bm/Gy/GywTWpgMHr6Yqsv8Jviuwd/img/thumbnail.png",
+        "width": 380,
+        "height": 190
+      }
+    },
+    "word_count": 8881,
+    "reading_time": 44
   }
 ]
