@@ -17,7 +17,7 @@ data class BookmarkDto(
     @SerialName("site_name")
     val siteName: String,
     val site: String,
-    val authors: List<String>,
+    val authors: List<String>?,
     val lang: String,
     @SerialName("text_direction")
     val textDirection: String,
@@ -48,8 +48,8 @@ data class Resources(
     val article: Resource? = null,
     val icon: ImageResource? = null,
     val image: ImageResource? = null,
-    val log: Resource,
-    val props: Resource,
+    val log: Resource? = null,
+    val props: Resource? = null,
     val thumbnail: ImageResource? = null
 )
 

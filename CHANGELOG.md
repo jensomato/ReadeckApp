@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.7.0] - 2025-10-05
+
+### Fixed
+
+- Fixed a parsing error where `author` field could be null in the server response. Closes #123
+- Fixed error extracting urls from share intents. Additional text is now treated as title. Closes #120
+- Fixed a parsing error where `log` and `props` fields could be null in the server response. Closes #110
+
 ## [0.6.0] - 2025-06-16
 
 ### Added
