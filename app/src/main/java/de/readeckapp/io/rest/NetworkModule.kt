@@ -2,6 +2,8 @@ package de.readeckapp.io.rest
 
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
+import coil3.ImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -78,6 +80,19 @@ object NetworkModule {
     @Singleton
     fun provideReadeckApiService(retrofit: Retrofit): ReadeckApi {
         return retrofit.create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context,
+        okHttpClient: OkHttpClient
+    ): ImageLoader {
+        return ImageLoader.Builder(context)
+            .components {
+                add(OkHttpNetworkFetcherFactory(callFactory = okHttpClient))
+            }
+            .build()
     }
 
     @Provides
