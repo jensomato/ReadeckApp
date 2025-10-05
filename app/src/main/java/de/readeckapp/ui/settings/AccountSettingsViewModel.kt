@@ -1,5 +1,6 @@
 package de.readeckapp.ui.settings
 
+import android.app.Activity
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
@@ -7,6 +8,7 @@ import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.io.rest.ssl.CertificateSelectionHelper
 import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -14,12 +16,14 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import timber.log.Timber
+import java.net.URL
 import javax.inject.Inject
 
 @HiltViewModel
 class AccountSettingsViewModel @Inject constructor(
     private val settingsDataStore: SettingsDataStore,
-    private val authenticateUseCase: AuthenticateUseCase
+    private val authenticateUseCase: AuthenticateUseCase,
+    private val certificateSelectionHelper: CertificateSelectionHelper
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
@@ -32,6 +36,7 @@ class AccountSettingsViewModel @Inject constructor(
             val url = settingsDataStore.urlFlow.value
             val username = settingsDataStore.usernameFlow.value
             val password = settingsDataStore.passwordFlow.value
+            val certificateAlias = certificateSelectionHelper.getCurrentCertificateAlias()
             _uiState.value = AccountSettingsUiState(
                 url = url,
                 username = username,
@@ -41,7 +46,8 @@ class AccountSettingsViewModel @Inject constructor(
                 usernameError = null,
                 passwordError = null,
                 authenticationResult = null,
-                allowUnencryptedConnection = false
+                allowUnencryptedConnection = false,
+                clientCertificateAlias = certificateAlias
             )
         }
     }
@@ -133,6 +139,57 @@ class AccountSettingsViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
+    fun onSelectCertificate(activity: Activity) {
+        viewModelScope.launch {
+            try {
+                val url = _uiState.value.url
+                if (url.isNullOrBlank()) {
+                    Timber.w("Cannot select certificate: URL is empty")
+                    return@launch
+                }
+                
+                val parsedUrl = try {
+                    URL(url)
+                } catch (e: Exception) {
+                    Timber.e(e, "Invalid URL for certificate selection")
+                    return@launch
+                }
+                
+                val host = parsedUrl.host
+                val port = if (parsedUrl.port > 0) parsedUrl.port else 443
+                
+                Timber.d("Selecting certificate for $host:$port")
+                val alias = certificateSelectionHelper.selectCertificate(activity, host, port)
+                
+                _uiState.update {
+                    it.copy(clientCertificateAlias = alias)
+                }
+                
+                if (alias != null) {
+                    Timber.d("Certificate selected: $alias")
+                } else {
+                    Timber.d("Certificate selection cancelled")
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error selecting certificate")
+            }
+        }
+    }
+
+    fun onClearCertificate() {
+        viewModelScope.launch {
+            try {
+                certificateSelectionHelper.clearCertificate()
+                _uiState.update {
+                    it.copy(clientCertificateAlias = null)
+                }
+                Timber.d("Certificate cleared")
+            } catch (e: Exception) {
+                Timber.e(e, "Error clearing certificate")
+            }
+        }
+    }
+
     sealed class NavigationEvent {
         data object NavigateBack : NavigationEvent()
     }
@@ -157,5 +214,6 @@ data class AccountSettingsUiState(
     val usernameError: Int?,
     val passwordError: Int?,
     val authenticationResult: AuthenticationResult?,
-    val allowUnencryptedConnection: Boolean = false
+    val allowUnencryptedConnection: Boolean = false,
+    val clientCertificateAlias: String? = null
 )
