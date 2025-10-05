@@ -1,5 +1,6 @@
 package de.readeckapp.ui.settings
 
+import android.app.Activity
 import android.app.Application
 import android.content.Intent
 import androidx.core.net.toUri
@@ -11,7 +12,10 @@ import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.io.rest.auth.ClientCertConnectionBuilder
 import de.readeckapp.io.rest.auth.UnencryptedConnectionBuilder
+import de.readeckapp.io.rest.ssl.CertificateSelectionHelper
+import de.readeckapp.io.rest.ssl.SSLConfigurationProvider
 import de.readeckapp.util.isValidUrl
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -28,8 +32,8 @@ import net.openid.appauth.AuthorizationServiceConfiguration
 import net.openid.appauth.RegistrationRequest
 import net.openid.appauth.GrantTypeValues
 import net.openid.appauth.ResponseTypeValues
-import net.openid.appauth.connectivity.DefaultConnectionBuilder
 import timber.log.Timber
+import java.net.URL
 import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -39,6 +43,8 @@ class AccountSettingsViewModel @Inject constructor(
     private val application: Application,
     private val settingsDataStore: SettingsDataStore,
     private val authenticateUseCase: AuthenticateUseCase,
+    private val certificateSelectionHelper: CertificateSelectionHelper,
+    private val sslConfigurationProvider: SSLConfigurationProvider
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
@@ -56,6 +62,7 @@ class AccountSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             val isLoggedIn = settingsDataStore.authStateFlow.value != null
             val url = settingsDataStore.urlFlow.value ?: ""
+            val certificateAlias = certificateSelectionHelper.getCurrentCertificateAlias()
             _uiState.value = AccountSettingsUiState(
                 url = url,
                 loginEnabled = isValidUrl(url),
@@ -63,6 +70,7 @@ class AccountSettingsViewModel @Inject constructor(
                 authenticationResult = null,
                 allowUnencryptedConnection = false,
                 isLoggedIn = isLoggedIn,
+                clientCertificateAlias = certificateAlias
             )
         }
     }
@@ -78,7 +86,7 @@ class AccountSettingsViewModel @Inject constructor(
             if (_uiState.value.allowUnencryptedConnection) {
                 builder.setConnectionBuilder(UnencryptedConnectionBuilder)
             } else {
-                builder.setConnectionBuilder(DefaultConnectionBuilder.INSTANCE)
+                builder.setConnectionBuilder(ClientCertConnectionBuilder(sslConfigurationProvider))
             }
             authService = AuthorizationService(application, builder.build())
         }
@@ -277,6 +285,57 @@ class AccountSettingsViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
+    fun onSelectCertificate(activity: Activity) {
+        viewModelScope.launch {
+            try {
+                val url = _uiState.value.url
+                if (url.isNullOrBlank()) {
+                    Timber.w("Cannot select certificate: URL is empty")
+                    return@launch
+                }
+                
+                val parsedUrl = try {
+                    URL(url)
+                } catch (e: Exception) {
+                    Timber.e(e, "Invalid URL for certificate selection")
+                    return@launch
+                }
+                
+                val host = parsedUrl.host
+                val port = if (parsedUrl.port > 0) parsedUrl.port else 443
+                
+                Timber.d("Selecting certificate for $host:$port")
+                val alias = certificateSelectionHelper.selectCertificate(activity, host, port)
+                
+                _uiState.update {
+                    it.copy(clientCertificateAlias = alias)
+                }
+                
+                if (alias != null) {
+                    Timber.d("Certificate selected: $alias")
+                } else {
+                    Timber.d("Certificate selection cancelled")
+                }
+            } catch (e: Exception) {
+                Timber.e(e, "Error selecting certificate")
+            }
+        }
+    }
+
+    fun onClearCertificate() {
+        viewModelScope.launch {
+            try {
+                certificateSelectionHelper.clearCertificate()
+                _uiState.update {
+                    it.copy(clientCertificateAlias = null)
+                }
+                Timber.d("Certificate cleared")
+            } catch (e: Exception) {
+                Timber.e(e, "Error clearing certificate")
+            }
+        }
+    }
+
     sealed class NavigationEvent {
         data object NavigateBack : NavigationEvent()
     }
@@ -300,4 +359,5 @@ data class AccountSettingsUiState(
     val allowUnencryptedConnection: Boolean = false,
     val isLoggedIn: Boolean = false,
     val isLoading: Boolean = false,
+    val clientCertificateAlias: String? = null
 )

@@ -38,6 +38,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_SYNC_READ_PROGRESS = booleanPreferencesKey("sync_read_progress")
     private val KEY_SCROLL_TO_PROGRESS = booleanPreferencesKey("scroll_to_progress")
     private val KEY_DEFAULT_FILTER = stringPreferencesKey("default_filter")
+    private val KEY_CLIENT_CERTIFICATE_ALIAS = stringPreferencesKey("client_certificate_alias")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -176,6 +177,21 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         encryptedSharedPreferences.edit {
             putString(KEY_DEFAULT_FILTER.name, defaultFilter.name)
         }
+    }
+
+    override suspend fun setClientCertificateAlias(alias: String?) {
+        Timber.d("setClientCertificateAlias: $alias")
+        encryptedSharedPreferences.edit {
+            if (alias != null) {
+                putString(KEY_CLIENT_CERTIFICATE_ALIAS.name, alias)
+            } else {
+                remove(KEY_CLIENT_CERTIFICATE_ALIAS.name)
+            }
+        }
+    }
+
+    override fun getClientCertificateAlias(): kotlinx.coroutines.flow.Flow<String?> {
+        return getStringFlow(KEY_CLIENT_CERTIFICATE_ALIAS.name, null)
     }
 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)
