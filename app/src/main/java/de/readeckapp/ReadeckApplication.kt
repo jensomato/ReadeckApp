@@ -1,21 +1,33 @@
 package de.readeckapp
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
+import coil3.ImageLoader
+import coil3.SingletonImageLoader
 import dagger.hilt.android.HiltAndroidApp
 import de.readeckapp.util.createLogDir
 import fr.bipi.treessence.context.GlobalContext.startTimber
 import timber.log.Timber
+import javax.inject.Inject
 
 
 @HiltAndroidApp
-class ReadeckApplication : Application() {
+class ReadeckApplication : Application(), SingletonImageLoader.Factory {
+    
+    @Inject
+    lateinit var imageLoader: ImageLoader
+    
     override fun onCreate() {
         super.onCreate()
         initTimberLog()
         Thread.setDefaultUncaughtExceptionHandler(
             CustomExceptionHandler(this)
         )
+    }
+    
+    override fun newImageLoader(context: Context): ImageLoader {
+        return imageLoader
     }
 
     private fun initTimberLog() {
