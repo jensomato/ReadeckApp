@@ -2,6 +2,7 @@ package de.readeckapp.io.prefs
 
 import de.readeckapp.domain.model.AutoSyncTimeframe
 import de.readeckapp.domain.model.Theme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
 
@@ -27,4 +28,6 @@ interface SettingsDataStore {
     suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe
     suspend fun saveTheme(theme: Theme)
     suspend fun getTheme(): Theme
+    suspend fun setClientCertificateAlias(alias: String?)
+    fun getClientCertificateAlias(): Flow<String?>
 }
