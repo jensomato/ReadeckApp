@@ -2,6 +2,8 @@ package de.readeckapp.io.rest
 
 import android.content.Context
 import androidx.core.app.NotificationManagerCompat
+import coil3.ImageLoader
+import coil3.network.okhttp.OkHttpNetworkFetcherFactory
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
@@ -13,6 +15,7 @@ import de.readeckapp.io.prefs.SettingsDataStoreImpl
 import de.readeckapp.io.rest.auth.AuthInterceptor
 import de.readeckapp.io.rest.auth.NotificationHelper
 import de.readeckapp.io.rest.auth.NotificationHelperImpl
+import de.readeckapp.io.rest.ssl.SSLConfigurationProvider
 import kotlinx.serialization.json.Json
 import okhttp3.OkHttpClient
 import okhttp3.MediaType.Companion.toMediaType
@@ -31,7 +34,8 @@ object NetworkModule {
     @Singleton
     fun provideOkHttpClient(
         authInterceptor: AuthInterceptor,
-        baseUrlInterceptor: UrlInterceptor
+        baseUrlInterceptor: UrlInterceptor,
+        sslConfigurationProvider: SSLConfigurationProvider
     ): OkHttpClient {
         val builder = OkHttpClient.Builder()
             .addInterceptor(authInterceptor)
@@ -42,6 +46,16 @@ object NetworkModule {
                 level = HttpLoggingInterceptor.Level.BASIC
             }
             builder.addInterceptor(loggingInterceptor)
+        }
+
+        // Configure SSL with client certificate support
+        try {
+            val sslSocketFactory = sslConfigurationProvider.createSSLSocketFactory()
+            val trustManager = sslConfigurationProvider.createTrustManager()
+            builder.sslSocketFactory(sslSocketFactory, trustManager)
+        } catch (e: Exception) {
+            // Log error but continue - will fail at connection time if cert is required
+            timber.log.Timber.e(e, "Failed to configure SSL with client certificates")
         }
 
         return builder.build()
@@ -66,6 +80,19 @@ object NetworkModule {
     @Singleton
     fun provideReadeckApiService(retrofit: Retrofit): ReadeckApi {
         return retrofit.create()
+    }
+
+    @Provides
+    @Singleton
+    fun provideImageLoader(
+        @ApplicationContext context: Context,
+        okHttpClient: OkHttpClient
+    ): ImageLoader {
+        return ImageLoader.Builder(context)
+            .components {
+                add(OkHttpNetworkFetcherFactory(callFactory = okHttpClient))
+            }
+            .build()
     }
 
     @Provides

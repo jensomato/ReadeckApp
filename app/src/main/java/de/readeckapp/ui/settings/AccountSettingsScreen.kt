@@ -1,14 +1,17 @@
 package de.readeckapp.ui.settings
 
+import android.app.Activity
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.Security
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
@@ -29,12 +32,16 @@ fun AccountSettingsScreen(
     val viewModel: AccountSettingsViewModel = hiltViewModel()
     val settingsUiState = viewModel.uiState.collectAsState().value
     val navigationEvent = viewModel.navigationEvent.collectAsState()
+    val context = LocalContext.current
+    val activity = context as? Activity
     val onUrlChanged: (String) -> Unit = { url -> viewModel.onUrlChanged(url) }
     val onUsernameChanged: (String) -> Unit = { username -> viewModel.onUsernameChanged(username) }
     val onPasswordChanged: (String) -> Unit = { password -> viewModel.onPasswordChanged(password) }
     val onLoginClicked: () -> Unit = { viewModel.login() }
     val onAllowUnencryptedConnectionChanged: (Boolean) -> Unit = { allow -> viewModel.onAllowUnencryptedConnectionChanged(allow) }
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
+    val onSelectCertificate: () -> Unit = { activity?.let { viewModel.onSelectCertificate(it) } }
+    val onClearCertificate: () -> Unit = { viewModel.onClearCertificate() }
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -92,7 +99,9 @@ fun AccountSettingsScreen(
         onPasswordChanged = onPasswordChanged,
         onLoginClicked = onLoginClicked,
         onClickBack = onClickBack,
-        onAllowUnencryptedConnectionChanged = onAllowUnencryptedConnectionChanged
+        onAllowUnencryptedConnectionChanged = onAllowUnencryptedConnectionChanged,
+        onSelectCertificate = onSelectCertificate,
+        onClearCertificate = onClearCertificate
     )
 }
 
@@ -107,7 +116,9 @@ fun AccountSettingsView(
     onPasswordChanged: (String) -> Unit,
     onLoginClicked: () -> Unit,
     onClickBack: () -> Unit,
-    onAllowUnencryptedConnectionChanged: (Boolean) -> Unit
+    onAllowUnencryptedConnectionChanged: (Boolean) -> Unit,
+    onSelectCertificate: () -> Unit,
+    onClearCertificate: () -> Unit
 ) {
     val keyboardController = LocalSoftwareKeyboardController.current
     Scaffold(
@@ -196,6 +207,69 @@ fun AccountSettingsView(
                 )
                 Text(text = stringResource(R.string.account_settings_allow_unencrypted))
             }
+            
+            // Client Certificate Section
+            HorizontalDivider(modifier = Modifier.padding(vertical = 8.dp))
+            
+            Text(
+                text = "Client Certificate (mTLS)",
+                style = MaterialTheme.typography.titleSmall,
+                modifier = Modifier.padding(vertical = 4.dp)
+            )
+            
+            if (settingsUiState.clientCertificateAlias != null) {
+                Card(
+                    modifier = Modifier.fillMaxWidth(),
+                    colors = CardDefaults.cardColors(
+                        containerColor = MaterialTheme.colorScheme.secondaryContainer
+                    )
+                ) {
+                    Row(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(16.dp),
+                        horizontalArrangement = Arrangement.SpaceBetween,
+                        verticalAlignment = Alignment.CenterVertically
+                    ) {
+                        Column(modifier = Modifier.weight(1f)) {
+                            Text(
+                                text = "Certificate Selected",
+                                style = MaterialTheme.typography.bodyMedium
+                            )
+                            Text(
+                                text = settingsUiState.clientCertificateAlias,
+                                style = MaterialTheme.typography.bodySmall,
+                                color = MaterialTheme.colorScheme.onSecondaryContainer.copy(alpha = 0.7f)
+                            )
+                        }
+                        TextButton(onClick = onClearCertificate) {
+                            Text("Clear")
+                        }
+                    }
+                }
+            } else {
+                OutlinedButton(
+                    onClick = onSelectCertificate,
+                    modifier = Modifier.fillMaxWidth()
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Security,
+                        contentDescription = null,
+                        modifier = Modifier.size(18.dp)
+                    )
+                    Spacer(modifier = Modifier.width(8.dp))
+                    Text("Select Client Certificate")
+                }
+                Text(
+                    text = "Optional: Select a client certificate for mTLS authentication",
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.6f),
+                    modifier = Modifier.padding(horizontal = 4.dp)
+                )
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
             Button(
                 onClick = {
                     keyboardController?.hide()
@@ -231,7 +305,9 @@ fun AccountSettingsScreenViewPreview() {
         onPasswordChanged = {},
         onLoginClicked = {},
         onClickBack = {},
-        onAllowUnencryptedConnectionChanged = {}
+        onAllowUnencryptedConnectionChanged = {},
+        onSelectCertificate = {},
+        onClearCertificate = {}
     )
 }
 
