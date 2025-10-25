@@ -4,6 +4,7 @@ import android.content.Context
 import android.content.SharedPreferences
 import androidx.core.content.edit
 import androidx.datastore.preferences.core.booleanPreferencesKey
+import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.domain.model.AutoSyncTimeframe
@@ -31,6 +32,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_AUTOSYNC_ENABLED = booleanPreferencesKey("autosync_enabled")
     private val KEY_AUTOSYNC_TIMEFRAME = stringPreferencesKey("autosync_timeframe")
     private val KEY_THEME = stringPreferencesKey("theme")
+    private val KEY_ZOOM_FACTOR = intPreferencesKey("zoom_factor")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -117,11 +119,22 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         }
     }
 
+    override suspend fun getZoomFactor(): Int {
+        return encryptedSharedPreferences.getInt(KEY_ZOOM_FACTOR.name, 100)
+    }
+
+    override suspend fun saveZoomFactor(zoomFactor: Int) {
+        encryptedSharedPreferences.edit {
+            putInt(KEY_ZOOM_FACTOR.name, zoomFactor.coerceIn(25, 400))
+        }
+    }
+
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)
     override val usernameFlow = getStringFlow(KEY_USERNAME.name, null)
     override val urlFlow = getStringFlow(KEY_URL.name, null)
     override val passwordFlow = getStringFlow(KEY_PASSWORD.name, null)
     override val themeFlow = getStringFlow(KEY_THEME.name, Theme.SYSTEM.name)
+    override val zoomFactorFlow = getIntFlow(KEY_ZOOM_FACTOR.name, 100)
     override suspend fun clearCredentials() {
         Timber.d("clearCredentials")
         encryptedSharedPreferences.edit(commit = true) {
@@ -149,6 +162,9 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
 
     private fun getStringFlow(key: String, defaultValue: String? = null): StateFlow<String?> =
         preferenceFlow(key) { encryptedSharedPreferences.getString(key, defaultValue) }
+
+    private fun getIntFlow(key: String, defaultValue: Int = 100): StateFlow<Int> =
+        preferenceFlow(key) { encryptedSharedPreferences.getInt(key, defaultValue) }
 
     private fun <T> preferenceFlow(key: String, getValue: () -> T): StateFlow<T> { // Create our flow using callbackflow
         // Emit initial value when we start collecting from this flow (if it exists) or use default one from params in function call above!  This is important so consumers know initial state!  Can skip this and just send updates if you do not need initial state emission on subscribe time!  That could be fine too depending on your use case - remember that!  Also you can send null as the "initial" value as well if you want!

@@ -11,6 +11,7 @@ interface SettingsDataStore {
     val passwordFlow: StateFlow<String?>
     val urlFlow: StateFlow<String?>
     val themeFlow: StateFlow<String?>
+    val zoomFactorFlow: StateFlow<Int>
     fun saveUsername(username: String)
     fun savePassword(password: String)
     fun saveToken(token: String)
@@ -27,4 +28,6 @@ interface SettingsDataStore {
     suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe
     suspend fun saveTheme(theme: Theme)
     suspend fun getTheme(): Theme
+    suspend fun  getZoomFactor(): Int
+    suspend fun  saveZoomFactor(zoomFactor: Int)
 }

@@ -25,6 +25,8 @@ import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.TextDecrease
+import androidx.compose.material.icons.filled.TextIncrease
 import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
@@ -87,6 +89,10 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
     val onMarkRead: (String, Boolean) -> Unit =
         { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
+    val onClickIncreaseZoomFactor: () -> Unit =
+        { viewModel.onClickChangeZoomFactor(25) }
+    val onClickDecreaseZoomFactor: () -> Unit =
+        { viewModel.onClickChangeZoomFactor(-25) }
 
     val onClickOpenUrl: (String) -> Unit = { viewModel.onClickOpenUrl(it) }
     val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
@@ -143,7 +149,9 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onClickShareBookmark = onClickShareBookmark,
                 onClickDeleteBookmark = onClickDeleteBookmark,
                 uiState = uiState,
-                onClickOpenUrl = onClickOpenUrl
+                onClickOpenUrl = onClickOpenUrl,
+                onClickIncreaseZoomFactor = onClickIncreaseZoomFactor,
+                onClickDecreaseZoomFactor = onClickDecreaseZoomFactor
             )
             // Consumes a shareIntent and creates the corresponding share dialog
             ShareBookmarkChooser(
@@ -182,6 +190,8 @@ fun BookmarkDetailScreen(
     onClickDeleteBookmark: (String) -> Unit,
     onClickOpenUrl: (String) -> Unit,
     onClickShareBookmark: (String) -> Unit,
+    onClickIncreaseZoomFactor: () -> Unit,
+    onClickDecreaseZoomFactor: () -> Unit
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -212,7 +222,9 @@ fun BookmarkDetailScreen(
                 onClickToggleArchive = onClickToggleArchive,
                 onMarkRead = onMarkRead,
                 onClickShareBookmark = onClickShareBookmark,
-                onClickDeleteBookmark = onClickDeleteBookmark
+                onClickDeleteBookmark = onClickDeleteBookmark,
+                onClickIncreaseZoomFactor = onClickIncreaseZoomFactor,
+                onClickDecreaseZoomFactor = onClickDecreaseZoomFactor
             )
         }
     ) { padding ->
@@ -270,8 +282,10 @@ fun BookmarkDetailArticle(
     val content = remember(isSystemInDarkMode, uiState.template) {
         mutableStateOf<String?>(null)
     }
+    val webViewRef = remember { mutableStateOf<WebView?>(null) }
     LaunchedEffect(isSystemInDarkMode, uiState.template) {
         content.value = getTemplate(uiState, isSystemInDarkMode)
+        webViewRef.value?.settings?.textZoom = uiState.zoomFactor
     }
     if (content.value != null) {
         if (!LocalInspectionMode.current) {
@@ -286,8 +300,9 @@ fun BookmarkDetailArticle(
                         settings.defaultTextEncodingName = "utf-8"
                         isVerticalScrollBarEnabled = false
                         isHorizontalScrollBarEnabled = false
+                        settings.textZoom = uiState.zoomFactor
+                        webViewRef.value = this
                     }
-
                 },
                 update = {
                     it.loadDataWithBaseURL(
@@ -297,6 +312,9 @@ fun BookmarkDetailArticle(
                         "utf-8",
                         null
                     )
+                    // Update reference and zoom
+                    webViewRef.value = it
+                    it.settings.textZoom = uiState.zoomFactor
                 }
             )
         }
@@ -398,7 +416,9 @@ fun BookmarkDetailMenu(
     onClickToggleArchive: (String, Boolean) -> Unit,
     onMarkRead: (String, Boolean) -> Unit,
     onClickShareBookmark: (String) -> Unit,
-    onClickDeleteBookmark: (String) -> Unit
+    onClickDeleteBookmark: (String) -> Unit,
+    onClickIncreaseZoomFactor: () -> Unit,
+    onClickDecreaseZoomFactor: () -> Unit
 ) {
     var expanded by remember { mutableStateOf(false) }
 
@@ -422,6 +442,30 @@ fun BookmarkDetailMenu(
                     Icon(
                         imageVector = if (uiState.bookmark.isFavorite) Icons.Filled.Grade else Icons.Outlined.Grade,
                         contentDescription = stringResource(R.string.action_favorite)
+                    )
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.action_increase_text_size)) },
+                onClick = {
+                    onClickIncreaseZoomFactor()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.TextIncrease,
+                        contentDescription = stringResource(R.string.action_increase_text_size)
+                    )
+                }
+            )
+            DropdownMenuItem(
+                text = { Text(stringResource(R.string.action_decrease_text_size)) },
+                onClick = {
+                    onClickDecreaseZoomFactor()
+                },
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Filled.TextDecrease,
+                        contentDescription = stringResource(R.string.action_decrease_text_size)
                     )
                 }
             )
@@ -503,11 +547,14 @@ fun BookmarkDetailScreenPreview() {
         onClickToggleFavorite = { _, _ -> },
         onMarkRead = { _, _ -> },
         onClickShareBookmark = {_ -> },
+        onClickIncreaseZoomFactor = { },
+        onClickDecreaseZoomFactor = { },
         onClickToggleArchive = { _, _ -> },
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
             updateBookmarkState = null,
-            template = Template.SimpleTemplate("template")
+            template = Template.SimpleTemplate("template"),
+            zoomFactor = 100
         ),
         onClickOpenUrl = {}
     )
@@ -522,7 +569,8 @@ private fun BookmarkDetailContentPreview() {
             uiState = BookmarkDetailViewModel.UiState.Success(
                 bookmark = sampleBookmark,
                 updateBookmarkState = null,
-                template = Template.SimpleTemplate("template")
+                template = Template.SimpleTemplate("template"),
+                zoomFactor = 100
             ),
             onClickOpenUrl = {}
         )
@@ -545,7 +593,8 @@ private fun BookmarkDetailHeaderPreview() {
         uiState = BookmarkDetailViewModel.UiState.Success(
             bookmark = sampleBookmark,
             updateBookmarkState = null,
-            template = Template.SimpleTemplate("template")
+            template = Template.SimpleTemplate("template"),
+            zoomFactor = 100
         ),
         onClickOpenUrl = {}
     )
