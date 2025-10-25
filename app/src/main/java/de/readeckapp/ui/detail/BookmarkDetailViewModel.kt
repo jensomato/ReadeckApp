@@ -56,6 +56,7 @@ class BookmarkDetailViewModel @Inject constructor(
         when (it) {
             Theme.DARK -> assetLoader.loadAsset(Template.DARK_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
             Theme.LIGHT -> assetLoader.loadAsset(Template.LIGHT_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
+            Theme.SEPIA -> assetLoader.loadAsset(Template.SEPIA_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
             Theme.SYSTEM -> {
                 val light = assetLoader.loadAsset(Template.LIGHT_TEMPLATE_FILE)
                 val dark = assetLoader.loadAsset(Template.DARK_TEMPLATE_FILE)

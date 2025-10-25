@@ -124,6 +124,7 @@ fun Theme.toLabelResource(): Int {
     return when (this) {
         Theme.LIGHT -> R.string.theme_light
         Theme.DARK -> R.string.theme_dark
+        Theme.SEPIA -> R.string.theme_sepia
         Theme.SYSTEM -> R.string.theme_system
     }
 }

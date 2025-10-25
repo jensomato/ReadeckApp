@@ -87,6 +87,7 @@ class MainActivity : ComponentActivity() {
             val darkTheme = when (theme.value) {
                 Theme.LIGHT -> false
                 Theme.DARK -> true
+                Theme.SEPIA -> false
                 Theme.SYSTEM -> isSystemInDarkTheme()
             }
 
