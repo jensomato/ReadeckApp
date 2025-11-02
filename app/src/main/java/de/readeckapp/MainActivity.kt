@@ -84,14 +84,12 @@ class MainActivity : ComponentActivity() {
                 }
             }
 
-            val darkTheme = when (theme.value) {
-                Theme.LIGHT -> false
-                Theme.DARK -> true
-                Theme.SEPIA -> false
-                Theme.SYSTEM -> isSystemInDarkTheme()
+            val themeValue = when (theme.value) {
+                Theme.SYSTEM -> if (isSystemInDarkTheme()) Theme.DARK else Theme.LIGHT
+                else -> theme.value
             }
 
-            ReadeckAppTheme(darkTheme = darkTheme) {
+            ReadeckAppTheme(theme = themeValue) {
                 ReadeckNavHost(navController)
             }
         }

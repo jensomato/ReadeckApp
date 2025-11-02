@@ -1,7 +1,6 @@
 package de.readeckapp.ui.theme
 
 import android.os.Build
-import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.darkColorScheme
 import androidx.compose.material3.dynamicDarkColorScheme
@@ -9,6 +8,8 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.platform.LocalContext
+import de.readeckapp.domain.model.Theme
+import de.readeckapp.ui.theme.sepia.SepiaColorScheme
 
 private val DarkColorScheme = darkColorScheme(
     primary = Purple80,
@@ -34,18 +35,22 @@ private val LightColorScheme = lightColorScheme(
 
 @Composable
 fun ReadeckAppTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    theme: Theme,
     // Dynamic color is available on Android 12+
     dynamicColor: Boolean = true,
     content: @Composable () -> Unit
 ) {
     val colorScheme = when {
-        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S -> {
+        dynamicColor && Build.VERSION.SDK_INT >= Build.VERSION_CODES.S && theme in listOf(
+            Theme.DARK,
+            Theme.LIGHT
+        ) -> {
             val context = LocalContext.current
-            if (darkTheme) dynamicDarkColorScheme(context) else dynamicLightColorScheme(context)
+            if (theme == Theme.DARK) dynamicDarkColorScheme(context)
+            else dynamicLightColorScheme(context)
         }
-
-        darkTheme -> DarkColorScheme
+        theme == Theme.DARK -> DarkColorScheme
+        theme == Theme.SEPIA -> SepiaColorScheme
         else -> LightColorScheme
     }
 
