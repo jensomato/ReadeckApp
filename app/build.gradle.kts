@@ -194,6 +194,7 @@ dependencies {
     implementation(libs.aboutlibraries.compose.m3)
     implementation(libs.treessence)
     implementation(libs.accompanist.permissions)
+    implementation(libs.appauth)
 }
 
 aboutLibraries {
