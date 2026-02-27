@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added support for client side authentication (mTLS). Contributed by @cat101
+
 ## [0.8.0] - 2025-11-11
 
 ### Added
@@ -19,10 +23,6 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 - Fixed missing support for Android devices with min sdk 24 (Android 7.0). Closes #127
 
 ## [0.7.0] - 2025-10-05
-
-### Added
-
-- Added support for client side authentication (mTLS). Contributed by @cat101
 
 ### Fixed
 
