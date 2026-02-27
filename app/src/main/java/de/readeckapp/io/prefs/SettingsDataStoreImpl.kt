@@ -33,6 +33,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_AUTOSYNC_TIMEFRAME = stringPreferencesKey("autosync_timeframe")
     private val KEY_THEME = stringPreferencesKey("theme")
     private val KEY_ZOOM_FACTOR = intPreferencesKey("zoom_factor")
+    private val KEY_CLIENT_CERTIFICATE_ALIAS = stringPreferencesKey("client_certificate_alias")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -127,6 +128,21 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         encryptedSharedPreferences.edit {
             putInt(KEY_ZOOM_FACTOR.name, zoomFactor.coerceIn(25, 400))
         }
+    }
+
+    override suspend fun setClientCertificateAlias(alias: String?) {
+        Timber.d("setClientCertificateAlias: $alias")
+        encryptedSharedPreferences.edit {
+            if (alias != null) {
+                putString(KEY_CLIENT_CERTIFICATE_ALIAS.name, alias)
+            } else {
+                remove(KEY_CLIENT_CERTIFICATE_ALIAS.name)
+            }
+        }
+    }
+
+    override fun getClientCertificateAlias(): kotlinx.coroutines.flow.Flow<String?> {
+        return getStringFlow(KEY_CLIENT_CERTIFICATE_ALIAS.name, null)
     }
 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)

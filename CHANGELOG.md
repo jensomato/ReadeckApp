@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added support for client side authentication (mTLS). Contributed by @cat101
+
 ## [0.8.0] - 2025-11-11
 
 ### Added
