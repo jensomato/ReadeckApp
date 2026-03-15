@@ -8,8 +8,7 @@ interface UserRepository {
     fun observeIsLoggedIn(): Flow<Boolean>
     fun observeUser(): Flow<User?>
     fun observeAuthenticationDetails(): Flow<AuthenticationDetails?>
-    suspend fun login(url: String, username: String, password: String): LoginResult
-    suspend fun login(url: String, appToken: String): LoginResult
+    suspend fun login(url: String, accessToken: String, authStateJson: String): LoginResult
     suspend fun logout()
     sealed class LoginResult {
         data object Success: LoginResult()

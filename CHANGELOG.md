@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added OAuth authorization. This restores compatibility with the latest version of Readeck 0.22, in which legacy authentication has been removed. Closes #145.
+
+### Removed
+
+- Removed legacy authentication using username and password. This means that only Readeck servers running at least version 0.21 will be supported. 
+
 ## [0.8.0] - 2025-11-11
 
 ### Added

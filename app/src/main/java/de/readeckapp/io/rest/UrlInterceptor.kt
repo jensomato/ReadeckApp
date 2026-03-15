@@ -1,14 +1,11 @@
 package de.readeckapp.io.rest
 
-import de.readeckapp.coroutine.ApplicationScope
 import de.readeckapp.io.prefs.SettingsDataStore
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.runBlocking
 import okhttp3.Interceptor
 import okhttp3.Request
 import okhttp3.Response
-import timber.log.Timber
 import java.io.IOException
 import javax.inject.Inject
 

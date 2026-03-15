@@ -26,7 +26,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_USERNAME = stringPreferencesKey("username")
     private val KEY_TOKEN = stringPreferencesKey("token")
     private val KEY_URL = stringPreferencesKey("url")
-    private val KEY_PASSWORD = stringPreferencesKey("password")
+    private val KEY_AUTH_STATE = stringPreferencesKey("auth_state")
     private val KEY_LAST_BOOKMARK_TIMESTAMP = stringPreferencesKey("lastBookmarkTimestamp")
     private val KEY_INITIAL_SYNC_PERFORMED = "initial_sync_performed"
     private val KEY_AUTOSYNC_ENABLED = booleanPreferencesKey("autosync_enabled")
@@ -41,10 +41,10 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         }
     }
 
-    override fun savePassword(password: String) {
-        Timber.d("savePassword")
+    override fun saveAuthState(authState: String) {
+        Timber.d("saveAuthState")
         encryptedSharedPreferences.edit {
-            putString(KEY_PASSWORD.name, password)
+            putString(KEY_AUTH_STATE.name, authState)
         }
     }
 
@@ -132,14 +132,30 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override val tokenFlow = getStringFlow(KEY_TOKEN.name, null)
     override val usernameFlow = getStringFlow(KEY_USERNAME.name, null)
     override val urlFlow = getStringFlow(KEY_URL.name, null)
-    override val passwordFlow = getStringFlow(KEY_PASSWORD.name, null)
+    override val authStateFlow = getStringFlow(KEY_AUTH_STATE.name, null)
     override val themeFlow = getStringFlow(KEY_THEME.name, Theme.SYSTEM.name)
     override val zoomFactorFlow = getIntFlow(KEY_ZOOM_FACTOR.name, 100)
+    
+    init {
+        // Migration: remove legacy password if it exists
+        if (encryptedSharedPreferences.contains("password")) {
+            Timber.d("Migration: Removing legacy password")
+            encryptedSharedPreferences.edit {
+                remove("password")
+            }
+        }
+
+        // Migration: remove /api suffix from url
+        encryptedSharedPreferences.getString(KEY_URL.name, null)?.takeIf { it.endsWith("/api") }?.let {
+            saveUrl(it.removeSuffix("/api"))
+        }
+    }
+
     override suspend fun clearCredentials() {
         Timber.d("clearCredentials")
         encryptedSharedPreferences.edit(commit = true) {
             remove(KEY_USERNAME.name)
-            remove(KEY_PASSWORD.name)
+            remove(KEY_AUTH_STATE.name)
             remove(KEY_TOKEN.name)
             remove(KEY_URL.name)
         }
@@ -148,14 +164,14 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override suspend fun saveCredentials(
         url: String,
         username: String,
-        password: String,
-        token: String
+        token: String,
+        authState: String
     ) {
         Timber.d("saveCredentials")
         encryptedSharedPreferences.edit {
             putString(KEY_URL.name, url)
             putString(KEY_USERNAME.name, username)
-            putString(KEY_PASSWORD.name, password)
+            putString(KEY_AUTH_STATE.name, authState)
             putString(KEY_TOKEN.name, token)
         }
     }

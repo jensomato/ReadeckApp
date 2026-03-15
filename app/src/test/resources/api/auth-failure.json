@@ -1,4 +1,4 @@
 {
-  "status": 403,
-  "message": "Invalid user and/or password"
+  "status": 401,
+  "message": "Unauthorized"
 }

@@ -4419,6 +4419,29 @@
             ]
         },
         {
+            "uniqueId": "net.openid:appauth",
+            "funding": [
+                
+            ],
+            "developers": [
+                {
+                    "name": "Iain McGinniss"
+                }
+            ],
+            "artifactVersion": "0.11.1",
+            "description": "OAuth2 / OpenID Connect client for Android apps",
+            "scm": {
+                "connection": "scm:git:git://github.com:openid/AppAuth-Android.git",
+                "url": "https://github.com/openid/AppAuth-Android/",
+                "developerConnection": "scm:git:ssh://github.com:openid/AppAuth-Android.git"
+            },
+            "name": "AppAuth for Android",
+            "website": "https://github.com/openid/AppAuth-Android/",
+            "licenses": [
+                "Apache-2.0"
+            ]
+        },
+        {
             "uniqueId": "org.bouncycastle:bcprov-jdk18on",
             "funding": [
                 

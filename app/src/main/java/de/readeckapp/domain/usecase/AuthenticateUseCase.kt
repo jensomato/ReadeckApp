@@ -22,9 +22,9 @@ class AuthenticateUseCase @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     @ApplicationContext private val context: Context // Need context to enqueue worker
 ) {
-    suspend fun execute(url: String, username: String, password: String): AuthenticationResult {
+    suspend fun execute(url: String, accessToken: String, authStateJson: String): AuthenticationResult {
 
-        return when(val loginResult = userRepository.login(url, username, password)) {
+        return when(val loginResult = userRepository.login(url, accessToken, authStateJson)) {
             is UserRepository.LoginResult.Success -> {
                 bookmarkRepository.deleteAllBookmarks()
                 settingsDataStore.saveLastBookmarkTimestamp(Instant.fromEpochMilliseconds(0))

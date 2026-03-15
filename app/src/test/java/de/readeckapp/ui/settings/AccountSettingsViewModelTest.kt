@@ -1,11 +1,10 @@
 package de.readeckapp.ui.settings
 
+import android.app.Application
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
-import de.readeckapp.domain.usecase.AuthenticationResult
 import de.readeckapp.io.prefs.SettingsDataStore
 import io.mockk.coEvery
-import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -30,6 +29,8 @@ import org.junit.Test
 class AccountSettingsViewModelTest {
 
     private val testDispatcher = StandardTestDispatcher()
+
+    private lateinit var application: Application
     private lateinit var settingsDataStore: SettingsDataStore
     private lateinit var authenticateUseCase: AuthenticateUseCase
     private lateinit var viewModel: AccountSettingsViewModel
@@ -37,12 +38,11 @@ class AccountSettingsViewModelTest {
     @Before
     fun setup() {
         Dispatchers.setMain(testDispatcher)
-        settingsDataStore = mockk()
-        authenticateUseCase = mockk()
+        settingsDataStore = mockk(relaxed = true)
+        authenticateUseCase = mockk(relaxed = true)
+        application = mockk(relaxed = true)
         coEvery { settingsDataStore.urlFlow } returns MutableStateFlow("")
-        coEvery { settingsDataStore.usernameFlow } returns MutableStateFlow("")
-        coEvery { settingsDataStore.passwordFlow } returns MutableStateFlow("")
-        viewModel = AccountSettingsViewModel(settingsDataStore, authenticateUseCase)
+        viewModel = AccountSettingsViewModel(application, settingsDataStore, authenticateUseCase)
     }
 
     @After
@@ -53,26 +53,18 @@ class AccountSettingsViewModelTest {
     @Test
     fun `initial uiState should reflect data store values`() = runTest {
         coEvery { settingsDataStore.urlFlow } returns MutableStateFlow("https://example.com")
-        coEvery { settingsDataStore.usernameFlow } returns MutableStateFlow("testUser")
-        coEvery { settingsDataStore.passwordFlow } returns MutableStateFlow("testPassword")
-        viewModel = AccountSettingsViewModel(settingsDataStore, authenticateUseCase)
+        viewModel = AccountSettingsViewModel(application, settingsDataStore, authenticateUseCase)
 
         val uiStateList = viewModel.uiState.take(2).toList()
         assertInitialUiState(uiStateList[0])
         val uiState = uiStateList[1]
         assertEquals("https://example.com", uiState.url)
-        assertEquals("testUser", uiState.username)
-        assertEquals("testPassword", uiState.password)
         assertFalse(uiState.allowUnencryptedConnection)
     }
 
     private fun assertInitialUiState(settingsUiState: AccountSettingsUiState) {
         assertEquals("", settingsUiState.url)
-        assertEquals("", settingsUiState.username)
-        assertEquals("", settingsUiState.password)
         assertNull(settingsUiState.urlError)
-        assertNull(settingsUiState.usernameError)
-        assertNull(settingsUiState.passwordError)
         assertNull(settingsUiState.authenticationResult)
         assertFalse(settingsUiState.loginEnabled)
         assertFalse(settingsUiState.allowUnencryptedConnection)
@@ -83,20 +75,6 @@ class AccountSettingsViewModelTest {
         viewModel.onUrlChanged("https://newurl.com")
         val uiState = viewModel.uiState.first()
         assertEquals("https://newurl.com", uiState.url)
-    }
-
-    @Test
-    fun `onUsernameChanged should update username in uiState`() = runTest {
-        viewModel.onUsernameChanged("newUsername")
-        val uiState = viewModel.uiState.first()
-        assertEquals("newUsername", uiState.username)
-    }
-
-    @Test
-    fun `onPasswordChanged should update password in uiState`() = runTest {
-        viewModel.onPasswordChanged("newPassword")
-        val uiState = viewModel.uiState.first()
-        assertEquals("newPassword", uiState.password)
     }
 
     @Test
@@ -111,93 +89,6 @@ class AccountSettingsViewModelTest {
         viewModel.onUrlChanged("invalid-url")
         val uiState = viewModel.uiState.first()
         assertEquals(R.string.account_settings_url_error, uiState.urlError)
-    }
-
-    @Test
-    fun `onUsernameChanged with blank username should set usernameError`() = runTest {
-        viewModel.onUsernameChanged("")
-        val uiState = viewModel.uiState.first()
-        assertEquals(R.string.account_settings_username_error, uiState.usernameError)
-    }
-
-    @Test
-    fun `onPasswordChanged with blank password should set passwordError`() = runTest {
-        viewModel.onPasswordChanged("")
-        val uiState = viewModel.uiState.first()
-        assertEquals(R.string.account_settings_password_error, uiState.passwordError)
-    }
-
-    @Test
-    fun `login should call authenticateUseCase with correct parameters`() = runTest {
-        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.Success
-        viewModel.onUrlChanged("https://example.com/api")
-        viewModel.onUsernameChanged("testUser")
-        viewModel.onPasswordChanged("testPassword")
-        viewModel.login()
-        advanceUntilIdle()
-        coVerify { authenticateUseCase.execute("https://example.com/api", "testUser", "testPassword") }
-    }
-
-    @Test
-    fun `login should add api suffix to url and call authenticateUseCase with correct parameters`() = runTest {
-        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.Success
-        viewModel.onUrlChanged("https://example.com")
-        viewModel.onUsernameChanged("testUser")
-        viewModel.onPasswordChanged("testPassword")
-        viewModel.login()
-        advanceUntilIdle()
-        coVerify { authenticateUseCase.execute("https://example.com/api", "testUser", "testPassword") }
-    }
-
-    @Test
-    fun `login should update authenticationResult on success`() = runTest {
-        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.Success
-        viewModel.onUrlChanged("https://example.com")
-        viewModel.onUsernameChanged("testUser")
-        viewModel.onPasswordChanged("testPassword")
-        viewModel.login()
-        advanceUntilIdle()
-        val uiState = viewModel.uiState.first()
-        assertEquals(AuthenticationResult.Success, uiState.authenticationResult)
-    }
-
-    @Test
-    fun `login should update authenticationResult on authentication failure`() = runTest {
-        val errorMessage = "Authentication failed"
-        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.AuthenticationFailed(errorMessage)
-        viewModel.onUrlChanged("https://example.com")
-        viewModel.onUsernameChanged("testUser")
-        viewModel.onPasswordChanged("testPassword")
-        viewModel.login()
-        advanceUntilIdle()
-        val uiState = viewModel.uiState.first()
-        assertEquals(AuthenticationResult.AuthenticationFailed(errorMessage), uiState.authenticationResult)
-    }
-
-    @Test
-    fun `login should update authenticationResult on network error`() = runTest {
-        val errorMessage = "Network error"
-        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.NetworkError(errorMessage)
-        viewModel.onUrlChanged("https://example.com")
-        viewModel.onUsernameChanged("testUser")
-        viewModel.onPasswordChanged("testPassword")
-        viewModel.login()
-        advanceUntilIdle()
-        val uiState = viewModel.uiState.first()
-        assertEquals(AuthenticationResult.NetworkError(errorMessage), uiState.authenticationResult)
-    }
-
-    @Test
-    fun `login should update authenticationResult on generic error`() = runTest {
-        val errorMessage = "Generic error"
-        coEvery { authenticateUseCase.execute(any(), any(), any()) } returns AuthenticationResult.GenericError(errorMessage)
-        viewModel.onUrlChanged("https://example.com")
-        viewModel.onUsernameChanged("testUser")
-        viewModel.onPasswordChanged("testPassword")
-        viewModel.login()
-        advanceUntilIdle()
-        val uiState = viewModel.uiState.first()
-        assertEquals(AuthenticationResult.GenericError(errorMessage), uiState.authenticationResult)
     }
 
     @Test
@@ -216,34 +107,8 @@ class AccountSettingsViewModelTest {
     @Test
     fun `loginEnabled should be false when url is invalid`() = runTest {
         viewModel.onUrlChanged("invalid-url")
-        viewModel.onUsernameChanged("test")
-        viewModel.onPasswordChanged("test")
         advanceUntilIdle()
         assertFalse(viewModel.uiState.first().loginEnabled)
-    }
-
-    @Test
-    fun `loginEnabled should be false when username is blank`() = runTest {
-        viewModel.onUrlChanged("https://validurl.com")
-        viewModel.onUsernameChanged("")
-        viewModel.onPasswordChanged("test")
-        assertFalse(viewModel.uiState.first().loginEnabled)
-    }
-
-    @Test
-    fun `loginEnabled should be false when password is blank`() = runTest {
-        viewModel.onUrlChanged("https://validurl.com")
-        viewModel.onUsernameChanged("test")
-        viewModel.onPasswordChanged("")
-        assertFalse(viewModel.uiState.first().loginEnabled)
-    }
-
-    @Test
-    fun `loginEnabled should be true when url, username and password are valid`() = runTest {
-        viewModel.onUrlChanged("https://validurl.com")
-        viewModel.onUsernameChanged("test")
-        viewModel.onPasswordChanged("test")
-        assertTrue(viewModel.uiState.first().loginEnabled)
     }
 
     @Test
@@ -285,22 +150,32 @@ class AccountSettingsViewModelTest {
     }
 
     @Test
-    fun `loginEnabled should be true when url is http and allowUnencryptedConnection is true and username and password are valid`() = runTest {
+    fun `loginEnabled should be true when url is http and allowUnencryptedConnection is true`() = runTest {
         viewModel.onAllowUnencryptedConnectionChanged(true)
         viewModel.onUrlChanged("http://validurl.com")
-        viewModel.onUsernameChanged("test")
-        viewModel.onPasswordChanged("test")
         advanceUntilIdle()
         assertTrue(viewModel.uiState.first().loginEnabled)
     }
 
     @Test
-    fun `loginEnabled should be false when url is http and allowUnencryptedConnection is false and username and password are valid`() = runTest {
+    fun `loginEnabled should be false when url is http and allowUnencryptedConnection is false`() = runTest {
         viewModel.onAllowUnencryptedConnectionChanged(false)
         viewModel.onUrlChanged("http://validurl.com")
-        viewModel.onUsernameChanged("test")
-        viewModel.onPasswordChanged("test")
         advanceUntilIdle()
         assertFalse(viewModel.uiState.first().loginEnabled)
+    }
+
+    @Test
+    fun `handleOAuthResult with null intent should reenable login button`() = runTest {
+        viewModel.onUrlChanged("https://validurl.com")
+        // Start login to disable button
+        viewModel.login()
+        advanceUntilIdle()
+        
+        // Simulating returning back without doing anything in the browser
+        viewModel.handleOAuthResult(null)
+        advanceUntilIdle()
+        
+        assertTrue(viewModel.uiState.first().loginEnabled)
     }
 }

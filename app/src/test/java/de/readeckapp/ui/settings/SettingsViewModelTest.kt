@@ -34,7 +34,6 @@ class SettingsViewModelTest {
             AuthenticationDetails(
                 url = "http://test",
                 username = "testUser",
-                password = "pass",
                 token = "token"
             )
         )
