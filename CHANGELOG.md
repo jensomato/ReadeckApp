@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.9.0] - 2026-03-15
+
 ### Added
 
 - Added OAuth authorization. This restores compatibility with the latest version of Readeck 0.22, in which legacy authentication has been removed. Closes #145.
