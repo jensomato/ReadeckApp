@@ -8,20 +8,21 @@ import kotlinx.datetime.Instant
 interface SettingsDataStore {
     val tokenFlow: StateFlow<String?>
     val usernameFlow: StateFlow<String?>
-    val passwordFlow: StateFlow<String?>
+    val authStateFlow: StateFlow<String?>
     val urlFlow: StateFlow<String?>
     val themeFlow: StateFlow<String?>
     val zoomFactorFlow: StateFlow<Int>
+
     fun saveUsername(username: String)
-    fun savePassword(password: String)
     fun saveToken(token: String)
+    fun saveAuthState(authState: String)
     fun saveUrl(url: String)
     suspend fun saveLastBookmarkTimestamp(timestamp: Instant)
     suspend fun getLastBookmarkTimestamp(): Instant?
     suspend fun setInitialSyncPerformed(performed: Boolean)
     suspend fun isInitialSyncPerformed(): Boolean
     suspend fun clearCredentials()
-    suspend fun saveCredentials(url: String, username: String, password: String, token: String)
+    suspend fun saveCredentials(url: String, username: String, token: String, authState: String)
     suspend fun setAutoSyncEnabled(isEnabled: Boolean)
     suspend fun isAutoSyncEnabled(): Boolean
     suspend fun saveAutoSyncTimeframe(autoSyncTimeframe: AutoSyncTimeframe)

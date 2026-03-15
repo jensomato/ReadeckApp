@@ -1,13 +1,10 @@
 package de.readeckapp.io.rest
 
-import de.readeckapp.io.rest.model.AuthenticationRequestDto
-import de.readeckapp.io.rest.model.AuthenticationResponseDto
 import de.readeckapp.io.rest.model.BookmarkDto
 import de.readeckapp.io.rest.model.UserProfileDto
 import de.readeckapp.io.rest.model.CreateBookmarkDto
 import de.readeckapp.io.rest.model.StatusMessageDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
-import de.readeckapp.io.rest.model.EditBookmarkErrorDto
 import de.readeckapp.io.rest.model.EditBookmarkResponseDto
 import kotlinx.datetime.Instant
 import retrofit2.Response
@@ -21,7 +18,7 @@ import retrofit2.http.Headers
 import retrofit2.http.Path
 
 interface ReadeckApi {
-    @GET("bookmarks")
+    @GET("/api/bookmarks")
     suspend fun getBookmarks(
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
@@ -29,32 +26,27 @@ interface ReadeckApi {
         @Query("sort") sortOrder: SortOrder
     ): Response<List<BookmarkDto>>
 
-    @POST("auth")
-    suspend fun authenticate(
-        @Body body: AuthenticationRequestDto
-    ): Response<AuthenticationResponseDto>
-
-    @GET("profile")
+    @GET("/api/profile")
     suspend fun userprofile(): Response<UserProfileDto>
 
     @Headers("Content-Type: text/html")
-    @GET("bookmarks/{id}/article")
+    @GET("/api/bookmarks/{id}/article")
     suspend fun getArticle(@Path("id") id: String): Response<String>
 
-    @POST("bookmarks")
+    @POST("/api/bookmarks")
     suspend fun createBookmark(
         @Body body: CreateBookmarkDto
     ): Response<StatusMessageDto>
 
     @Headers("Accept: application/json")
-    @PATCH("bookmarks/{id}")
+    @PATCH("/api/bookmarks/{id}")
     suspend fun editBookmark(
         @Path("id") id: String,
         @Body body: EditBookmarkDto
     ): Response<EditBookmarkResponseDto>
 
     @Headers("Accept: application/json")
-    @DELETE("bookmarks/{id}")
+    @DELETE("/api/bookmarks/{id}")
     suspend fun deleteBookmark(@Path("id") id: String): Response<Unit>
 
     data class SortOrder(val sort: Sort, val order: Order = Order.Ascending) {

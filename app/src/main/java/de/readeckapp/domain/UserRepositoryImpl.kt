@@ -4,7 +4,6 @@ import de.readeckapp.domain.model.AuthenticationDetails
 import de.readeckapp.domain.model.User
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.io.rest.ReadeckApi
-import de.readeckapp.io.rest.model.AuthenticationRequestDto
 import de.readeckapp.io.rest.model.StatusMessageDto
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.Flow
@@ -27,11 +26,10 @@ class UserRepositoryImpl @Inject constructor(
         combine(
             settingsDataStore.urlFlow,
             settingsDataStore.usernameFlow,
-            settingsDataStore.passwordFlow,
             settingsDataStore.tokenFlow
-        ) { url, username, password, token ->
-            if (url != null && username != null && password != null && token != null) {
-                AuthenticationDetails(url, username, password, token)
+        ) { url, username, token ->
+            if (url != null && username != null && token != null) {
+                AuthenticationDetails(url, username, token)
             } else {
                 null
             }
@@ -39,31 +37,26 @@ class UserRepositoryImpl @Inject constructor(
 
     override suspend fun login(
         url: String,
-        username: String,
-        password: String
+        accessToken: String,
+        authStateJson: String
     ): UserRepository.LoginResult {
         return withContext(Dispatchers.IO) {
-            // save url early to allow call to authenticate endpoint
+            // save url and token early to allow call to userprofile endpoint
             settingsDataStore.saveUrl(url)
+            settingsDataStore.saveToken(accessToken)
             try {
-                val response = readeckApi.authenticate(
-                    AuthenticationRequestDto(
-                        username,
-                        password,
-                        "readeck-app"
-                    )
-                )
+                val response = readeckApi.userprofile()
                 if (response.isSuccessful && response.body() != null) {
                     response.body()?.let {
-                        settingsDataStore.saveCredentials(url, username, password, it.token)
+                        settingsDataStore.saveCredentials(url, it.user.username, accessToken, authStateJson)
                         UserRepository.LoginResult.Success
                     } ?: UserRepository.LoginResult.Error("Empty response body")
                 } else {
                     val errorBodyString = response.errorBody()?.string()
                     val errorState: StatusMessageDto = if (!errorBodyString.isNullOrBlank()) {
                         try {
-                            json.decodeFromString<StatusMessageDto>(errorBodyString) // Use json.decodeFromString
-                        } catch (e: SerializationException) { // Catch SerializationException
+                            json.decodeFromString<StatusMessageDto>(errorBodyString)
+                        } catch (e: SerializationException) {
                             StatusMessageDto(
                                 response.code(),
                                 "Failed to parse error: ${e.message}"
@@ -92,10 +85,6 @@ class UserRepositoryImpl @Inject constructor(
                 }
             }
         }
-    }
-
-    override suspend fun login(url: String, appToken: String): UserRepository.LoginResult {
-        TODO("Not yet implemented")
     }
 
     override suspend fun logout() {

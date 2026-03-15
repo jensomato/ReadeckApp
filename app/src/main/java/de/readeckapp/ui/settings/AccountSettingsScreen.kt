@@ -1,8 +1,10 @@
 package de.readeckapp.ui.settings
 
+import android.app.Activity
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.selection.selectable
-import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.*
@@ -13,8 +15,6 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.platform.testTag
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.semantics.Role
-import androidx.compose.ui.text.input.KeyboardType
-import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
@@ -29,14 +29,20 @@ fun AccountSettingsScreen(
     val viewModel: AccountSettingsViewModel = hiltViewModel()
     val settingsUiState = viewModel.uiState.collectAsState().value
     val navigationEvent = viewModel.navigationEvent.collectAsState()
+    val oAuthIntentEvent = viewModel.oAuthIntentEvent.collectAsState()
     val onUrlChanged: (String) -> Unit = { url -> viewModel.onUrlChanged(url) }
-    val onUsernameChanged: (String) -> Unit = { username -> viewModel.onUsernameChanged(username) }
-    val onPasswordChanged: (String) -> Unit = { password -> viewModel.onPasswordChanged(password) }
     val onLoginClicked: () -> Unit = { viewModel.login() }
     val onAllowUnencryptedConnectionChanged: (Boolean) -> Unit = { allow -> viewModel.onAllowUnencryptedConnectionChanged(allow) }
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val snackbarHostState = remember { SnackbarHostState() }
-    val scope = rememberCoroutineScope()
+
+    val oauthLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == Activity.RESULT_OK || result.resultCode == Activity.RESULT_CANCELED) {
+            viewModel.handleOAuthResult(result.data)
+        }
+    }
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -45,7 +51,14 @@ fun AccountSettingsScreen(
                     navHostController.popBackStack()
                 }
             }
-            viewModel.onNavigationEventConsumed() // Consume the event
+            viewModel.onNavigationEventConsumed()
+        }
+    }
+
+    LaunchedEffect(key1 = oAuthIntentEvent.value) {
+        oAuthIntentEvent.value?.let { intent ->
+            oauthLauncher.launch(intent)
+            viewModel.onOAuthIntentConsumed()
         }
     }
 
@@ -58,21 +71,18 @@ fun AccountSettingsScreen(
                         duration = SnackbarDuration.Short
                     )
                 }
-
                 is AuthenticationResult.AuthenticationFailed -> {
                     snackbarHostState.showSnackbar(
                         message = result.message,
                         duration = SnackbarDuration.Short
                     )
                 }
-
                 is AuthenticationResult.NetworkError -> {
                     snackbarHostState.showSnackbar(
                         message = result.message,
                         duration = SnackbarDuration.Short
                     )
                 }
-
                 is AuthenticationResult.GenericError -> {
                     snackbarHostState.showSnackbar(
                         message = result.message,
@@ -88,8 +98,6 @@ fun AccountSettingsScreen(
         snackbarHostState = snackbarHostState,
         settingsUiState = settingsUiState,
         onUrlChanged = onUrlChanged,
-        onUsernameChanged = onUsernameChanged,
-        onPasswordChanged = onPasswordChanged,
         onLoginClicked = onLoginClicked,
         onClickBack = onClickBack,
         onAllowUnencryptedConnectionChanged = onAllowUnencryptedConnectionChanged
@@ -103,8 +111,6 @@ fun AccountSettingsView(
     snackbarHostState: SnackbarHostState,
     settingsUiState: AccountSettingsUiState,
     onUrlChanged: (String) -> Unit,
-    onUsernameChanged: (String) -> Unit,
-    onPasswordChanged: (String) -> Unit,
     onLoginClicked: () -> Unit,
     onClickBack: () -> Unit,
     onAllowUnencryptedConnectionChanged: (Boolean) -> Unit
@@ -145,36 +151,9 @@ fun AccountSettingsView(
                 label = { Text(stringResource(R.string.account_settings_url_label)) },
                 modifier = Modifier.fillMaxWidth(),
                 isError = settingsUiState.urlError != null,
+                enabled = settingsUiState.isLoading.not(),
                 supportingText = {
                     settingsUiState.urlError?.let {
-                        Text(text = stringResource(it))
-                    }
-                }
-            )
-            OutlinedTextField(
-                value = settingsUiState.username ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_username_placeholder)) },
-                onValueChange = { onUsernameChanged(it) },
-                label = { Text(stringResource(R.string.account_settings_username_label)) },
-                modifier = Modifier.fillMaxWidth(),
-                isError = settingsUiState.usernameError != null,
-                supportingText = {
-                    settingsUiState.usernameError?.let {
-                        Text(text = stringResource(it))
-                    }
-                }
-            )
-            OutlinedTextField(
-                value = settingsUiState.password ?: "",
-                placeholder = { Text(stringResource(R.string.account_settings_password_placeholder)) },
-                onValueChange = { onPasswordChanged(it) },
-                label = { Text(stringResource(R.string.account_settings_password_label)) },
-                visualTransformation = PasswordVisualTransformation(),
-                keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password),
-                modifier = Modifier.fillMaxWidth(),
-                isError = settingsUiState.passwordError != null,
-                supportingText = {
-                    settingsUiState.passwordError?.let {
                         Text(text = stringResource(it))
                     }
                 }
@@ -192,6 +171,7 @@ fun AccountSettingsView(
             ) {
                 Checkbox(
                     checked = settingsUiState.allowUnencryptedConnection,
+                    enabled = settingsUiState.isLoading.not(),
                     onCheckedChange = null
                 )
                 Text(text = stringResource(R.string.account_settings_allow_unencrypted))
@@ -201,9 +181,21 @@ fun AccountSettingsView(
                     keyboardController?.hide()
                     onLoginClicked.invoke()
                 },
-                enabled = settingsUiState.loginEnabled
+                enabled = settingsUiState.loginEnabled && settingsUiState.isLoading.not()
             ) {
-                Text(stringResource(R.string.account_settings_login))
+                Row(
+                    verticalAlignment = Alignment.CenterVertically,
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    if (settingsUiState.isLoading) {
+                        CircularProgressIndicator(
+                            modifier = Modifier.size(ButtonDefaults.IconSize),
+                            color = MaterialTheme.colorScheme.onPrimary,
+                            strokeWidth = 2.dp
+                        )
+                    }
+                    Text(stringResource(R.string.account_settings_login))
+                }
             }
         }
     }
@@ -214,12 +206,8 @@ fun AccountSettingsView(
 fun AccountSettingsScreenViewPreview() {
     val settingsUiState = AccountSettingsUiState(
         url = "https://example.com",
-        username = "user",
-        password = "pass",
         loginEnabled = true,
-        urlError = R.string.account_settings_url_error,
-        usernameError = null,
-        passwordError = null,
+        urlError = null,
         authenticationResult = null
     )
     AccountSettingsView(
@@ -227,8 +215,6 @@ fun AccountSettingsScreenViewPreview() {
         snackbarHostState = SnackbarHostState(),
         settingsUiState = settingsUiState,
         onUrlChanged = {},
-        onUsernameChanged = {},
-        onPasswordChanged = {},
         onLoginClicked = {},
         onClickBack = {},
         onAllowUnencryptedConnectionChanged = {}

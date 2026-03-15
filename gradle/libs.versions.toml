@@ -39,6 +39,7 @@ aboutLibraries = "12.0.0-a04"
 treessence = "1.1.2"
 accompanist = "0.37.3"
 browser = "1.8.0"
+appauth = "0.11.1"
 
 [libraries]
 timber = { group = "com.jakewharton.timber", name = "timber", version.ref = "timber" }
@@ -103,7 +104,8 @@ aboutlibraries-compose-m3 = { module = "com.mikepenz:aboutlibraries-compose-m3",
 treessence = { module = "com.github.bastienpaulfr:Treessence", version.ref = "treessence" }
 accompanist-permissions = { group = "com.google.accompanist", name = "accompanist-permissions", version.ref = "accompanist" }
 androidx-browser = { group = "androidx.browser", name = "browser", version.ref = "browser" }
-desugar-jdk-libs = { group ="com.android.tools" ,name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+desugar-jdk-libs = { group ="com.android.tools", name = "desugar_jdk_libs", version.ref = "desugarJdkLibs" }
+appauth = { group = "net.openid", name = "appauth", version.ref = "appauth" }
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }
 kotlin-android = { id = "org.jetbrains.kotlin.android", version.ref = "kotlin" }
