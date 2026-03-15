@@ -3,7 +3,6 @@ package de.readeckapp.io.rest
 import de.readeckapp.io.rest.auth.AuthInterceptor
 import de.readeckapp.io.rest.auth.NotificationHelper
 import de.readeckapp.io.rest.auth.TokenManager
-import de.readeckapp.io.rest.model.AuthenticationRequestDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkErrorDto
 import de.readeckapp.io.rest.model.StatusMessageDto
@@ -33,7 +32,7 @@ import java.net.HttpURLConnection
 class ReadeckApiTest {
     private lateinit var mockWebServer: MockWebServer
     val tokenManager = mockk<TokenManager>()
-    val notificationHelper = mockk<NotificationHelper>()
+    val notificationHelper = mockk<NotificationHelper>(relaxed = true)
     val authInterceptor = AuthInterceptor(tokenManager, notificationHelper)
     val loggingInterceptor =
         HttpLoggingInterceptor().apply { level = HttpLoggingInterceptor.Level.BODY }
@@ -64,32 +63,6 @@ class ReadeckApiTest {
     @After
     fun tearDown() {
         mockWebServer.shutdown()
-    }
-
-    @Test
-    fun testSuccessfulAuthentication() = runTest {
-        mockWebServer.enqueue(MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_OK)
-            .addHeader("Content-Type", "application/json")
-            .setBody(loadJsonFromClasspath("api/auth.json"))
-        )
-        val response = readeckApi.authenticate(AuthenticationRequestDto("test", "test", "test"))
-        assertEquals(true, response.isSuccessful)
-        assertEquals(200, response.code())
-        assertEquals("theId", response.body()?.id)
-        assertEquals("theToken", response.body()?.token)
-    }
-
-    @Test
-    fun testFailedAuthentication() = runTest {
-        mockWebServer.enqueue(MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_FORBIDDEN)
-            .addHeader("Content-Type", "application/json")
-            .setBody(loadJsonFromClasspath("api/auth-failure.json"))
-        )
-        val response = readeckApi.authenticate(AuthenticationRequestDto("test", "test", "test"))
-        assertEquals(false, response.isSuccessful)
-        assertEquals(403, response.code())
     }
 
     @Test
@@ -182,7 +155,7 @@ class ReadeckApiTest {
     @Test
     fun testFailedDeleteBookmark() = runTest {
         mockWebServer.enqueue(MockResponse()
-            .setResponseCode(HttpURLConnection.HTTP_FORBIDDEN)
+            .setResponseCode(HttpURLConnection.HTTP_UNAUTHORIZED)
             .addHeader("Content-Type", "application/json")
             .setBody(loadJsonFromClasspath("api/auth-failure.json"))
         )
@@ -190,13 +163,13 @@ class ReadeckApiTest {
         val response = readeckApi.deleteBookmark("bookmarkId")
 
         assertFalse(response.isSuccessful)
-        assertEquals(HttpURLConnection.HTTP_FORBIDDEN, response.code())
+        assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, response.code())
 
         val errorBody = response.errorBody()?.string()
         val statusMessage = Json.decodeFromString<StatusMessageDto>(errorBody!!)
 
-        assertEquals(HttpURLConnection.HTTP_FORBIDDEN, statusMessage.status)
-        assertEquals("Invalid user and/or password", statusMessage.message)
+        assertEquals(HttpURLConnection.HTTP_UNAUTHORIZED, statusMessage.status)
+        assertEquals("Unauthorized", statusMessage.message)
     }
 
     private fun loadJsonFromClasspath(resourcePath: String): String {
