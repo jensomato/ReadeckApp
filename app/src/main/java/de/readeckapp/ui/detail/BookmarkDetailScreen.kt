@@ -15,6 +15,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.ScrollState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
@@ -38,6 +39,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -52,7 +54,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
@@ -75,7 +79,11 @@ import de.readeckapp.ui.components.ErrorPlaceholderImage
 import de.readeckapp.util.openUrlInCustomTab
 import de.readeckapp.ui.components.ShareBookmarkChooser
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import kotlin.math.absoluteValue
+import kotlin.math.roundToInt
 
 @Composable
 fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) {
@@ -93,12 +101,15 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { viewModel.onClickChangeZoomFactor(25) }
     val onClickDecreaseZoomFactor: () -> Unit =
         { viewModel.onClickChangeZoomFactor(-25) }
+    val onProgressUpdate: (Int) -> Unit =
+        { progress -> viewModel.onUpdateReadProgress(progress) }
 
     val onClickOpenUrl: (String) -> Unit = { viewModel.onClickOpenUrl(it) }
     val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
     val onClickDeleteBookmark: (String) -> Unit = { viewModel.deleteBookmark(it) }
     val snackbarHostState = remember { SnackbarHostState() }
     val uiState = viewModel.uiState.collectAsState().value
+    val readProgress = viewModel.readProgress.collectAsState().value
 
     LaunchedEffect(key1 = navigationEvent.value) {
         navigationEvent.value?.let { event ->
@@ -107,7 +118,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                     navHostController.popBackStack()
                 }
             }
-            viewModel.onNavigationEventConsumed() // Consume the event
+            viewModel.onNavigationEventConsumed()
         }
     }
 
@@ -151,7 +162,9 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 uiState = uiState,
                 onClickOpenUrl = onClickOpenUrl,
                 onClickIncreaseZoomFactor = onClickIncreaseZoomFactor,
-                onClickDecreaseZoomFactor = onClickDecreaseZoomFactor
+                onClickDecreaseZoomFactor = onClickDecreaseZoomFactor,
+                onProgressUpdate = onProgressUpdate,
+                readProgress = readProgress
             )
             // Consumes a shareIntent and creates the corresponding share dialog
             ShareBookmarkChooser(
@@ -191,29 +204,38 @@ fun BookmarkDetailScreen(
     onClickOpenUrl: (String) -> Unit,
     onClickShareBookmark: (String) -> Unit,
     onClickIncreaseZoomFactor: () -> Unit,
-    onClickDecreaseZoomFactor: () -> Unit
+    onClickDecreaseZoomFactor: () -> Unit,
+    onProgressUpdate: (Int) -> Unit,
+    readProgress: Int,
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
         modifier = modifier,
         topBar = {
-            TopAppBar(
-                title = {
-                    Text(
-                        text = uiState.bookmark.title,
-                        overflow = TextOverflow.Ellipsis,
-                        maxLines = 1
-                    )
-                },
-                navigationIcon = {
-                    IconButton(onClick = onClickBack) {
-                        Icon(
-                            Icons.AutoMirrored.Filled.ArrowBack,
-                            contentDescription = stringResource(R.string.back)
+            Column {
+                TopAppBar(
+                    title = {
+                        Text(
+                            text = uiState.bookmark.title,
+                            overflow = TextOverflow.Ellipsis,
+                            maxLines = 1
                         )
+                    },
+                    navigationIcon = {
+                        IconButton(onClick = onClickBack) {
+                            Icon(
+                                Icons.AutoMirrored.Filled.ArrowBack,
+                                contentDescription = stringResource(R.string.back)
+                            )
+                        }
                     }
-                }
-            )
+                )
+                LinearProgressIndicator(
+                    progress = { readProgress / 100f },
+                    modifier = Modifier.fillMaxWidth()//.padding(horizontal = 16.dp, vertical = 8.dp)
+                )
+
+            }
         },
         floatingActionButton = {
             BookmarkDetailMenu(
@@ -228,24 +250,54 @@ fun BookmarkDetailScreen(
             )
         }
     ) { padding ->
+        val scope = rememberCoroutineScope()
+        val scrollState = rememberScrollState()
+        LaunchedEffect(scrollState) {
+            snapshotFlow { scrollState.value }
+                .distinctUntilChanged()
+                .collect { value ->
+                    val progress = calculateProgress(value, scrollState.maxValue)
+                    if ((progress - readProgress).absoluteValue > 1) {
+                        onProgressUpdate(progress)
+                    }
+                }
+        }
+        LaunchedEffect(uiState.bookmark.readProgress, scrollState.maxValue) {
+            if (scrollState.maxValue > 0) {
+                scope.launch {
+                    val position = scrollState.maxValue / 100 * uiState.bookmark.readProgress
+                    scrollState.scrollTo(position)
+                    onProgressUpdate(position)
+                }
+            }
+        }
+
         BookmarkDetailContent(
             modifier = Modifier.padding(padding),
             uiState = uiState,
-            onClickOpenUrl = onClickOpenUrl
+            onClickOpenUrl = onClickOpenUrl,
+            scrollState = scrollState,
         )
     }
+}
+
+private fun calculateProgress(x: Int, max: Int): Int {
+    if (max <= 0) return 0
+    val progress = (x.toFloat() / max * 100).roundToInt()
+    return maxOf(1, minOf(100, progress))
 }
 
 @Composable
 fun BookmarkDetailContent(
     modifier: Modifier = Modifier,
     uiState: BookmarkDetailViewModel.UiState.Success,
-    onClickOpenUrl: (String) -> Unit
+    onClickOpenUrl: (String) -> Unit,
+    scrollState: ScrollState,
 ) {
     Column(
         modifier = modifier
             .fillMaxSize()
-            .verticalScroll(rememberScrollState()),
+            .verticalScroll(scrollState),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         BookmarkDetailHeader(
@@ -254,7 +306,10 @@ fun BookmarkDetailContent(
             onClickOpenUrl = onClickOpenUrl
         )
         if (uiState.bookmark.articleContent != null) {
-            BookmarkDetailArticle(modifier = Modifier, uiState = uiState)
+            BookmarkDetailArticle(
+                modifier = Modifier,
+                uiState = uiState
+            )
         } else {
             EmptyBookmarkDetailArticle(
                 modifier = Modifier
@@ -312,13 +367,11 @@ fun BookmarkDetailArticle(
                         "utf-8",
                         null
                     )
-                    // Update reference and zoom
                     webViewRef.value = it
                     it.settings.textZoom = uiState.zoomFactor
                 }
             )
         }
-
     } else {
         CircularProgressIndicator()
     }
@@ -556,7 +609,9 @@ fun BookmarkDetailScreenPreview() {
             template = Template.SimpleTemplate("template"),
             zoomFactor = 100
         ),
-        onClickOpenUrl = {}
+        onClickOpenUrl = {},
+        onProgressUpdate = {},
+        readProgress = 0,
     )
 }
 
@@ -572,7 +627,8 @@ private fun BookmarkDetailContentPreview() {
                 template = Template.SimpleTemplate("template"),
                 zoomFactor = 100
             ),
-            onClickOpenUrl = {}
+            onClickOpenUrl = {},
+            scrollState = rememberScrollState()
         )
     }
 }
@@ -613,5 +669,6 @@ private val sampleBookmark = BookmarkDetailViewModel.Bookmark(
     isArchived = false,
     isRead = false,
     type = BookmarkDetailViewModel.Bookmark.Type.ARTICLE,
-    articleContent = "articleContent"
+    articleContent = "articleContent",
+    readProgress = 0,
 )

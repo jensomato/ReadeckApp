@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added reading progress tracking. The app now tracks and synchronizes your reading position. A progress indicator below the top app bar shows your progress, content automatically scrolls to your last saved position from the backend, and progress is synced when leaving the bookmark detail view.
+
 ## [0.9.0] - 2026-03-15
 
 ### Added

@@ -29,6 +29,7 @@ interface BookmarkRepository {
     suspend fun deleteBookmark(id: String): UpdateResult
     suspend fun createBookmark(title: String, url: String): String
     suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): UpdateResult
+    suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, readProgress: Int?): UpdateResult
     suspend fun performFullSync(): SyncResult
     fun observeAllBookmarkCounts(): Flow<BookmarkCounts>
     sealed class UpdateResult {
