@@ -139,11 +139,25 @@ class BookmarkRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun updateBookmark(
+   override suspend fun updateBookmark(
         bookmarkId: String,
         isFavorite: Boolean?,
         isArchived: Boolean?,
         isRead: Boolean?
+   ): BookmarkRepository.UpdateResult {
+       return updateBookmark(
+           bookmarkId = bookmarkId,
+           isFavorite = isFavorite,
+           isArchived = isArchived,
+           readProgress = isRead?.let { if (it) 100 else 0 }
+       )
+   }
+
+    override suspend fun updateBookmark(
+        bookmarkId: String,
+        isFavorite: Boolean?,
+        isArchived: Boolean?,
+        readProgress: Int?
     ): BookmarkRepository.UpdateResult {
         return withContext(dispatcher) {
             try {
@@ -153,7 +167,7 @@ class BookmarkRepositoryImpl @Inject constructor(
                         body = EditBookmarkDto(
                             isMarked = isFavorite,
                             isArchived = isArchived,
-                            readProgress = isRead?.let { if (it) 100 else 0 }
+                            readProgress = readProgress
                         )
                     )
                 if (response.isSuccessful) {
