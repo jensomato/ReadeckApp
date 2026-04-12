@@ -6,6 +6,7 @@ import de.readeckapp.io.rest.model.CreateBookmarkDto
 import de.readeckapp.io.rest.model.StatusMessageDto
 import de.readeckapp.io.rest.model.EditBookmarkDto
 import de.readeckapp.io.rest.model.EditBookmarkResponseDto
+import de.readeckapp.io.rest.model.SyncInfoDto
 import kotlinx.datetime.Instant
 import retrofit2.Response
 import retrofit2.http.GET
@@ -32,6 +33,11 @@ interface ReadeckApi {
     @Headers("Content-Type: text/html")
     @GET("/api/bookmarks/{id}/article")
     suspend fun getArticle(@Path("id") id: String): Response<String>
+
+    @GET("/api/bookmarks/sync")
+    suspend fun getBookmarkSyncList(
+        @Query("since") since: Instant
+    ): Response<List<SyncInfoDto>>
 
     @POST("/api/bookmarks")
     suspend fun createBookmark(
