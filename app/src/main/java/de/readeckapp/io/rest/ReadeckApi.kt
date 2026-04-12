@@ -24,7 +24,8 @@ interface ReadeckApi {
         @Query("limit") limit: Int,
         @Query("offset") offset: Int,
         @Query("updated_since") updatedSince: Instant?,
-        @Query("sort") sortOrder: SortOrder
+        @Query("sort") sortOrder: SortOrder,
+        @Query("id") idList: List<String>? = null,
     ): Response<List<BookmarkDto>>
 
     @GET("/api/profile")

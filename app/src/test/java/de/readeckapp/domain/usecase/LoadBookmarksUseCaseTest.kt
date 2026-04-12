@@ -65,7 +65,7 @@ class LoadBookmarksUseCaseTest {
 
         println("result=$result")
         // Verify the result
-        assertTrue(result is LoadBookmarksUseCase.UseCaseResult.Success<*>)
+        assertTrue(result is UseCaseResult.Success<*>)
         // Add more specific assertions based on your logic
     }
 
@@ -79,7 +79,7 @@ class LoadBookmarksUseCaseTest {
         val result = loadBookmarksUseCase.execute(10, 0)
 
         // Verify the result
-        assertTrue(result is LoadBookmarksUseCase.UseCaseResult.Error)
+        assertTrue(result is UseCaseResult.Error)
         // Add more specific assertions based on your logic
     }
 
@@ -99,7 +99,7 @@ class LoadBookmarksUseCaseTest {
         val result = loadBookmarksUseCase.execute(10, 0)
 
         // Verify the result
-        assertTrue(result is LoadBookmarksUseCase.UseCaseResult.Error)
+        assertTrue(result is UseCaseResult.Error)
         // Add more specific assertions based on your logic
     }
 

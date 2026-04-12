@@ -28,6 +28,7 @@ class AuthenticateUseCase @Inject constructor(
             is UserRepository.LoginResult.Success -> {
                 bookmarkRepository.deleteAllBookmarks()
                 settingsDataStore.saveLastBookmarkTimestamp(Instant.fromEpochMilliseconds(0))
+                settingsDataStore.saveLastSyncTimestamp(Instant.fromEpochMilliseconds(0))
                 LoadBookmarksWorker.enqueue(context, isInitialLoad = true)
                 settingsDataStore.setInitialSyncPerformed(true)
                 AuthenticationResult.Success

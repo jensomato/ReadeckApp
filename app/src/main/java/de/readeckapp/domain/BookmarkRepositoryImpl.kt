@@ -233,7 +233,7 @@ class BookmarkRepositoryImpl @Inject constructor(
                 val response =
                     readeckApi.deleteBookmark(id = id)
                 if (response.isSuccessful) {
-                    bookmarkDao.deleteBookmark(id)
+                    deleteBookmarkLocal(id)
                     Timber.i("Delete Bookmark successful")
                     BookmarkRepository.UpdateResult.Success
                 } else {
@@ -257,6 +257,10 @@ class BookmarkRepositoryImpl @Inject constructor(
                 )
             }
         }
+    }
+
+    override suspend fun deleteBookmarkLocal(id: String) {
+        bookmarkDao.deleteBookmark(id)
     }
 
     private fun handleStatusMessage(code: Int, errorBody: String?): StatusMessageDto {
