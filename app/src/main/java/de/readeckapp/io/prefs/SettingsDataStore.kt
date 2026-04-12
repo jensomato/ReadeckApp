@@ -19,6 +19,8 @@ interface SettingsDataStore {
     fun saveUrl(url: String)
     suspend fun saveLastBookmarkTimestamp(timestamp: Instant)
     suspend fun getLastBookmarkTimestamp(): Instant?
+    suspend fun saveLastSyncTimestamp(timestamp: Instant)
+    suspend fun getLastSyncTimestamp(): Instant?
     suspend fun setInitialSyncPerformed(performed: Boolean)
     suspend fun isInitialSyncPerformed(): Boolean
     suspend fun clearCredentials()

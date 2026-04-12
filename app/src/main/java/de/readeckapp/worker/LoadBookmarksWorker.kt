@@ -15,6 +15,8 @@ import dagger.assisted.Assisted
 import dagger.assisted.AssistedInject
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.usecase.LoadBookmarksUseCase
+import de.readeckapp.domain.usecase.SyncBookmarksUseCase
+import de.readeckapp.domain.usecase.UseCaseResult
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -26,6 +28,7 @@ class LoadBookmarksWorker @AssistedInject constructor(
     @Assisted appContext: Context,
     @Assisted workerParams: WorkerParameters,
     private val loadBookmarksUseCase: LoadBookmarksUseCase,
+    private val syncBookmarksUseCase: SyncBookmarksUseCase,
     private val bookmarkRepository: BookmarkRepository,
     private val settingsDataStore: SettingsDataStore,
 ) : CoroutineWorker(appContext, workerParams) {
@@ -50,11 +53,21 @@ class LoadBookmarksWorker @AssistedInject constructor(
             }
         }
 
-        return when (val result = loadBookmarksUseCase.execute()) {
-            is LoadBookmarksUseCase.UseCaseResult.Success -> {
+        val lastSyncTimestamp = settingsDataStore.getLastSyncTimestamp()
+
+        val result = if (isInitialLoad || lastSyncTimestamp == null) {
+            Timber.d("start full sync")
+            loadBookmarksUseCase.execute()
+        } else {
+            Timber.d("start incremental sync")
+            syncBookmarksUseCase.execute()
+        }
+
+        return when (result) {
+            is UseCaseResult.Success -> {
                 Result.success()
             }
-            is LoadBookmarksUseCase.UseCaseResult.Error -> {
+            is UseCaseResult.Error -> {
                 Timber.e(result.exception, "Error loading bookmarks")
                 Result.failure() // Or Result.retry() depending on the error
             }

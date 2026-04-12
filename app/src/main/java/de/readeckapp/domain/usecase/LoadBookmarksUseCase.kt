@@ -22,11 +22,6 @@ class LoadBookmarksUseCase @Inject constructor(
     private val settingsDataStore: SettingsDataStore
 ) {
 
-    sealed class UseCaseResult<out DataType : Any> {
-        data class Success<out DataType : Any>(val  dataType: DataType) : UseCaseResult<DataType>()
-        data class Error(val exception: Throwable) : UseCaseResult<Nothing>()
-    }
-
     @Transaction
     suspend fun execute(pageSize: Int = DEFAULT_PAGE_SIZE, initialOffset: Int = 0): UseCaseResult<Unit> {
         Timber.d("execute(pageSize=$pageSize, initialOffset=$initialOffset")
@@ -71,6 +66,7 @@ class LoadBookmarksUseCase @Inject constructor(
                     latestBookmark?.let {
                         val timestamp = it.created.toInstant(TimeZone.currentSystemDefault())
                         settingsDataStore.saveLastBookmarkTimestamp(timestamp)
+                        settingsDataStore.saveLastSyncTimestamp(timestamp) // Also update sync timestamp
                         Timber.i("Saved last bookmark timestamp: [local=${it.created}, utc=$timestamp]")
                     }
 
