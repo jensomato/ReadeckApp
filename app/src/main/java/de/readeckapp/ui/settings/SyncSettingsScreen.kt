@@ -55,6 +55,8 @@ fun SyncSettingsScreen(
     val onClickAutoSync: () -> Unit = { viewModel.onClickAutoSync() }
     val onClickAutoSyncSwitch: (value: Boolean) -> Unit =
         { value -> viewModel.onClickAutoSyncSwitch(value) }
+    val onSyncReadProgressToggle: (value: Boolean) -> Unit =
+        { value -> viewModel.onSyncReadProgressToggle(value) }
     val snackbarHostState = remember { SnackbarHostState() }
     val notificationPermissionState = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU) {
         rememberPermissionState(Manifest.permission.POST_NOTIFICATIONS)
@@ -108,6 +110,7 @@ fun SyncSettingsScreen(
         onClickDoFullSyncNow = onClickDoFullSyncNow,
         onClickAutoSync = onClickAutoSync,
         onClickAutoSyncSwitch = onClickAutoSyncSwitch,
+        onSyncReadProgressToggle = onSyncReadProgressToggle,
         settingsUiState = settingsUiState
     )
 }
@@ -121,6 +124,7 @@ fun SyncSettingsView(
     onClickDoFullSyncNow: () -> Unit,
     onClickAutoSync: () -> Unit,
     onClickAutoSyncSwitch: (Boolean) -> Unit,
+    onSyncReadProgressToggle: (Boolean) -> Unit,
     onClickBack: () -> Unit,
 ) {
     Scaffold(
@@ -151,6 +155,23 @@ fun SyncSettingsView(
             horizontalAlignment = Alignment.Start,
             verticalArrangement = Arrangement.spacedBy(8.dp)
         ) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f).padding(end = 24.dp)) {
+                    Text(stringResource(R.string.sync_settings_sync_read_progress_title))
+                    Text(
+                        text = stringResource(R.string.sync_settings_sync_read_progress_description),
+                        style = Typography.bodySmall
+                    )
+                }
+                Row {
+                    Switch(
+                        checked = settingsUiState.syncReadProgressEnabled,
+                        onCheckedChange = { onSyncReadProgressToggle(it) })
+                }
+            }
             Text(
                 text = stringResource(R.string.settings_sync_full_sync_heading),
                 style = Typography.titleSmall
@@ -212,7 +233,8 @@ fun SyncSettingsScreenViewPreview() {
         showDialog = null,
         autoSyncTimeframeLabel = AutoSyncTimeframe.HOURS_12.toLabelResource(),
         nextAutoSyncRun = null,
-        autoSyncButtonEnabled = false
+        autoSyncButtonEnabled = false,
+        syncReadProgressEnabled = true,
     )
     SyncSettingsView(
         modifier = Modifier,
@@ -221,7 +243,8 @@ fun SyncSettingsScreenViewPreview() {
         onClickAutoSync = {},
         onClickAutoSyncSwitch = {},
         onClickDoFullSyncNow = {},
-        settingsUiState = settingsUiState
+        settingsUiState = settingsUiState,
+        onSyncReadProgressToggle = {},
     )
 }
 

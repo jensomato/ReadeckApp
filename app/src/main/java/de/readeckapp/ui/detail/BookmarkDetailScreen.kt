@@ -103,6 +103,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { viewModel.onClickChangeZoomFactor(-25) }
     val onProgressUpdate: (Int) -> Unit =
         { progress -> viewModel.onUpdateReadProgress(progress) }
+    val scrollToProgressEnabled by viewModel.scrollToProgressEnabledFlow.collectAsState()
 
     val onClickOpenUrl: (String) -> Unit = { viewModel.onClickOpenUrl(it) }
     val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
@@ -164,7 +165,8 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onClickIncreaseZoomFactor = onClickIncreaseZoomFactor,
                 onClickDecreaseZoomFactor = onClickDecreaseZoomFactor,
                 onProgressUpdate = onProgressUpdate,
-                readProgress = readProgress
+                readProgress = readProgress,
+                scrollToProgressEnabled = scrollToProgressEnabled
             )
             // Consumes a shareIntent and creates the corresponding share dialog
             ShareBookmarkChooser(
@@ -207,6 +209,7 @@ fun BookmarkDetailScreen(
     onClickDecreaseZoomFactor: () -> Unit,
     onProgressUpdate: (Int) -> Unit,
     readProgress: Int,
+    scrollToProgressEnabled: Boolean,
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -263,7 +266,7 @@ fun BookmarkDetailScreen(
                 }
         }
         LaunchedEffect(uiState.bookmark.readProgress, scrollState.maxValue) {
-            if (scrollState.maxValue > 0) {
+            if (scrollToProgressEnabled && scrollState.maxValue > 0) {
                 scope.launch {
                     val position = scrollState.maxValue / 100 * uiState.bookmark.readProgress
                     scrollState.scrollTo(position)
@@ -612,6 +615,7 @@ fun BookmarkDetailScreenPreview() {
         onClickOpenUrl = {},
         onProgressUpdate = {},
         readProgress = 0,
+        scrollToProgressEnabled = true,
     )
 }
 

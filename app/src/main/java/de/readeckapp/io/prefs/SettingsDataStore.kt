@@ -29,6 +29,10 @@ interface SettingsDataStore {
     suspend fun isAutoSyncEnabled(): Boolean
     suspend fun saveAutoSyncTimeframe(autoSyncTimeframe: AutoSyncTimeframe)
     suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe
+    suspend fun isSyncReadProgressEnabled(): Boolean
+    suspend fun setSyncReadProgressEnabled(enabled: Boolean)
+    suspend fun isScrollToProgressEnabled(): Boolean
+    suspend fun setScrollToProgressEnabled(enabled: Boolean)
     suspend fun saveTheme(theme: Theme)
     suspend fun getTheme(): Theme
     suspend fun  getZoomFactor(): Int
