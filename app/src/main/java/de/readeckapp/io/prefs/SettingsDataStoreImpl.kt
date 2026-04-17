@@ -34,6 +34,8 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_AUTOSYNC_TIMEFRAME = stringPreferencesKey("autosync_timeframe")
     private val KEY_THEME = stringPreferencesKey("theme")
     private val KEY_ZOOM_FACTOR = intPreferencesKey("zoom_factor")
+    private val KEY_SYNC_READ_PROGRESS = booleanPreferencesKey("sync_read_progress")
+    private val KEY_SCROLL_TO_PROGRESS = booleanPreferencesKey("scroll_to_progress")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -139,6 +141,26 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override suspend fun saveZoomFactor(zoomFactor: Int) {
         encryptedSharedPreferences.edit {
             putInt(KEY_ZOOM_FACTOR.name, zoomFactor.coerceIn(25, 400))
+        }
+    }
+
+    override suspend fun isSyncReadProgressEnabled(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_SYNC_READ_PROGRESS.name, true)
+    }
+
+    override suspend fun setSyncReadProgressEnabled(enabled: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_SYNC_READ_PROGRESS.name, enabled)
+        }
+    }
+
+    override suspend fun isScrollToProgressEnabled(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_SCROLL_TO_PROGRESS.name, true)
+    }
+
+    override suspend fun setScrollToProgressEnabled(enabled: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_SCROLL_TO_PROGRESS.name, enabled)
         }
     }
 

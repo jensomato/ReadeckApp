@@ -14,6 +14,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
@@ -44,6 +45,7 @@ fun UiSettingsScreen(
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val onClickTheme: () -> Unit = { viewModel.onClickTheme() }
+    val onScrollToProgressToggle: (Boolean) -> Unit = { viewModel.onScrollToProgressToggle(it) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(key1 = navigationEvent.value) {
@@ -65,13 +67,15 @@ fun UiSettingsScreen(
         )
     }
 
-    UiSettingsView(
-        modifier = Modifier,
-        snackbarHostState = snackbarHostState,
-        onClickBack = onClickBack,
-        onClickTheme = onClickTheme,
-        settingsUiState = settingsUiState
-    )
+        UiSettingsView(
+            modifier = Modifier,
+            snackbarHostState = snackbarHostState,
+            onClickBack = onClickBack,
+            onClickTheme = onClickTheme,
+            onScrollToProgressToggle = onScrollToProgressToggle,
+            settingsUiState = settingsUiState
+        )
+
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
@@ -81,6 +85,7 @@ fun UiSettingsView(
     snackbarHostState: SnackbarHostState,
     settingsUiState: UiSettingsUiState,
     onClickTheme: () -> Unit,
+    onScrollToProgressToggle: (Boolean) -> Unit,
     onClickBack: () -> Unit,
 ) {
     Scaffold(
@@ -124,6 +129,22 @@ fun UiSettingsView(
                     )
                 }
             }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.ui_settings_scroll_to_progress_title))
+                    Text(
+                        text = stringResource(R.string.ui_settings_scroll_to_progress_description),
+                        style = Typography.bodySmall
+                    )
+                }
+                Switch(
+                    checked = settingsUiState.scrollToProgressEnabled,
+                    onCheckedChange = { onScrollToProgressToggle(it) }
+                )
+            }
         }
     }
 }
@@ -136,13 +157,15 @@ fun UiSettingsScreenViewPreview() {
         themeOptions = listOf(),
         showDialog = false,
         themeLabel = Theme.SYSTEM.toLabelResource(),
+        scrollToProgressEnabled = true,
     )
     UiSettingsView(
         modifier = Modifier,
         snackbarHostState = SnackbarHostState(),
         onClickBack = {},
         onClickTheme = {},
-        settingsUiState = settingsUiState
+        settingsUiState = settingsUiState,
+        onScrollToProgressToggle = {},
     )
 }
 

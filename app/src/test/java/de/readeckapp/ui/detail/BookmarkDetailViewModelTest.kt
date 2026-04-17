@@ -58,6 +58,8 @@ class BookmarkDetailViewModelTest {
         every { savedStateHandle.get<String>("bookmarkId") } returns "123"
         every { settingsDataStore.themeFlow } returns MutableStateFlow(Theme.LIGHT.name)
         every { settingsDataStore.zoomFactorFlow } returns MutableStateFlow(100)
+        coEvery { settingsDataStore.isSyncReadProgressEnabled() } returns true
+        coEvery { settingsDataStore.isScrollToProgressEnabled() } returns true
         viewModel = BookmarkDetailViewModel(updateBookmarkUseCase, bookmarkRepository, assetLoader, settingsDataStore, appScope, savedStateHandle)
     }
 

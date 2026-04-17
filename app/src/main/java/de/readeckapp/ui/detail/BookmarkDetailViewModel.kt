@@ -70,10 +70,23 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
     private val zoomFactor: Flow<Int> = settingsDataStore.zoomFactorFlow
+    private var syncReadProgressEnabled: Boolean = true
+    private var scrollToProgressEnabled: Boolean = true
     private val updateState = MutableStateFlow<UpdateBookmarkState?>(null)
 
     private val _readProgress = MutableStateFlow<Int>(0)
     val readProgress: StateFlow<Int> = _readProgress.asStateFlow()
+
+    private val _scrollToProgressEnabledFlow = MutableStateFlow(true)
+    val scrollToProgressEnabledFlow: StateFlow<Boolean> = _scrollToProgressEnabledFlow.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            syncReadProgressEnabled = settingsDataStore.isSyncReadProgressEnabled()
+            scrollToProgressEnabled = settingsDataStore.isScrollToProgressEnabled()
+            _scrollToProgressEnabledFlow.value = scrollToProgressEnabled
+        }
+    }
 
     @OptIn(ExperimentalEncodingApi::class)
     val uiState = combine(
@@ -211,8 +224,10 @@ class BookmarkDetailViewModel @Inject constructor(
 
     fun onClickBack() {
         _navigationEvent.update { NavigationEvent.NavigateBack }
-        updateBookmarkInBackground {
-            updateBookmarkUseCase.updateReadProgress(bookmarkId!!, _readProgress.value)
+        if (syncReadProgressEnabled) {
+            updateBookmarkInBackground {
+                updateBookmarkUseCase.updateReadProgress(bookmarkId!!, _readProgress.value)
+            }
         }
     }
 
