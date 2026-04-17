@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added reading progress settings. You can now configure if the reading progress is synchronized with the backend and if content automatically scrolls to your last reading position.
 - Added optimized incremental bookmark synchronization using the new `/bookmarks/sync` endpoint, improving performance and consistency by efficiently handling bookmark updates and deletions.
 - Added reading progress tracking. The app now tracks and synchronizes your reading position. A progress indicator below the top app bar shows your progress, content automatically scrolls to your last saved position from the backend, and progress is synced when leaving the bookmark detail view.
 
