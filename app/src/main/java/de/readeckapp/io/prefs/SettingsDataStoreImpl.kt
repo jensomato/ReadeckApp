@@ -28,11 +28,14 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_URL = stringPreferencesKey("url")
     private val KEY_AUTH_STATE = stringPreferencesKey("auth_state")
     private val KEY_LAST_BOOKMARK_TIMESTAMP = stringPreferencesKey("lastBookmarkTimestamp")
+    private val KEY_LAST_SYNC_TIMESTAMP = stringPreferencesKey("lastSyncTimestamp")
     private val KEY_INITIAL_SYNC_PERFORMED = "initial_sync_performed"
     private val KEY_AUTOSYNC_ENABLED = booleanPreferencesKey("autosync_enabled")
     private val KEY_AUTOSYNC_TIMEFRAME = stringPreferencesKey("autosync_timeframe")
     private val KEY_THEME = stringPreferencesKey("theme")
     private val KEY_ZOOM_FACTOR = intPreferencesKey("zoom_factor")
+    private val KEY_SYNC_READ_PROGRESS = booleanPreferencesKey("sync_read_progress")
+    private val KEY_SCROLL_TO_PROGRESS = booleanPreferencesKey("scroll_to_progress")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -70,6 +73,18 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
 
     override suspend fun getLastBookmarkTimestamp(): Instant? {
         return encryptedSharedPreferences.getString(KEY_LAST_BOOKMARK_TIMESTAMP.name, null)?.let {
+            Instant.parse(it)
+        }
+    }
+
+    override suspend fun saveLastSyncTimestamp(timestamp: Instant) {
+        encryptedSharedPreferences.edit {
+            putString(KEY_LAST_SYNC_TIMESTAMP.name, timestamp.toString())
+        }
+    }
+
+    override suspend fun getLastSyncTimestamp(): Instant? {
+        return encryptedSharedPreferences.getString(KEY_LAST_SYNC_TIMESTAMP.name, null)?.let {
             Instant.parse(it)
         }
     }
@@ -126,6 +141,26 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override suspend fun saveZoomFactor(zoomFactor: Int) {
         encryptedSharedPreferences.edit {
             putInt(KEY_ZOOM_FACTOR.name, zoomFactor.coerceIn(25, 400))
+        }
+    }
+
+    override suspend fun isSyncReadProgressEnabled(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_SYNC_READ_PROGRESS.name, true)
+    }
+
+    override suspend fun setSyncReadProgressEnabled(enabled: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_SYNC_READ_PROGRESS.name, enabled)
+        }
+    }
+
+    override suspend fun isScrollToProgressEnabled(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_SCROLL_TO_PROGRESS.name, true)
+    }
+
+    override suspend fun setScrollToProgressEnabled(enabled: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_SCROLL_TO_PROGRESS.name, enabled)
         }
     }
 

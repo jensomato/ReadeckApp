@@ -37,6 +37,15 @@ class UpdateBookmarkUseCase @Inject constructor(
         ))
     }
 
+    suspend fun updateReadProgress(bookmarkId: String, readProgress: Int): Result {
+        return handleResult(bookmarkRepository.updateBookmark(
+            bookmarkId = bookmarkId,
+            isFavorite = null,
+            isArchived = null,
+            readProgress = readProgress
+        ))
+    }
+
     suspend fun deleteBookmark(bookmarkId: String): Result {
         return handleResult(bookmarkRepository.deleteBookmark(bookmarkId))
     }

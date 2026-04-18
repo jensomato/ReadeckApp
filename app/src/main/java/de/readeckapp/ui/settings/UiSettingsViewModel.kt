@@ -31,18 +31,21 @@ class UiSettingsViewModel @Inject constructor(
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
     private val theme = MutableStateFlow(Theme.SYSTEM)
+    private val scrollToProgressEnabled = MutableStateFlow(true)
     private val showDialog = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
             theme.value = settingsDataStore.getTheme()
+            scrollToProgressEnabled.value = settingsDataStore.isScrollToProgressEnabled()
         }
     }
 
 
-    val uiState = combine(theme, showDialog) { theme, showDialog ->
+    val uiState = combine(theme, scrollToProgressEnabled, showDialog) { theme, scrollToProgressEnabled, showDialog ->
         UiSettingsUiState(
             theme = theme,
+            scrollToProgressEnabled = scrollToProgressEnabled,
             themeOptions = getThemeOptionList(theme),
             showDialog = showDialog,
             themeLabel = theme.toLabelResource(),
@@ -54,11 +57,19 @@ class UiSettingsViewModel @Inject constructor(
             initialValue =
                 UiSettingsUiState(
                     theme = Theme.SYSTEM,
+                    scrollToProgressEnabled = true,
                     themeOptions = getThemeOptionList(Theme.SYSTEM),
                     showDialog = false,
                     themeLabel = Theme.SYSTEM.toLabelResource(),
                 )
         )
+
+    fun onScrollToProgressToggle(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setScrollToProgressEnabled(enabled)
+            scrollToProgressEnabled.value = settingsDataStore.isScrollToProgressEnabled()
+        }
+    }
 
     fun onNavigationEventConsumed() {
         _navigationEvent.update { null } // Reset the event
@@ -106,6 +117,7 @@ class UiSettingsViewModel @Inject constructor(
 @Immutable
 data class UiSettingsUiState(
     val theme: Theme,
+    val scrollToProgressEnabled: Boolean,
     val themeOptions: List<ThemeOption>,
     val showDialog: Boolean,
     @StringRes

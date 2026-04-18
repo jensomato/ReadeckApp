@@ -19,6 +19,8 @@ interface SettingsDataStore {
     fun saveUrl(url: String)
     suspend fun saveLastBookmarkTimestamp(timestamp: Instant)
     suspend fun getLastBookmarkTimestamp(): Instant?
+    suspend fun saveLastSyncTimestamp(timestamp: Instant)
+    suspend fun getLastSyncTimestamp(): Instant?
     suspend fun setInitialSyncPerformed(performed: Boolean)
     suspend fun isInitialSyncPerformed(): Boolean
     suspend fun clearCredentials()
@@ -27,6 +29,10 @@ interface SettingsDataStore {
     suspend fun isAutoSyncEnabled(): Boolean
     suspend fun saveAutoSyncTimeframe(autoSyncTimeframe: AutoSyncTimeframe)
     suspend fun getAutoSyncTimeframe(): AutoSyncTimeframe
+    suspend fun isSyncReadProgressEnabled(): Boolean
+    suspend fun setSyncReadProgressEnabled(enabled: Boolean)
+    suspend fun isScrollToProgressEnabled(): Boolean
+    suspend fun setScrollToProgressEnabled(enabled: Boolean)
     suspend fun saveTheme(theme: Theme)
     suspend fun getTheme(): Theme
     suspend fun  getZoomFactor(): Int

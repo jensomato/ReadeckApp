@@ -48,6 +48,7 @@ class SyncSettingsViewModel @Inject constructor(
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
     private val autoSyncEnabled = MutableStateFlow(false)
+    private val syncReadProgressEnabled = MutableStateFlow(true)
     private val autoSyncTimeframe = MutableStateFlow(AutoSyncTimeframe.MANUAL)
     private val showDialog = MutableStateFlow<Dialog?>(null)
     private val workInfo: Flow<WorkInfo?> = fullSyncUseCase.workInfoFlow.map { workInfoList ->
@@ -59,12 +60,26 @@ class SyncSettingsViewModel @Inject constructor(
     init {
         viewModelScope.launch {
             autoSyncEnabled.value = settingsDataStore.isAutoSyncEnabled()
+            syncReadProgressEnabled.value = settingsDataStore.isSyncReadProgressEnabled()
             autoSyncTimeframe.value = settingsDataStore.getAutoSyncTimeframe()
         }
     }
 
+    private val autoSyncState =
+        combine(autoSyncEnabled, autoSyncTimeframe) { autoSyncEnabled, autoSyncTimeframe ->
+            Pair(
+                autoSyncEnabled,
+                autoSyncTimeframe
+            )
+        }
 
-    val uiState = combine(autoSyncEnabled, autoSyncTimeframe, showDialog, workInfo, fullSyncUseCase.syncIsRunning) { autoSyncEnabled, autoSyncTimeframe, showDialog, workInfo, syncIsRunning ->
+    val uiState = combine(
+        autoSyncState,
+        showDialog,
+        workInfo,
+        fullSyncUseCase.syncIsRunning,
+        syncReadProgressEnabled
+    ) { (autoSyncEnabled, autoSyncTimeframe), showDialog, workInfo, syncIsRunning, syncReadProgressEnabled ->
         Timber.d("changed")
         val next = workInfo?.let {
             if (it.state == WorkInfo.State.ENQUEUED) {
@@ -78,6 +93,7 @@ class SyncSettingsViewModel @Inject constructor(
         Timber.d("enabled=$autoSyncEnabled, timeFrame=$autoSyncTimeframe")
         SyncSettingsUiState(
             autoSyncEnabled = autoSyncEnabled,
+            syncReadProgressEnabled = syncReadProgressEnabled,
             autoSyncTimeframe = autoSyncTimeframe,
             autoSyncTimeframeOptions = getAutoSyncOptionList(autoSyncTimeframe),
             showDialog = showDialog,
@@ -92,6 +108,7 @@ class SyncSettingsViewModel @Inject constructor(
             initialValue =
                 SyncSettingsUiState(
                     autoSyncEnabled = false,
+                    syncReadProgressEnabled = true,
                     autoSyncTimeframe = AutoSyncTimeframe.MANUAL,
                     autoSyncTimeframeOptions = getAutoSyncOptionList(AutoSyncTimeframe.MANUAL),
                     showDialog = null,
@@ -100,6 +117,13 @@ class SyncSettingsViewModel @Inject constructor(
                     autoSyncButtonEnabled = false
                 )
         )
+
+    fun onSyncReadProgressToggle(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setSyncReadProgressEnabled(enabled)
+            syncReadProgressEnabled.value = settingsDataStore.isSyncReadProgressEnabled()
+        }
+    }
 
     fun onClickDoFullSyncNow() {
         fullSyncUseCase.performFullSync()
@@ -135,7 +159,7 @@ class SyncSettingsViewModel @Inject constructor(
                 _permissionState?.status?.shouldShowRationale == true -> {
                     showDialog.value = Dialog.RationaleDialog
                 }
-                else ->{
+                else -> {
                     showDialog.value = Dialog.PermissionRequest
                 }
             }
@@ -195,6 +219,7 @@ class SyncSettingsViewModel @Inject constructor(
 @Immutable
 data class SyncSettingsUiState(
     val autoSyncEnabled: Boolean,
+    val syncReadProgressEnabled: Boolean,
     val autoSyncTimeframe: AutoSyncTimeframe,
     val autoSyncTimeframeOptions: List<AutoSyncTimeframeOption>,
     val showDialog: Dialog?,

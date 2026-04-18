@@ -65,6 +65,10 @@ other{}
     <string name="theme_sepia">Sepia</string>
     <string name="ui_settings_theme_heading">Theming</string>
     <string name="ui_settings_theme_dialog_support_text">Which theme should be used?</string>
+    <string name="ui_settings_scroll_to_progress_title">Scroll to reading progress</string>
+    <string name="ui_settings_scroll_to_progress_description">When opening a bookmark, automatically scroll to your last reading position.</string>
+    <string name="sync_settings_sync_read_progress_title">Sync reading progress</string>
+    <string name="sync_settings_sync_read_progress_description">When leaving a bookmark, sync your reading progress to the server.</string>
 
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorite</string>

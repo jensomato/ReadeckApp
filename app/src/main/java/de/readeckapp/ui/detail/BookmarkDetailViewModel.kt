@@ -5,12 +5,14 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
+import de.readeckapp.coroutine.ApplicationScope
 import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Template
 import de.readeckapp.domain.model.Theme
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.AssetLoader
 import de.readeckapp.io.prefs.SettingsDataStore
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +38,7 @@ class BookmarkDetailViewModel @Inject constructor(
     private val bookmarkRepository: BookmarkRepository,
     private val assetLoader: AssetLoader,
     private val settingsDataStore: SettingsDataStore,
+    @ApplicationScope private val applicationScope: CoroutineScope,
     savedStateHandle: SavedStateHandle
 ) : ViewModel() {
     private val _navigationEvent = MutableStateFlow<NavigationEvent?>(null)
@@ -67,7 +70,23 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
     private val zoomFactor: Flow<Int> = settingsDataStore.zoomFactorFlow
+    private var syncReadProgressEnabled: Boolean = true
+    private var scrollToProgressEnabled: Boolean = true
     private val updateState = MutableStateFlow<UpdateBookmarkState?>(null)
+
+    private val _readProgress = MutableStateFlow<Int>(0)
+    val readProgress: StateFlow<Int> = _readProgress.asStateFlow()
+
+    private val _scrollToProgressEnabledFlow = MutableStateFlow(true)
+    val scrollToProgressEnabledFlow: StateFlow<Boolean> = _scrollToProgressEnabledFlow.asStateFlow()
+
+    init {
+        viewModelScope.launch {
+            syncReadProgressEnabled = settingsDataStore.isSyncReadProgressEnabled()
+            scrollToProgressEnabled = settingsDataStore.isScrollToProgressEnabled()
+            _scrollToProgressEnabledFlow.value = scrollToProgressEnabled
+        }
+    }
 
     @OptIn(ExperimentalEncodingApi::class)
     val uiState = combine(
@@ -100,7 +119,8 @@ class BookmarkDetailViewModel @Inject constructor(
                         is de.readeckapp.domain.model.Bookmark.Type.Picture -> Bookmark.Type.PHOTO
                         is de.readeckapp.domain.model.Bookmark.Type.Video -> Bookmark.Type.VIDEO
                     },
-                    articleContent = bookmark.articleContent
+                    articleContent = bookmark.articleContent,
+                    readProgress = bookmark.readProgress,
                 ),
                 updateBookmarkState = updateState,
                 template = template,
@@ -113,6 +133,10 @@ class BookmarkDetailViewModel @Inject constructor(
             started = SharingStarted.WhileSubscribed(5000),
             initialValue = UiState.Loading
         )
+
+    fun onUpdateReadProgress(progress: Int) {
+        _readProgress.value = progress
+    }
 
     fun onToggleFavorite(bookmarkId: String, isFavorite: Boolean) {
         updateBookmark {
@@ -142,6 +166,15 @@ class BookmarkDetailViewModel @Inject constructor(
                 bookmarkId = bookmarkId,
                 isRead = isRead
             )
+        }
+    }
+
+    private fun updateBookmarkInBackground(update: suspend () -> UpdateBookmarkUseCase.Result) {
+        applicationScope.launch {
+            when (val result = update()) {
+                is UpdateBookmarkUseCase.Result.Success -> Timber.d("Update in background successful")
+                else -> Timber.e("Update in background error: $result")
+            }
         }
     }
 
@@ -191,6 +224,11 @@ class BookmarkDetailViewModel @Inject constructor(
 
     fun onClickBack() {
         _navigationEvent.update { NavigationEvent.NavigateBack }
+        if (syncReadProgressEnabled) {
+            updateBookmarkInBackground {
+                updateBookmarkUseCase.updateReadProgress(bookmarkId!!, _readProgress.value)
+            }
+        }
     }
 
     fun onClickChangeZoomFactor(value: Int) {
@@ -243,6 +281,7 @@ class BookmarkDetailViewModel @Inject constructor(
         val isFavorite: Boolean,
         val isArchived: Boolean,
         val isRead: Boolean,
+        val readProgress: Int,
         val type: Type,
         val articleContent: String?
     ) {

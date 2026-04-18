@@ -87,6 +87,10 @@ other{}
     <string name="auto_sync_next_run">Nächste Synchronisierung am %1$1s</string>
     <string name="auto_sync_next_run_null">Keine Synchronisierung geplant</string>
     <string name="settings_sync_support_text">Um deine Lesezeichenliste aktuell zu halten, prüft die App gelegentlich, ob du Lesezeichen auf dem Readedeck-Server gelöscht hast, und entfernt diese. Da dieser Vorgang das Herunterladen all deiner Lesezeichen-Daten erfordert, läuft er automatisch im Hintergrund ab. So wird sichergestellt, dass deine App deine aktuellen Readedeck-Lesezeichen korrekt widerspiegelt, ohne dass du sie manuell löschen musst.</string>
+    <string name="ui_settings_scroll_to_progress_title">Zum Lesefortschritt scrollen</string>
+    <string name="ui_settings_scroll_to_progress_description">Beim Öffnen eines Lesezeichens automatisch zur letzten Leseposition scrollen.</string>
+    <string name="sync_settings_sync_read_progress_title">Lesefortschritt synchronisieren</string>
+    <string name="sync_settings_sync_read_progress_description">Beim Verlassen eines Lesezeichens den Lesefortschritt mit dem Server synchronisieren.</string>
     <string name="auto_sync_notification_success">Synchronisierung im Hintergrund erfolgreich. %1$d Lesezeichen gelöscht.</string>
     <string name="auto_sync_notification_failure">Synchronisierung im Hintergrund gescheitert.</string>
     <string name="auto_sync_notification_running">Synchronisierung im Hintergrund läuft.</string>
