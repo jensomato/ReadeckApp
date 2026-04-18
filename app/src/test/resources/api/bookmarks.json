@@ -165,8 +165,8 @@
       },
       "image": {
         "src": "https://readeck.example.com/bm/Gy/GywTWpgMHr6Yqsv8Jviuwd/img/image.png",
-        "width": 800,
-        "height": 400
+        "width": null,
+        "height": null
       },
       "log": {
         "src": "https://readeck.example.com/api/bookmarks/GywTWpgMHr6Yqsv8Jviuwd/x/log"
@@ -175,9 +175,7 @@
         "src": "https://readeck.example.com/api/bookmarks/GywTWpgMHr6Yqsv8Jviuwd/x/props.json"
       },
       "thumbnail": {
-        "src": "https://readeck.example.com/bm/Gy/GywTWpgMHr6Yqsv8Jviuwd/img/thumbnail.png",
-        "width": 380,
-        "height": 190
+        "src": "https://readeck.example.com/bm/Gy/GywTWpgMHr6Yqsv8Jviuwd/img/thumbnail.png"
       }
     },
     "word_count": 8881,
