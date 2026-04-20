@@ -54,7 +54,8 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
-import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.rememberUpdatedState
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
@@ -80,7 +81,6 @@ import de.readeckapp.util.openUrlInCustomTab
 import de.readeckapp.ui.components.ShareBookmarkChooser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
-import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -253,25 +253,26 @@ fun BookmarkDetailScreen(
             )
         }
     ) { padding ->
-        val scope = rememberCoroutineScope()
         val scrollState = rememberScrollState()
+        val currentReadProgress by rememberUpdatedState(readProgress)
         LaunchedEffect(scrollState) {
             snapshotFlow { scrollState.value }
                 .distinctUntilChanged()
                 .collect { value ->
                     val progress = calculateProgress(value, scrollState.maxValue)
-                    if ((progress - readProgress).absoluteValue > 1) {
+                    if ((progress - currentReadProgress).absoluteValue > 1) {
                         onProgressUpdate(progress)
                     }
                 }
         }
-        LaunchedEffect(uiState.bookmark.readProgress, scrollState.maxValue) {
-            if (scrollToProgressEnabled && scrollState.maxValue > 0) {
-                scope.launch {
-                    val position = scrollState.maxValue / 100 * uiState.bookmark.readProgress
-                    scrollState.scrollTo(position)
-                    onProgressUpdate(position)
-                }
+        val hasScrolledToInitialPosition = rememberSaveable(uiState.bookmark.bookmarkId) { mutableStateOf(false) }
+        LaunchedEffect(uiState.bookmark.bookmarkId, scrollState.maxValue) {
+            if (!hasScrolledToInitialPosition.value && scrollToProgressEnabled && scrollState.maxValue > 0) {
+                // Wait for the UI to settle before attempting the initial scroll
+                kotlinx.coroutines.delay(100)
+                val position = scrollState.maxValue / 100 * uiState.bookmark.readProgress
+                scrollState.scrollTo(position)
+                hasScrolledToInitialPosition.value = true
             }
         }
 
@@ -341,6 +342,8 @@ fun BookmarkDetailArticle(
         mutableStateOf<String?>(null)
     }
     val webViewRef = remember { mutableStateOf<WebView?>(null) }
+    var lastLoadedContent by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(isSystemInDarkMode, uiState.template) {
         content.value = getTemplate(uiState, isSystemInDarkMode)
         webViewRef.value?.settings?.textZoom = uiState.zoomFactor
@@ -362,16 +365,19 @@ fun BookmarkDetailArticle(
                         webViewRef.value = this
                     }
                 },
-                update = {
-                    it.loadDataWithBaseURL(
-                        null,
-                        content.value!!,
-                        "text/html",
-                        "utf-8",
-                        null
-                    )
-                    webViewRef.value = it
-                    it.settings.textZoom = uiState.zoomFactor
+                update = { webView ->
+                    if (content.value != lastLoadedContent) {
+                        webView.loadDataWithBaseURL(
+                            null,
+                            content.value!!,
+                            "text/html",
+                            "utf-8",
+                            null
+                        )
+                        lastLoadedContent = content.value
+                    }
+                    webViewRef.value = webView
+                    webView.settings.textZoom = uiState.zoomFactor
                 }
             )
         }
