@@ -1,0 +1,2 @@
+FIXED:
+- Fixed an error regarding the progress tracking and improved performance at the same time. Closes #155.
