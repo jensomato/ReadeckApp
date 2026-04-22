@@ -67,7 +67,7 @@ fun AccountSettingsScreen(
             when (result) {
                 is AuthenticationResult.Success -> {
                     snackbarHostState.showSnackbar(
-                        message = "Success",
+                        message = "Success",   // TODO: untranslated string
                         duration = SnackbarDuration.Short
                     )
                 }

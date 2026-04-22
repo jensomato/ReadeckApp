@@ -371,7 +371,7 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                             uiState.updateBookmarkState?.let { result ->
                                 val message = when (result) {
                                     is BookmarkListViewModel.UpdateBookmarkState.Success -> {
-                                        "success"
+                                        "success"   // TODO: untranslated string
                                     }
 
                                     is BookmarkListViewModel.UpdateBookmarkState.Error -> {
