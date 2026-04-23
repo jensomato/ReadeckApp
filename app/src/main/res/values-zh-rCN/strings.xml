@@ -15,7 +15,6 @@
     <string name="settings_account_subtitle_default">未登录</string>
     <string name="accountsettings_topbar_title">账号</string>
     <string name="account_settings_topbar_title">Readeck URL</string>
-    <string name="account_settings_url_placeholder">https://readeck.example.com/api</string>
     <string name="account_settings_url_label">Readeck URL</string>
     <string name="account_settings_allow_unencrypted">允许未加密连接</string>
     <string name="sync_settings_topbar_title">同步设置</string>
