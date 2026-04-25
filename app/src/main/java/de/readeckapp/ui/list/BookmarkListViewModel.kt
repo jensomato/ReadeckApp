@@ -14,6 +14,7 @@ import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
+import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import de.readeckapp.util.extractUrlAndTitle
@@ -102,6 +103,14 @@ class BookmarkListViewModel @Inject constructor(
         }
 
         viewModelScope.launch(loadBookmarkExceptionHandler) {
+            _filterState.value = settingsDataStore.getDefaultFilter().toFilterState()
+
+            // Check if the initial sync has been performed
+            if (!settingsDataStore.isInitialSyncPerformed()) {
+                Timber.d("loadBookmarks")
+                loadBookmarks() // Start incremental sync when the ViewModel is created
+            }
+
             filterState.collectLatest { filterState ->
                 bookmarkRepository.observeBookmarkListItems(
                     type = filterState.type,
@@ -116,12 +125,6 @@ class BookmarkListViewModel @Inject constructor(
                         UiState.Success( bookmarks = it, updateBookmarkState = null)
                     }
                 }
-            }
-
-            // Check if the initial sync has been performed
-            if (!settingsDataStore.isInitialSyncPerformed()) {
-                Timber.d("loadBookmarks")
-                loadBookmarks() // Start incremental sync when the ViewModel is created
             }
         }
     }
@@ -382,4 +385,11 @@ class BookmarkListViewModel @Inject constructor(
         data object Success : UpdateBookmarkState()
         data class Error(val message: String) : UpdateBookmarkState()
     }
+}
+
+private fun DefaultFilter.toFilterState(): BookmarkListViewModel.FilterState = when (this) {
+    DefaultFilter.ALL -> BookmarkListViewModel.FilterState()
+    DefaultFilter.UNREAD -> BookmarkListViewModel.FilterState(unread = true)
+    DefaultFilter.ARCHIVED -> BookmarkListViewModel.FilterState(archived = true)
+    DefaultFilter.FAVORITES -> BookmarkListViewModel.FilterState(favorite = true)
 }

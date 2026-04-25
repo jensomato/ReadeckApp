@@ -9,6 +9,7 @@ import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
+import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import io.mockk.coEvery
@@ -64,6 +65,7 @@ class BookmarkListViewModelTest {
 
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
+        coEvery { settingsDataStore.getDefaultFilter() } returns DefaultFilter.ALL
         every { bookmarkRepository.observeBookmarkListItems(any(), any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
