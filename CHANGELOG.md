@@ -13,6 +13,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed missing synchronization of reading progress when using system back press (gesture or back button). Closes #159.
 - Fixed some untranslated strings.
 - Fixed misleading url field. Closes #158.
 
