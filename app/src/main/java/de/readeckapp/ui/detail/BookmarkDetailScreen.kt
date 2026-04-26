@@ -3,6 +3,7 @@ package de.readeckapp.ui.detail
 import android.icu.text.MessageFormat
 import android.view.View
 import android.webkit.WebView
+import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
@@ -122,6 +123,8 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
             viewModel.onNavigationEventConsumed()
         }
     }
+
+    BackHandler { onClickBack() }
 
     val context = LocalContext.current
     LaunchedEffect(key1 = openUrlEvent.value){
