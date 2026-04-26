@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed some untranslated strings.
 - Fixed misleading url field. Closes #158.
 
 ## [0.10.1] - 2026-04-20
