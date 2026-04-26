@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added translation for Italian by @igor-cali
+
 ### Fixed
 
 - Fixed some untranslated strings.
