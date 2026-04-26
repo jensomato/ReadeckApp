@@ -11,6 +11,7 @@
     <string name="account_settings_login">Accedi</string>
     <string name="account_settings_url_error">URL non valido</string>
     <string name="account_settings_allow_unencrypted">Permetti connessioni non criptate</string>
+    <string name="account_settings_registration_success">Registrazione avvenuta con successo</string>
     <string name="sync_settings_topbar_title">Impostazioni di sincronizzazione</string>
     <string name="authors" translatable="true">
 {count, plural,
