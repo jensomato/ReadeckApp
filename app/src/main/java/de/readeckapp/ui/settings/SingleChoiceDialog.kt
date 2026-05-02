@@ -1,5 +1,6 @@
 package de.readeckapp.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,14 +24,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import de.readeckapp.R
-import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.ui.theme.Typography
 
+data class SelectableOption<T>(
+    val value: T,
+    @StringRes
+    val label: Int,
+    val selected: Boolean
+)
+
 @Composable
-fun DefaultFilterDialog(
-    defaultFilterOptions: List<DefaultFilterOption>,
+fun <T> SingleChoiceDialog(
+    @StringRes supportText: Int,
+    options: List<SelectableOption<T>>,
     onDismissRequest: () -> Unit,
-    onElementSelected: (selected: DefaultFilter) -> Unit,
+    onElementSelected: (selected: T) -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismissRequest
@@ -48,19 +56,19 @@ fun DefaultFilterDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.ui_settings_default_filter_dialog_support_text),
+                    text = stringResource(supportText),
                     style = Typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 HorizontalDivider()
-                defaultFilterOptions.forEach { option ->
+                options.forEach { option ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                             .selectable(
                                 selected = option.selected,
-                                onClick = { onElementSelected(option.filter) },
+                                onClick = { onElementSelected(option.value) },
                                 role = Role.RadioButton
                             ),
                         verticalAlignment = Alignment.CenterVertically
@@ -94,29 +102,13 @@ fun DefaultFilterDialog(
 
 @Preview
 @Composable
-fun DefaultFilterDialogPreview() {
-    DefaultFilterDialog(
-        defaultFilterOptions = listOf(
-            DefaultFilterOption(
-                filter = DefaultFilter.ALL,
-                label = R.string.default_filter_all,
-                selected = false
-            ),
-            DefaultFilterOption(
-                filter = DefaultFilter.UNREAD,
-                label = R.string.default_filter_unread,
-                selected = true
-            ),
-            DefaultFilterOption(
-                filter = DefaultFilter.ARCHIVED,
-                label = R.string.default_filter_archived,
-                selected = false
-            ),
-            DefaultFilterOption(
-                filter = DefaultFilter.FAVORITES,
-                label = R.string.default_filter_favorites,
-                selected = false
-            ),
+private fun SingleChoiceDialogPreview() {
+    SingleChoiceDialog(
+        supportText = R.string.ui_settings_theme_dialog_support_text,
+        options = listOf(
+            SelectableOption(value = "a", label = R.string.theme_system, selected = true),
+            SelectableOption(value = "b", label = R.string.theme_light, selected = false),
+            SelectableOption(value = "c", label = R.string.theme_dark, selected = false),
         ),
         onDismissRequest = {},
         onElementSelected = {}

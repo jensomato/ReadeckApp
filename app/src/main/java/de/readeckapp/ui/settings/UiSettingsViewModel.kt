@@ -121,20 +121,20 @@ class UiSettingsViewModel @Inject constructor(
         data object NavigateBack : NavigationEvent()
     }
 
-    private fun getThemeOptionList(selected: Theme): List<ThemeOption> {
+    private fun getThemeOptionList(selected: Theme): List<SelectableOption<Theme>> {
         return Theme.entries.map {
-            ThemeOption(
-                theme = it,
+            SelectableOption(
+                value = it,
                 label = it.toLabelResource(),
                 selected = it == selected
             )
         }
     }
 
-    private fun getDefaultFilterOptionList(selected: DefaultFilter): List<DefaultFilterOption> {
+    private fun getDefaultFilterOptionList(selected: DefaultFilter): List<SelectableOption<DefaultFilter>> {
         return DefaultFilter.entries.map {
-            DefaultFilterOption(
-                filter = it,
+            SelectableOption(
+                value = it,
                 label = it.toLabelResource(),
                 selected = it == selected
             )
@@ -160,29 +160,15 @@ class UiSettingsViewModel @Inject constructor(
 data class UiSettingsUiState(
     val theme: Theme,
     val scrollToProgressEnabled: Boolean,
-    val themeOptions: List<ThemeOption>,
+    val themeOptions: List<SelectableOption<Theme>>,
     val showDialog: Boolean,
     @StringRes
     val themeLabel: Int,
     val defaultFilter: DefaultFilter,
     @StringRes
     val defaultFilterLabel: Int,
-    val defaultFilterOptions: List<DefaultFilterOption>,
+    val defaultFilterOptions: List<SelectableOption<DefaultFilter>>,
     val showDefaultFilterDialog: Boolean,
-)
-
-data class ThemeOption(
-    val theme: Theme,
-    @StringRes
-    val label: Int,
-    val selected: Boolean
-)
-
-data class DefaultFilterOption(
-    val filter: DefaultFilter,
-    @StringRes
-    val label: Int,
-    val selected: Boolean
 )
 
 @StringRes

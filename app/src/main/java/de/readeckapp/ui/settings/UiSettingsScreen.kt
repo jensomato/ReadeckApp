@@ -62,16 +62,18 @@ fun UiSettingsScreen(
     }
 
     if (settingsUiState.showDialog) {
-        ThemeDialog(
-            themeOptions = settingsUiState.themeOptions,
+        SingleChoiceDialog(
+            supportText = R.string.ui_settings_theme_dialog_support_text,
+            options = settingsUiState.themeOptions,
             onDismissRequest = { viewModel.onDismissDialog() },
             onElementSelected = { viewModel.onThemeSelected(it) }
         )
     }
 
     if (settingsUiState.showDefaultFilterDialog) {
-        DefaultFilterDialog(
-            defaultFilterOptions = settingsUiState.defaultFilterOptions,
+        SingleChoiceDialog(
+            supportText = R.string.ui_settings_default_filter_dialog_support_text,
+            options = settingsUiState.defaultFilterOptions,
             onDismissRequest = { viewModel.onDismissDefaultFilterDialog() },
             onElementSelected = { viewModel.onDefaultFilterSelected(it) }
         )
