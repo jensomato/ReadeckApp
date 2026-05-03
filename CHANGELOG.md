@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Added
 
+- Added configurable default bookmark list view. You can now configure whether the initial view displays unread, archived, or favorite bookmarks. Closes #141. Contributed by @ajaypremshankar
 - Added translation for Italian by @igor-cali
 
 ### Fixed
