@@ -332,7 +332,18 @@ fun BookmarkListScreen(navHostController: NavHostController) {
             snackbarHost = { SnackbarHost(snackbarHostState) },
             topBar = {
                 TopAppBar(
-                    title = { Text(stringResource(id = R.string.bookmarks)) },
+                    title = {
+                        val titleRes = when {
+                            filterState.value.unread == true -> R.string.unread
+                            filterState.value.archived == true -> R.string.archive
+                            filterState.value.favorite == true -> R.string.favorites
+                            filterState.value.type == Bookmark.Type.Article -> R.string.articles
+                            filterState.value.type == Bookmark.Type.Video -> R.string.videos
+                            filterState.value.type == Bookmark.Type.Picture -> R.string.pictures
+                            else -> R.string.bookmarks
+                        }
+                        Text(stringResource(id = titleRes))
+                    },
                     navigationIcon = {
                         IconButton(
                             onClick = { scope.launch { drawerState.open() } }
@@ -367,11 +378,12 @@ fun BookmarkListScreen(navHostController: NavHostController) {
                         EmptyScreen(messageResource = uiState.messageResource)
                     }
                     is BookmarkListViewModel.UiState.Success -> {
+                        val successMsg = stringResource(R.string.update_successful)
                         LaunchedEffect(key1 = uiState.updateBookmarkState) {
                             uiState.updateBookmarkState?.let { result ->
                                 val message = when (result) {
                                     is BookmarkListViewModel.UpdateBookmarkState.Success -> {
-                                        "success"
+                                        successMsg
                                     }
 
                                     is BookmarkListViewModel.UpdateBookmarkState.Error -> {

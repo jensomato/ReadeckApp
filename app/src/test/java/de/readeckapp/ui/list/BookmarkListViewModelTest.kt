@@ -9,6 +9,7 @@ import de.readeckapp.domain.BookmarkRepository
 import de.readeckapp.domain.model.Bookmark
 import de.readeckapp.domain.model.BookmarkCounts
 import de.readeckapp.domain.model.BookmarkListItem
+import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.usecase.UpdateBookmarkUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
 import io.mockk.coEvery
@@ -64,6 +65,7 @@ class BookmarkListViewModelTest {
 
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
+        coEvery { settingsDataStore.getDefaultFilter() } returns DefaultFilter.ALL
         every { bookmarkRepository.observeBookmarkListItems(any(), any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
@@ -323,19 +325,15 @@ class BookmarkListViewModelTest {
             settingsDataStore,
             savedStateHandle
         )
+        advanceUntilIdle() // let init apply default filter before user actions
 
         viewModel.onClickArticles()
         viewModel.onClickUnread()
+        advanceUntilIdle()
 
-        val uiStates = viewModel.uiState.take(2).toList()
-        val empty = uiStates[0]
-        val success = uiStates[1]
-        // Assert initial state
-        assert(empty is BookmarkListViewModel.UiState.Empty)
-        // Assert success state
         assertEquals(
             BookmarkListViewModel.UiState.Success(expectedBookmarks, null),
-            success
+            viewModel.uiState.value
         )
     }
 
@@ -578,18 +576,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite)
@@ -643,18 +636,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite)
@@ -708,18 +696,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleFavoriteBookmark(bookmarkId, isFavorite)
@@ -772,18 +755,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleArchiveBookmark(bookmarkId, isArchived)
@@ -837,18 +815,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleArchiveBookmark(bookmarkId, isArchived)
@@ -902,18 +875,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleArchiveBookmark(bookmarkId, isArchived)
@@ -967,18 +935,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
@@ -1032,18 +995,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
@@ -1097,18 +1055,13 @@ class BookmarkListViewModelTest {
                 savedStateHandle
             )
 
-            val uiStates = viewModel.uiState.take(2).toList()
-            val emptyState = uiStates[0]
-            val successState = uiStates[1]
-            // Assert initial state
-            assert(emptyState is BookmarkListViewModel.UiState.Empty)
-            // Assert success state
+            advanceUntilIdle()
             assertEquals(
                 BookmarkListViewModel.UiState.Success(
                     bookmarks,
                     null
                 ),
-                successState
+                viewModel.uiState.value
             )
 
             viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)

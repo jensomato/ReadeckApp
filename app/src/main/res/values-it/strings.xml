@@ -1,0 +1,116 @@
+<resources>
+    <string name="app_name">Readeck</string>
+    <string name="back">Indietro</string>
+    <string name="settings_topbar_title">Impostazioni</string>
+    <string name="settings_account_title">Account</string>
+    <string name="settings_account_subtitle_default">Accesso non effettuato</string>
+    <string name="accountsettings_topbar_title">Account</string>
+    <string name="account_settings_topbar_title">URL Readeck</string>
+    <string name="account_settings_url_placeholder">https://readeck.example.com</string>
+    <string name="account_settings_url_label">URL Readeck</string>
+    <string name="account_settings_login">Accedi</string>
+    <string name="account_settings_url_error">URL non valido</string>
+    <string name="account_settings_allow_unencrypted">Permetti connessioni non criptate</string>
+    <string name="account_settings_registration_success">Registrazione avvenuta con successo</string>
+    <string name="sync_settings_topbar_title">Impostazioni di sincronizzazione</string>
+    <string name="authors" translatable="true">
+{count, plural,
+zero{}
+one{from {author}}
+many{from {author} et. al.}
+other{}
+}
+    </string>
+    <string name="settings_open_source_libraries">Librerie Open Source</string>
+    <string name="settings_open_source_libraries_subtitle">Visualizza le librerie open source utilizzate in questa app.</string>
+    <string name="bookmarks">Segnalibri</string>
+    <string name="menu">Menu</string>
+    <string name="refresh_bookmarks">Aggiorna i segnalibri</string>
+    <string name="all">Tutti</string>
+    <string name="unread">Non letti</string>
+    <string name="archive">Archivio</string>
+    <string name="favorites">Preferiti</string>
+    <string name="articles">Articoli</string>
+    <string name="videos">Video</string>
+    <string name="pictures">Immagini</string>
+    <string name="settings">Impostazioni</string>
+    <string name="an_error_occurred">C\'è stato un errore.</string>
+    <string name="no_bookmarks_found">Nessun segnalibro trovato.</string>
+    <string name="add_bookmark">Aggiungi segnalibro</string>
+    <string name="title">Titolo (facoltativo)</string>
+    <string name="url">URL</string>
+    <string name="invalid_url">URL non valido</string>
+    <string name="save">Salva</string>
+    <string name="cancel">Cancella</string>
+    <string name="create_bookmark_error">Errore nella creazione del segnalibro: %1$s</string>
+    <string name="add_new_bookmark">Aggiungi un nuovo segnalibro</string>
+    <string name="create">Crea</string>
+    <string name="error">Errore</string>
+    <string name="ok">OK</string>
+    <string name="not_valid_url">Non è un URL valido</string>
+    <string name="log_view_title">Log</string>
+    <string name="log_view_send_logs">Invia Log</string>
+    <string name="settings_logs">Log</string>
+    <string name="settings_logs_subtitle">Visualizza e trasmetti i file di log</string>
+    <string name="log_view_share_title">Invia Log</string>
+    <string name="log_view_no_log_file_found">Nessun file di log trovato</string>
+    <string name="settings_sync">Sincronizzazione</string>
+    <string name="settings_sync_subtitle">Impostazioni di sincronizzazione</string>
+    <string name="settings_ui">Interfaccia utente</string>
+    <string name="settings_ui_subtitle">Aspetto</string>
+    <string name="ui_settings_topbar_title">Impostazioni interfaccia utente</string>
+    <string name="ui_settings_theme_title">Tema</string>
+    <string name="theme_system">Prefefinito di sistema</string>
+    <string name="theme_light">Chiaro</string>
+    <string name="theme_dark">Scuro</string>
+    <string name="theme_sepia">Seppia</string>
+    <string name="ui_settings_theme_heading">Impostazioni tema</string>
+    <string name="ui_settings_theme_dialog_support_text">Quale tema vorresti usare?</string>
+    <string name="ui_settings_scroll_to_progress_title">Scorri ai progressi di lettura</string>
+    <string name="ui_settings_scroll_to_progress_description">All\'apertura di un segnalibro, scorre automaticamente all\'ultima posizione di lettura.</string>
+    <string name="sync_settings_sync_read_progress_title">Sincronizza i progressi di lettura</string>
+    <string name="sync_settings_sync_read_progress_description">All\'uscita da un legnalibro, sincronizza i tuoi progressi di lettura sul server.</string>
+
+    <!-- Bookmark Card Actions -->
+    <string name="action_favorite">Preferiti</string>
+    <string name="action_archive">Archivio</string>
+    <string name="action_mark_read">Letti</string>
+    <string name="action_share">Condividi collegamento</string>
+    <string name="action_delete">Elimina</string>
+    <string name="action_open_in_browser">Apri nel browser</string>
+    <string name="action_increase_text_size">Aumenta la dimensione del testo</string>
+    <string name="action_decrease_text_size">Riduci la dimensione del testo</string>
+    <string name="error_no_article_content">Errore: il contenuto dell\'articolo non è disponibile</string>
+    <string name="update_successful">Aggiornamento avvenuto con successo</string>
+    <string name="notification_channel_sync_name">Errori di sincronizzazione</string>
+    <string name="notification_channel_sync_description">Errori durante la sincronizzazione</string>
+    <string name="notification_authentication_error_title">Autenticazione necessaria</string>
+    <string name="notification_authentication_error_message">Prego validare le proprie credenziali.</string>
+    <string name="detail_view_no_content">Contenuto dell\'articolo non trovato</string>
+    <string name="common_bookmark_image_content_description">Immagine del segnalivro</string>
+    <string name="settings_sync_full_sync_heading">Sincronizzazione in background</string>
+    <string name="settings_sync_auto_full_sync_title">Sincronizzazione in background</string>
+    <string name="settings_sync_auto_full_button">Sincronizza ora</string>
+    <string name="settings_sync_support_text">Per mantenere la tua lista di segnalibri aggiornata, la app occasionalmente verifica e rimuovw i contatti che hai rimosso dal server Readeck. Poiché questo processo richiede il download di tutti i dati dei segnalibri, esso viene eseguito automaticamente in background, Questo assicura che la tua app rifletta correttamente i tuoi segnalibri Readeck senza tuo download manuale.</string>
+    <string name="settings_sync_dialog_support_text">Con che frequenza eseguire la sincronizzazione in background?</string>
+    <string name="auto_sync_timeframe_manual">Manuale</string>
+    <string name="auto_sync_timeframe_01_hours">Ogni ora</string>
+    <string name="auto_sync_timeframe_06_hours">Ogni 6 ore</string>
+    <string name="auto_sync_timeframe_12_hours">Ogni 12 ore</string>
+    <string name="auto_sync_timeframe_07_days">Settimanalmente</string>
+    <string name="auto_sync_timeframe_01_days">Giornalmente</string>
+    <string name="auto_sync_timeframe_14_days">Ogni 14 giorni</string>
+    <string name="auto_sync_timeframe_30_days">Ogni 30 giorni</string>
+    <string name="auto_sync_next_run">Prossima sincronizzazione il %1$s</string>
+    <string name="auto_sync_next_run_null">Nessuna sincronizzazione pianificata</string>
+    <string name="auto_sync_notification_success">Sincronizzazione in background avvenuta con successo. %1$d segnalibri eliminati.</string>
+    <string name="auto_sync_notification_failure">Sincronizzazione in background fallita.</string>
+    <string name="auto_sync_notification_running">Sincronizzazione in background in corso.</string>
+    <string name="auto_sync_notification_channel">Sincronizzazione in background</string>
+    <string name="auto_sync_notification_rationale_dialog_title">Richiesti permessi per le notifiche</string>
+    <string name="auto_sync_notification_rationale_dialog_text">Per notificarti dei problemi della sincronizzazione in background, serve il permesso ad inviare notifiche. Prego concedere questo permesso.</string>
+    <string name="auto_sync_notification_rationale_dialog_grant_button">Concedi permesso</string>
+    <string name="list_view_empty_not_loaded_yet">I segnalibri non sono stati ancora caricati.</string>
+    <string name="list_view_empty_error_loading_bookmarks">Errore durante il caricamento dei segnalibri.</string>
+    <string name="list_view_empty_nothing_to_see">Nessun segnalibro trovato.</string>
+</resources>

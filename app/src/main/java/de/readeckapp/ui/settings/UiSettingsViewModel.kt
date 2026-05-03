@@ -9,6 +9,7 @@ import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import dagger.hilt.android.lifecycle.HiltViewModel
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.R
+import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.model.Theme
 import de.readeckapp.io.prefs.SettingsDataStore
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -33,22 +34,29 @@ class UiSettingsViewModel @Inject constructor(
     private val theme = MutableStateFlow(Theme.SYSTEM)
     private val scrollToProgressEnabled = MutableStateFlow(true)
     private val showDialog = MutableStateFlow(false)
+    private val defaultFilter = MutableStateFlow(DefaultFilter.ALL)
+    private val showDefaultFilterDialog = MutableStateFlow(false)
 
     init {
         viewModelScope.launch {
             theme.value = settingsDataStore.getTheme()
             scrollToProgressEnabled.value = settingsDataStore.isScrollToProgressEnabled()
+            defaultFilter.value = settingsDataStore.getDefaultFilter()
         }
     }
 
 
-    val uiState = combine(theme, scrollToProgressEnabled, showDialog) { theme, scrollToProgressEnabled, showDialog ->
+    val uiState = combine(theme, scrollToProgressEnabled, showDialog, defaultFilter, showDefaultFilterDialog) { theme, scrollToProgressEnabled, showDialog, defaultFilter, showDefaultFilterDialog ->
         UiSettingsUiState(
             theme = theme,
             scrollToProgressEnabled = scrollToProgressEnabled,
             themeOptions = getThemeOptionList(theme),
             showDialog = showDialog,
             themeLabel = theme.toLabelResource(),
+            defaultFilter = defaultFilter,
+            defaultFilterLabel = defaultFilter.toLabelResource(),
+            defaultFilterOptions = getDefaultFilterOptionList(defaultFilter),
+            showDefaultFilterDialog = showDefaultFilterDialog,
         )
     }
         .stateIn(
@@ -61,6 +69,10 @@ class UiSettingsViewModel @Inject constructor(
                     themeOptions = getThemeOptionList(Theme.SYSTEM),
                     showDialog = false,
                     themeLabel = Theme.SYSTEM.toLabelResource(),
+                    defaultFilter = DefaultFilter.ALL,
+                    defaultFilterLabel = DefaultFilter.ALL.toLabelResource(),
+                    defaultFilterOptions = getDefaultFilterOptionList(DefaultFilter.ALL),
+                    showDefaultFilterDialog = false,
                 )
         )
 
@@ -92,14 +104,37 @@ class UiSettingsViewModel @Inject constructor(
         _navigationEvent.update { NavigationEvent.NavigateBack }
     }
 
+    fun onClickDefaultFilter() {
+        showDefaultFilterDialog.value = true
+    }
+
+    fun onDismissDefaultFilterDialog() {
+        showDefaultFilterDialog.value = false
+    }
+
+    fun onDefaultFilterSelected(selected: DefaultFilter) {
+        Timber.d("onDefaultFilterSelected [selected=$selected]")
+        updateDefaultFilter(selected)
+    }
+
     sealed class NavigationEvent {
         data object NavigateBack : NavigationEvent()
     }
 
-    private fun getThemeOptionList(selected: Theme): List<ThemeOption> {
+    private fun getThemeOptionList(selected: Theme): List<SelectableOption<Theme>> {
         return Theme.entries.map {
-            ThemeOption(
-                theme = it,
+            SelectableOption(
+                value = it,
+                label = it.toLabelResource(),
+                selected = it == selected
+            )
+        }
+    }
+
+    private fun getDefaultFilterOptionList(selected: DefaultFilter): List<SelectableOption<DefaultFilter>> {
+        return DefaultFilter.entries.map {
+            SelectableOption(
+                value = it,
                 label = it.toLabelResource(),
                 selected = it == selected
             )
@@ -112,23 +147,28 @@ class UiSettingsViewModel @Inject constructor(
             theme.value = settingsDataStore.getTheme()
         }
     }
+
+    private fun updateDefaultFilter(value: DefaultFilter) {
+        viewModelScope.launch {
+            settingsDataStore.saveDefaultFilter(value)
+            defaultFilter.value = settingsDataStore.getDefaultFilter()
+        }
+    }
 }
 
 @Immutable
 data class UiSettingsUiState(
     val theme: Theme,
     val scrollToProgressEnabled: Boolean,
-    val themeOptions: List<ThemeOption>,
+    val themeOptions: List<SelectableOption<Theme>>,
     val showDialog: Boolean,
     @StringRes
     val themeLabel: Int,
-)
-
-data class ThemeOption(
-    val theme: Theme,
+    val defaultFilter: DefaultFilter,
     @StringRes
-    val label: Int,
-    val selected: Boolean
+    val defaultFilterLabel: Int,
+    val defaultFilterOptions: List<SelectableOption<DefaultFilter>>,
+    val showDefaultFilterDialog: Boolean,
 )
 
 @StringRes
@@ -138,5 +178,15 @@ fun Theme.toLabelResource(): Int {
         Theme.DARK -> R.string.theme_dark
         Theme.SEPIA -> R.string.theme_sepia
         Theme.SYSTEM -> R.string.theme_system
+    }
+}
+
+@StringRes
+fun DefaultFilter.toLabelResource(): Int {
+    return when (this) {
+        DefaultFilter.ALL -> R.string.default_filter_all
+        DefaultFilter.UNREAD -> R.string.default_filter_unread
+        DefaultFilter.ARCHIVED -> R.string.default_filter_archived
+        DefaultFilter.FAVORITES -> R.string.default_filter_favorites
     }
 }

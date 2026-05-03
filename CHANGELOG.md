@@ -7,6 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.11.0] - 2026-05-03
+
+### Added
+
+- Added configurable default bookmark list view. You can now configure whether the initial view displays unread, archived, or favorite bookmarks. Closes #141. Contributed by @ajaypremshankar
+- Added translation for Italian by @igor-cali
+
+### Fixed
+
+- Fixed missing synchronization of reading progress when using system back press (gesture or back button). Closes #159.
+- Fixed some untranslated strings.
+- Fixed misleading url field. Closes #158.
+
 ## [0.10.1] - 2026-04-20
 
 ### Fixed

@@ -62,12 +62,13 @@ fun AccountSettingsScreen(
         }
     }
 
+    val registrationSuccessMsg = stringResource(R.string.account_settings_registration_success)
     LaunchedEffect(key1 = settingsUiState.authenticationResult) {
         settingsUiState.authenticationResult?.let { result ->
             when (result) {
                 is AuthenticationResult.Success -> {
                     snackbarHostState.showSnackbar(
-                        message = "Success",
+                        message = registrationSuccessMsg,
                         duration = SnackbarDuration.Short
                     )
                 }

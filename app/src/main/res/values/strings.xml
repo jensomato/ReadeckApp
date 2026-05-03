@@ -6,11 +6,12 @@
     <string name="settings_account_subtitle_default">Not logged in</string>
     <string name="accountsettings_topbar_title">Account</string>
     <string name="account_settings_topbar_title">Readeck URL</string>
-    <string name="account_settings_url_placeholder">https://readeck.example.com</string>
+    <string name="account_settings_url_placeholder" translatable="false">https://readeck.example.com</string>
     <string name="account_settings_url_label">Readeck URL</string>
     <string name="account_settings_login">Login</string>
     <string name="account_settings_url_error">Invalid URL</string>
     <string name="account_settings_allow_unencrypted">Allow unencrypted connections</string>
+    <string name="account_settings_registration_success">Registration successful</string>
     <string name="sync_settings_topbar_title">Synchronization Settings</string>
     <string name="authors" translatable="true">
 {count, plural,
@@ -67,6 +68,12 @@ other{}
     <string name="ui_settings_theme_dialog_support_text">Which theme should be used?</string>
     <string name="ui_settings_scroll_to_progress_title">Scroll to reading progress</string>
     <string name="ui_settings_scroll_to_progress_description">When opening a bookmark, automatically scroll to your last reading position.</string>
+    <string name="ui_settings_default_filter_title">Default view</string>
+    <string name="ui_settings_default_filter_dialog_support_text">Which view should be shown on startup?</string>
+    <string name="default_filter_all">All</string>
+    <string name="default_filter_unread">Unread</string>
+    <string name="default_filter_archived">Archive</string>
+    <string name="default_filter_favorites">Favorites</string>
     <string name="sync_settings_sync_read_progress_title">Sync reading progress</string>
     <string name="sync_settings_sync_read_progress_description">When leaving a bookmark, sync your reading progress to the server.</string>
 
