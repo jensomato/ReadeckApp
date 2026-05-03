@@ -32,6 +32,7 @@ import androidx.navigation.NavHostController
 import com.google.accompanist.permissions.ExperimentalPermissionsApi
 import de.readeckapp.R
 import de.readeckapp.domain.model.AutoSyncTimeframe
+import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.model.Theme
 import de.readeckapp.ui.theme.Typography
 
@@ -45,6 +46,7 @@ fun UiSettingsScreen(
     val navigationEvent = viewModel.navigationEvent.collectAsState()
     val onClickBack: () -> Unit = { viewModel.onClickBack() }
     val onClickTheme: () -> Unit = { viewModel.onClickTheme() }
+    val onClickDefaultFilter: () -> Unit = { viewModel.onClickDefaultFilter() }
     val onScrollToProgressToggle: (Boolean) -> Unit = { viewModel.onScrollToProgressToggle(it) }
     val snackbarHostState = remember { SnackbarHostState() }
 
@@ -60,10 +62,20 @@ fun UiSettingsScreen(
     }
 
     if (settingsUiState.showDialog) {
-        ThemeDialog(
-            themeOptions = settingsUiState.themeOptions,
+        SingleChoiceDialog(
+            supportText = R.string.ui_settings_theme_dialog_support_text,
+            options = settingsUiState.themeOptions,
             onDismissRequest = { viewModel.onDismissDialog() },
             onElementSelected = { viewModel.onThemeSelected(it) }
+        )
+    }
+
+    if (settingsUiState.showDefaultFilterDialog) {
+        SingleChoiceDialog(
+            supportText = R.string.ui_settings_default_filter_dialog_support_text,
+            options = settingsUiState.defaultFilterOptions,
+            onDismissRequest = { viewModel.onDismissDefaultFilterDialog() },
+            onElementSelected = { viewModel.onDefaultFilterSelected(it) }
         )
     }
 
@@ -72,6 +84,7 @@ fun UiSettingsScreen(
             snackbarHostState = snackbarHostState,
             onClickBack = onClickBack,
             onClickTheme = onClickTheme,
+            onClickDefaultFilter = onClickDefaultFilter,
             onScrollToProgressToggle = onScrollToProgressToggle,
             settingsUiState = settingsUiState
         )
@@ -85,6 +98,7 @@ fun UiSettingsView(
     snackbarHostState: SnackbarHostState,
     settingsUiState: UiSettingsUiState,
     onClickTheme: () -> Unit,
+    onClickDefaultFilter: () -> Unit,
     onScrollToProgressToggle: (Boolean) -> Unit,
     onClickBack: () -> Unit,
 ) {
@@ -132,6 +146,19 @@ fun UiSettingsView(
             Row(
                 horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier.clickable(enabled = true, onClick = onClickDefaultFilter)
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.ui_settings_default_filter_title))
+                    Text(
+                        text = stringResource(settingsUiState.defaultFilterLabel),
+                        style = Typography.bodySmall
+                    )
+                }
+            }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
             ) {
                 Column(modifier = Modifier.weight(1f)) {
                     Text(stringResource(R.string.ui_settings_scroll_to_progress_title))
@@ -158,12 +185,17 @@ fun UiSettingsScreenViewPreview() {
         showDialog = false,
         themeLabel = Theme.SYSTEM.toLabelResource(),
         scrollToProgressEnabled = true,
+        defaultFilter = DefaultFilter.ALL,
+        defaultFilterLabel = DefaultFilter.ALL.toLabelResource(),
+        defaultFilterOptions = listOf(),
+        showDefaultFilterDialog = false,
     )
     UiSettingsView(
         modifier = Modifier,
         snackbarHostState = SnackbarHostState(),
         onClickBack = {},
         onClickTheme = {},
+        onClickDefaultFilter = {},
         settingsUiState = settingsUiState,
         onScrollToProgressToggle = {},
     )

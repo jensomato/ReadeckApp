@@ -8,6 +8,7 @@ import androidx.datastore.preferences.core.intPreferencesKey
 import androidx.datastore.preferences.core.stringPreferencesKey
 import dagger.hilt.android.qualifiers.ApplicationContext
 import de.readeckapp.domain.model.AutoSyncTimeframe
+import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.model.Theme
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -36,6 +37,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_ZOOM_FACTOR = intPreferencesKey("zoom_factor")
     private val KEY_SYNC_READ_PROGRESS = booleanPreferencesKey("sync_read_progress")
     private val KEY_SCROLL_TO_PROGRESS = booleanPreferencesKey("scroll_to_progress")
+    private val KEY_DEFAULT_FILTER = stringPreferencesKey("default_filter")
 
     override fun saveUsername(username: String) {
         Timber.d("saveUsername")
@@ -161,6 +163,18 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override suspend fun setScrollToProgressEnabled(enabled: Boolean) {
         encryptedSharedPreferences.edit {
             putBoolean(KEY_SCROLL_TO_PROGRESS.name, enabled)
+        }
+    }
+
+    override suspend fun getDefaultFilter(): DefaultFilter {
+        return encryptedSharedPreferences.getString(KEY_DEFAULT_FILTER.name, DefaultFilter.ALL.name)?.let {
+            DefaultFilter.valueOf(it)
+        } ?: DefaultFilter.ALL
+    }
+
+    override suspend fun saveDefaultFilter(defaultFilter: DefaultFilter) {
+        encryptedSharedPreferences.edit {
+            putString(KEY_DEFAULT_FILTER.name, defaultFilter.name)
         }
     }
 

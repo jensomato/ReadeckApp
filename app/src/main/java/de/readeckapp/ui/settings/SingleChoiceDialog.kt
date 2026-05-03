@@ -1,5 +1,6 @@
 package de.readeckapp.ui.settings
 
+import androidx.annotation.StringRes
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -23,14 +24,21 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import de.readeckapp.R
-import de.readeckapp.domain.model.Theme
 import de.readeckapp.ui.theme.Typography
 
+data class SelectableOption<T>(
+    val value: T,
+    @StringRes
+    val label: Int,
+    val selected: Boolean
+)
+
 @Composable
-fun ThemeDialog(
-    themeOptions: List<ThemeOption>,
+fun <T> SingleChoiceDialog(
+    @StringRes supportText: Int,
+    options: List<SelectableOption<T>>,
     onDismissRequest: () -> Unit,
-    onElementSelected: (selected: Theme) -> Unit,
+    onElementSelected: (selected: T) -> Unit,
 ) {
     Dialog(
         onDismissRequest = onDismissRequest
@@ -48,19 +56,19 @@ fun ThemeDialog(
                 modifier = Modifier.padding(24.dp)
             ) {
                 Text(
-                    text = stringResource(R.string.ui_settings_theme_dialog_support_text),
+                    text = stringResource(supportText),
                     style = Typography.bodyMedium,
                     modifier = Modifier.padding(bottom = 16.dp)
                 )
                 HorizontalDivider()
-                themeOptions.forEach { option ->
+                options.forEach { option ->
                     Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(56.dp)
                             .selectable(
                                 selected = option.selected,
-                                onClick = { onElementSelected(option.theme) },
+                                onClick = { onElementSelected(option.value) },
                                 role = Role.RadioButton
                             ),
                         verticalAlignment = Alignment.CenterVertically
@@ -94,24 +102,13 @@ fun ThemeDialog(
 
 @Preview
 @Composable
-fun ThemeDialogPreview() {
-    ThemeDialog(
-        themeOptions = listOf(
-            ThemeOption(
-                theme = Theme.SYSTEM,
-                label = R.string.theme_system,
-                selected = true
-            ),
-            ThemeOption(
-                theme = Theme.LIGHT,
-                label = R.string.theme_light,
-                selected = false
-            ),
-            ThemeOption(
-                theme = Theme.DARK,
-                label = R.string.theme_dark,
-                selected = false
-            ),
+private fun SingleChoiceDialogPreview() {
+    SingleChoiceDialog(
+        supportText = R.string.ui_settings_theme_dialog_support_text,
+        options = listOf(
+            SelectableOption(value = "a", label = R.string.theme_system, selected = true),
+            SelectableOption(value = "b", label = R.string.theme_light, selected = false),
+            SelectableOption(value = "c", label = R.string.theme_dark, selected = false),
         ),
         onDismissRequest = {},
         onElementSelected = {}
