@@ -74,7 +74,6 @@ other{}
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Preferiti</string>
     <string name="action_archive">Archivio</string>
-    <string name="action_mark_read">Letti</string>
     <string name="action_share">Condividi collegamento</string>
     <string name="action_delete">Elimina</string>
     <string name="action_open_in_browser">Apri nel browser</string>

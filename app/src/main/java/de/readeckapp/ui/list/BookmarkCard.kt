@@ -1,6 +1,5 @@
 package de.readeckapp.ui.list
 
-import android.content.Context
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -13,12 +12,10 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
-import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Share
@@ -65,7 +62,6 @@ fun BookmarkCard(
     bookmark: BookmarkListItem,
     onClickCard: (String) -> Unit,
     onClickDelete: (String) -> Unit,
-    onClickMarkRead: (String, Boolean) -> Unit,
     onClickFavorite: (String, Boolean) -> Unit,
     onClickShareBookmark: (String) -> Unit,
     onClickArchive: (String, Boolean) -> Unit,
@@ -205,19 +201,6 @@ fun BookmarkCard(
                                 }
                             )
                             DropdownMenuItem(
-                                text = { Text(stringResource(R.string.action_mark_read)) },
-                                onClick = {
-                                    onClickMarkRead(bookmark.id, !bookmark.isRead)
-                                    expanded = false
-                                },
-                                leadingIcon = {
-                                    Icon(
-                                        imageVector = if (bookmark.isRead) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
-                                        contentDescription = stringResource(R.string.action_mark_read)
-                                    )
-                                }
-                            )
-                            DropdownMenuItem(
                                 text = { Text(stringResource(R.string.action_share)) },
                                 onClick = {
                                     onClickShareBookmark(bookmark.url)
@@ -273,7 +256,6 @@ fun BookmarkCardPreview() {
             "fourhundretandtwentyone",
             "threethousendtwohundretandfive"
         ),
-        isRead = true,
         iconSrc = "https://picsum.photos/seed/picsum/640/480",
         imageSrc = "https://picsum.photos/seed/picsum/640/480",
         thumbnailSrc = "https://picsum.photos/seed/picsum/640/480",
@@ -283,7 +265,6 @@ fun BookmarkCardPreview() {
             bookmark = sampleBookmark,
             onClickCard = {},
             onClickDelete = {},
-            onClickMarkRead = { _, _ -> },
             onClickFavorite = { _, _ -> },
             onClickArchive = { _, _ -> },
             onClickOpenUrl = {},

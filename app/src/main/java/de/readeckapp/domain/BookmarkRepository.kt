@@ -16,7 +16,6 @@ interface BookmarkRepository {
 
     fun observeBookmarkListItems(
         type: Bookmark.Type? = null,
-        unread: Boolean? = null,
         archived: Boolean? = null,
         favorite: Boolean? = null,
         state: Bookmark.State? = null
@@ -29,7 +28,7 @@ interface BookmarkRepository {
     suspend fun deleteBookmark(id: String): UpdateResult
     suspend fun deleteBookmarkLocal(id: String)
     suspend fun createBookmark(title: String, url: String): String
-    suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, isRead: Boolean?): UpdateResult
+    suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?): UpdateResult
     suspend fun updateBookmark(bookmarkId: String, isFavorite: Boolean?, isArchived: Boolean?, readProgress: Int?): UpdateResult
     suspend fun performFullSync(): SyncResult
     fun observeAllBookmarkCounts(): Flow<BookmarkCounts>
