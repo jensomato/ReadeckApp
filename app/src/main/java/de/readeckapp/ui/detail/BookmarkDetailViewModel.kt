@@ -160,15 +160,6 @@ class BookmarkDetailViewModel @Inject constructor(
         }
     }
 
-    fun onToggleMarkRead(bookmarkId: String, isRead: Boolean) {
-        updateBookmark {
-            updateBookmarkUseCase.updateIsRead(
-                bookmarkId = bookmarkId,
-                isRead = isRead
-            )
-        }
-    }
-
     private fun updateBookmarkInBackground(update: suspend () -> UpdateBookmarkUseCase.Result) {
         applicationScope.launch {
             when (val result = update()) {

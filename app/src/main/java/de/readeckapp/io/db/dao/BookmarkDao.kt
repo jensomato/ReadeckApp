@@ -137,7 +137,6 @@ interface BookmarkDao {
 
     fun getBookmarkListItemsByFilters(
         type: BookmarkEntity.Type? = null,
-        isUnread: Boolean? = null,
         isArchived: Boolean? = null,
         isFavorite: Boolean? = null,
         state: BookmarkEntity.State? = null
@@ -169,12 +168,6 @@ interface BookmarkDao {
             type?.let {
                 append(" AND type = ?")
                 args.add(it.value)
-            }
-
-            if (isUnread == true) {
-                append(" AND readProgress < 100")
-            } else if (isUnread == false) {
-                append(" AND readProgress = 100")
             }
 
             isArchived?.let {
@@ -212,7 +205,7 @@ interface BookmarkDao {
     @Query(
         """
         SELECT
-            (SELECT COUNT(*) FROM bookmarks WHERE readProgress < 100 AND state = 0) AS unread_count,
+            (SELECT COUNT(*) FROM bookmarks WHERE isArchived = 0 AND state = 0) AS unread_count,
             (SELECT COUNT(*) FROM bookmarks WHERE isArchived = 1 AND state = 0) AS archived_count,
             (SELECT COUNT(*) FROM bookmarks WHERE isMarked = 1 AND state = 0) AS favorite_count,
             (SELECT COUNT(*) FROM bookmarks WHERE type = 'article' AND state = 0) AS article_count,

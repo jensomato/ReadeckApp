@@ -62,7 +62,6 @@ class BookmarkRepositoryImpl @Inject constructor(
 
     override fun observeBookmarkListItems(
         type: Bookmark.Type?,
-        unread: Boolean?,
         archived: Boolean?,
         favorite: Boolean?,
         state: Bookmark.State?
@@ -75,7 +74,6 @@ class BookmarkRepositoryImpl @Inject constructor(
                     Bookmark.Type.Video -> BookmarkEntity.Type.VIDEO
                 }
             },
-            isUnread = unread,
             isArchived = archived,
             isFavorite = favorite,
             state = state?.let {
@@ -94,7 +92,6 @@ class BookmarkRepositoryImpl @Inject constructor(
                     siteName = listItem.siteName,
                     isMarked = listItem.isMarked,
                     isArchived = listItem.isArchived,
-                    isRead = listItem.readProgress == 100,
                     thumbnailSrc = listItem.thumbnailSrc,
                     iconSrc = listItem.iconSrc,
                     imageSrc = listItem.imageSrc,
@@ -143,13 +140,12 @@ class BookmarkRepositoryImpl @Inject constructor(
         bookmarkId: String,
         isFavorite: Boolean?,
         isArchived: Boolean?,
-        isRead: Boolean?
    ): BookmarkRepository.UpdateResult {
        return updateBookmark(
            bookmarkId = bookmarkId,
            isFavorite = isFavorite,
            isArchived = isArchived,
-           readProgress = isRead?.let { if (it) 100 else 0 }
+           readProgress = null,
        )
    }
 

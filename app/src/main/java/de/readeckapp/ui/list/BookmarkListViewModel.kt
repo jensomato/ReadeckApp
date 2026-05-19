@@ -114,7 +114,6 @@ class BookmarkListViewModel @Inject constructor(
             filterState.collectLatest { filterState ->
                 bookmarkRepository.observeBookmarkListItems(
                     type = filterState.type,
-                    unread = filterState.unread,
                     archived = filterState.archived,
                     favorite = filterState.favorite,
                     state = Bookmark.State.LOADED
@@ -134,19 +133,19 @@ class BookmarkListViewModel @Inject constructor(
         _filterState.value = _filterState.value.copy(type = type)
     }
 
-    private fun setUnreadFilter(unread: Boolean?) {
+    private fun setUnreadFilter() {
         _filterState.value =
-            _filterState.value.copy(unread = unread, archived = null, favorite = null)
+            _filterState.value.copy(archived = false, favorite = null)
     }
 
-    private fun setArchivedFilter(archived: Boolean?) {
+    private fun setArchivedFilter() {
         _filterState.value =
-            _filterState.value.copy(archived = archived, unread = null, favorite = null)
+            _filterState.value.copy(archived = true, favorite = null)
     }
 
-    private fun setFavoriteFilter(favorite: Boolean?) {
+    private fun setFavoriteFilter() {
         _filterState.value =
-            _filterState.value.copy(favorite = favorite, unread = null, archived = null)
+            _filterState.value.copy(favorite = true, archived = null)
     }
 
     // UI event handlers (already present, but need modification)
@@ -161,17 +160,17 @@ class BookmarkListViewModel @Inject constructor(
 
     fun onClickUnread() {
         Timber.d("onClickUnread")
-        setUnreadFilter(true)
+        setUnreadFilter()
     }
 
     fun onClickArchive() {
         Timber.d("onClickArchive")
-        setArchivedFilter(true)
+        setArchivedFilter()
     }
 
     fun onClickFavorite() {
         Timber.d("onClickFavorite")
-        setFavoriteFilter(true)
+        setFavoriteFilter()
     }
 
     fun onClickArticles() {
@@ -243,15 +242,6 @@ class BookmarkListViewModel @Inject constructor(
     fun onDeleteBookmark(bookmarkId: String) {
         updateBookmark {
             updateBookmarkUseCase.deleteBookmark(bookmarkId)
-        }
-    }
-
-    fun onToggleMarkReadBookmark(bookmarkId: String, isRead: Boolean) {
-        updateBookmark {
-            updateBookmarkUseCase.updateIsRead(
-                bookmarkId = bookmarkId,
-                isRead = isRead
-            )
         }
     }
 
@@ -351,7 +341,6 @@ class BookmarkListViewModel @Inject constructor(
 
     data class FilterState(
         val type: Bookmark.Type? = null,
-        val unread: Boolean? = null,
         val archived: Boolean? = null,
         val favorite: Boolean? = null
     )
@@ -389,7 +378,7 @@ class BookmarkListViewModel @Inject constructor(
 
 private fun DefaultFilter.toFilterState(): BookmarkListViewModel.FilterState = when (this) {
     DefaultFilter.ALL -> BookmarkListViewModel.FilterState()
-    DefaultFilter.UNREAD -> BookmarkListViewModel.FilterState(unread = true)
+    DefaultFilter.UNREAD -> BookmarkListViewModel.FilterState(archived = false)
     DefaultFilter.ARCHIVED -> BookmarkListViewModel.FilterState(archived = true)
     DefaultFilter.FAVORITES -> BookmarkListViewModel.FilterState(favorite = true)
 }
