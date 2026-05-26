@@ -1,0 +1,54 @@
+[
+  {
+    "id": "OverflowImageWidth123",
+    "href": "https://readeck.example.com/api/bookmarks/OverflowImageWidth123",
+    "created": "2025-04-03T19:00:13.646333268Z",
+    "updated": "2025-04-04T14:09:22.615018537Z",
+    "state": 0,
+    "loaded": true,
+    "url": "https://example.com/blog/overflow",
+    "title": "Bookmark with overflow image dimensions",
+    "site_name": "example.com",
+    "site": "example.com",
+    "authors": [],
+    "lang": "",
+    "text_direction": "",
+    "document_type": "article",
+    "type": "article",
+    "has_article": true,
+    "description": "This bookmark has Long.MIN_VALUE as image width",
+    "is_deleted": false,
+    "is_marked": false,
+    "is_archived": false,
+    "labels": [],
+    "read_progress": 0,
+    "resources": {
+      "article": {
+        "src": "https://readeck.example.com/api/bookmarks/OverflowImageWidth123/article"
+      },
+      "icon": {
+        "src": "https://readeck.example.com/bm/Ov/OverflowImageWidth123/img/icon.png",
+        "width": 48,
+        "height": 48
+      },
+      "image": {
+        "src": "https://readeck.example.com/bm/Ov/OverflowImageWidth123/img/image.png",
+        "width": -9223372036854775808,
+        "height": -9223372036854775808
+      },
+      "log": {
+        "src": "https://readeck.example.com/api/bookmarks/OverflowImageWidth123/x/log"
+      },
+      "props": {
+        "src": "https://readeck.example.com/api/bookmarks/OverflowImageWidth123/x/props.json"
+      },
+      "thumbnail": {
+        "src": "https://readeck.example.com/bm/Ov/OverflowImageWidth123/img/thumbnail.png",
+        "width": 380,
+        "height": 190
+      }
+    },
+    "word_count": 100,
+    "reading_time": 1
+  }
+]
