@@ -37,6 +37,7 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     private val KEY_ZOOM_FACTOR = intPreferencesKey("zoom_factor")
     private val KEY_SYNC_READ_PROGRESS = booleanPreferencesKey("sync_read_progress")
     private val KEY_SCROLL_TO_PROGRESS = booleanPreferencesKey("scroll_to_progress")
+    private val KEY_EINK_MODE = booleanPreferencesKey("eink_mode")
     private val KEY_DEFAULT_FILTER = stringPreferencesKey("default_filter")
 
     override fun saveUsername(username: String) {
@@ -166,6 +167,16 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
         }
     }
 
+    override suspend fun isEInkModeEnabled(): Boolean {
+        return encryptedSharedPreferences.getBoolean(KEY_EINK_MODE.name, false)
+    }
+
+    override suspend fun setEInkModeEnabled(enabled: Boolean) {
+        encryptedSharedPreferences.edit {
+            putBoolean(KEY_EINK_MODE.name, enabled)
+        }
+    }
+
     override suspend fun getDefaultFilter(): DefaultFilter {
         return encryptedSharedPreferences.getString(KEY_DEFAULT_FILTER.name, DefaultFilter.ALL.name)?.let {
             DefaultFilter.valueOf(it)
@@ -184,6 +195,9 @@ class SettingsDataStoreImpl @Inject constructor(@ApplicationContext private val 
     override val authStateFlow = getStringFlow(KEY_AUTH_STATE.name, null)
     override val themeFlow = getStringFlow(KEY_THEME.name, Theme.SYSTEM.name)
     override val zoomFactorFlow = getIntFlow(KEY_ZOOM_FACTOR.name, 100)
+    override val eInkModeFlow = preferenceFlow(KEY_EINK_MODE.name) {
+        encryptedSharedPreferences.getBoolean(KEY_EINK_MODE.name, false)
+    }
     
     init {
         // Migration: remove legacy password if it exists

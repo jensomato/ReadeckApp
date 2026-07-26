@@ -48,6 +48,7 @@ fun UiSettingsScreen(
     val onClickTheme: () -> Unit = { viewModel.onClickTheme() }
     val onClickDefaultFilter: () -> Unit = { viewModel.onClickDefaultFilter() }
     val onScrollToProgressToggle: (Boolean) -> Unit = { viewModel.onScrollToProgressToggle(it) }
+    val onEInkModeToggle: (Boolean) -> Unit = { viewModel.onEInkModeToggle(it) }
     val snackbarHostState = remember { SnackbarHostState() }
 
     LaunchedEffect(key1 = navigationEvent.value) {
@@ -86,6 +87,7 @@ fun UiSettingsScreen(
             onClickTheme = onClickTheme,
             onClickDefaultFilter = onClickDefaultFilter,
             onScrollToProgressToggle = onScrollToProgressToggle,
+            onEInkModeToggle = onEInkModeToggle,
             settingsUiState = settingsUiState
         )
 
@@ -100,6 +102,7 @@ fun UiSettingsView(
     onClickTheme: () -> Unit,
     onClickDefaultFilter: () -> Unit,
     onScrollToProgressToggle: (Boolean) -> Unit,
+    onEInkModeToggle: (Boolean) -> Unit,
     onClickBack: () -> Unit,
 ) {
     Scaffold(
@@ -172,6 +175,22 @@ fun UiSettingsView(
                     onCheckedChange = { onScrollToProgressToggle(it) }
                 )
             }
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+            ) {
+                Column(modifier = Modifier.weight(1f)) {
+                    Text(stringResource(R.string.ui_settings_eink_mode_title))
+                    Text(
+                        text = stringResource(R.string.ui_settings_eink_mode_description),
+                        style = Typography.bodySmall
+                    )
+                }
+                Switch(
+                    checked = settingsUiState.eInkMode,
+                    onCheckedChange = { onEInkModeToggle(it) }
+                )
+            }
         }
     }
 }
@@ -185,6 +204,7 @@ fun UiSettingsScreenViewPreview() {
         showDialog = false,
         themeLabel = Theme.SYSTEM.toLabelResource(),
         scrollToProgressEnabled = true,
+        eInkMode = false,
         defaultFilter = DefaultFilter.ALL,
         defaultFilterLabel = DefaultFilter.ALL.toLabelResource(),
         defaultFilterOptions = listOf(),
@@ -198,6 +218,7 @@ fun UiSettingsScreenViewPreview() {
         onClickDefaultFilter = {},
         settingsUiState = settingsUiState,
         onScrollToProgressToggle = {},
+        onEInkModeToggle = {},
     )
 }
 

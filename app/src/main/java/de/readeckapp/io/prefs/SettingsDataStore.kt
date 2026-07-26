@@ -13,6 +13,7 @@ interface SettingsDataStore {
     val urlFlow: StateFlow<String?>
     val themeFlow: StateFlow<String?>
     val zoomFactorFlow: StateFlow<Int>
+    val eInkModeFlow: StateFlow<Boolean>
 
     fun saveUsername(username: String)
     fun saveToken(token: String)
@@ -34,6 +35,8 @@ interface SettingsDataStore {
     suspend fun setSyncReadProgressEnabled(enabled: Boolean)
     suspend fun isScrollToProgressEnabled(): Boolean
     suspend fun setScrollToProgressEnabled(enabled: Boolean)
+    suspend fun isEInkModeEnabled(): Boolean
+    suspend fun setEInkModeEnabled(enabled: Boolean)
     suspend fun saveTheme(theme: Theme)
     suspend fun getTheme(): Theme
     suspend fun  getZoomFactor(): Int

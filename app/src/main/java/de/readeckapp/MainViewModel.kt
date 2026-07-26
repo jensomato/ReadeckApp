@@ -21,4 +21,10 @@ class MainViewModel @Inject constructor(
         started = SharingStarted.WhileSubscribed(5000),
         initialValue = Theme.SYSTEM
     )
+
+    val eInkMode = settingsDataStore.eInkModeFlow.stateIn(
+        scope = viewModelScope,
+        started = SharingStarted.WhileSubscribed(5000),
+        initialValue = false
+    )
 }

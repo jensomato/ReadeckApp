@@ -7,6 +7,11 @@ import android.widget.Toast
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.compose.animation.EnterTransition
+import androidx.compose.animation.ExitTransition
+import androidx.compose.animation.core.tween
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
@@ -56,6 +61,7 @@ class MainActivity : ComponentActivity() {
         setContent {
             val viewModel = hiltViewModel<MainViewModel>()
             val theme = viewModel.theme.collectAsState()
+            val eInkMode = viewModel.eInkMode.collectAsState()
             val navController = rememberNavController()
             intentState = remember { mutableStateOf(intent) }
             val scope = rememberCoroutineScope()
@@ -89,8 +95,8 @@ class MainActivity : ComponentActivity() {
                 else -> theme.value
             }
 
-            ReadeckAppTheme(theme = themeValue) {
-                ReadeckNavHost(navController)
+            ReadeckAppTheme(theme = themeValue, eInkMode = eInkMode.value) {
+                ReadeckNavHost(navController, eInkMode = eInkMode.value)
             }
         }
     }
@@ -103,8 +109,15 @@ class MainActivity : ComponentActivity() {
 
 @SuppressLint("WrongStartDestinationType")
 @Composable
-fun ReadeckNavHost(navController: NavHostController) {
-    NavHost(navController = navController, startDestination = BookmarkListRoute()) {
+fun ReadeckNavHost(navController: NavHostController, eInkMode: Boolean = false) {
+    NavHost(
+        navController = navController,
+        startDestination = BookmarkListRoute(),
+        enterTransition = { if (eInkMode) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
+        exitTransition = { if (eInkMode) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
+        popEnterTransition = { if (eInkMode) EnterTransition.None else fadeIn(animationSpec = tween(700)) },
+        popExitTransition = { if (eInkMode) ExitTransition.None else fadeOut(animationSpec = tween(700)) },
+    ) {
         composable<BookmarkListRoute> { BookmarkListScreen(navController) }
         composable<SettingsRoute> { SettingsScreen(navController) }
         composable<AccountSettingsRoute> { AccountSettingsScreen(navController) }

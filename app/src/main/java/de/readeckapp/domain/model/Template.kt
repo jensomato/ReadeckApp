@@ -20,5 +20,6 @@ sealed interface Template {
         const val LIGHT_TEMPLATE_FILE = "html_template_light.html"
         const val DARK_TEMPLATE_FILE = "html_template_dark.html"
         const val SEPIA_TEMPLATE_FILE = "html_template_sepia.html"
+        const val EINK_TEMPLATE_FILE = "html_template_eink.html"
     }
 }
