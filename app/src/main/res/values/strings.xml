@@ -68,6 +68,8 @@ other{}
     <string name="ui_settings_theme_dialog_support_text">Which theme should be used?</string>
     <string name="ui_settings_scroll_to_progress_title">Scroll to reading progress</string>
     <string name="ui_settings_scroll_to_progress_description">When opening a bookmark, automatically scroll to your last reading position.</string>
+    <string name="ui_settings_eink_mode_title">E-ink mode</string>
+    <string name="ui_settings_eink_mode_description">Reduces animations and enables tap zones (tap top/bottom half of the screen to page up/down) for e-ink readers.</string>
     <string name="ui_settings_default_filter_title">Default view</string>
     <string name="ui_settings_default_filter_dialog_support_text">Which view should be shown on startup?</string>
     <string name="default_filter_all">All</string>

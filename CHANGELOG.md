@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+
+- Added e-ink mode setting. When enabled, navigation transitions and image crossfade are disabled, and tap zones (tap the top or bottom half of the screen) allow paging through articles without scrolling. Intended for e-ink readers.
+
 ### Changed
 
 - Changed the way unread bookmarks are determined. The behavior now matches that of the Readeck web app. This means that unread bookmarks are bookmarks that have not been archived. Closes #166 and #169.

@@ -5,6 +5,7 @@ import android.view.View
 import android.webkit.WebView
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -53,6 +54,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
@@ -60,6 +62,7 @@ import androidx.compose.runtime.snapshotFlow
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.ContentScale
+import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.res.stringResource
@@ -80,6 +83,7 @@ import de.readeckapp.util.openUrlInCustomTab
 import de.readeckapp.ui.components.ShareBookmarkChooser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import kotlin.math.absoluteValue
 import kotlin.math.roundToInt
@@ -101,6 +105,7 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
     val onProgressUpdate: (Int) -> Unit =
         { progress -> viewModel.onUpdateReadProgress(progress) }
     val scrollToProgressEnabled by viewModel.scrollToProgressEnabledFlow.collectAsState()
+    val eInkMode by viewModel.eInkModeFlow.collectAsState()
 
     val onClickOpenUrl: (String) -> Unit = { viewModel.onClickOpenUrl(it) }
     val onClickShareBookmark: (String) -> Unit = { url -> viewModel.onClickShareBookmark(url) }
@@ -164,7 +169,8 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onClickDecreaseZoomFactor = onClickDecreaseZoomFactor,
                 onProgressUpdate = onProgressUpdate,
                 readProgress = readProgress,
-                scrollToProgressEnabled = scrollToProgressEnabled
+                scrollToProgressEnabled = scrollToProgressEnabled,
+                eInkMode = eInkMode,
             )
             // Consumes a shareIntent and creates the corresponding share dialog
             ShareBookmarkChooser(
@@ -207,6 +213,7 @@ fun BookmarkDetailScreen(
     onProgressUpdate: (Int) -> Unit,
     readProgress: Int,
     scrollToProgressEnabled: Boolean,
+    eInkMode: Boolean,
 ) {
     Scaffold(
         snackbarHost = { SnackbarHost(snackbarHostState) },
@@ -277,6 +284,7 @@ fun BookmarkDetailScreen(
             uiState = uiState,
             onClickOpenUrl = onClickOpenUrl,
             scrollState = scrollState,
+            eInkMode = eInkMode,
         )
     }
 }
@@ -293,26 +301,45 @@ fun BookmarkDetailContent(
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickOpenUrl: (String) -> Unit,
     scrollState: ScrollState,
+    eInkMode: Boolean,
 ) {
-    Column(
-        modifier = modifier
-            .fillMaxSize()
-            .verticalScroll(scrollState),
-        horizontalAlignment = Alignment.CenterHorizontally
-    ) {
-        BookmarkDetailHeader(
-            modifier = Modifier,
-            uiState = uiState,
-            onClickOpenUrl = onClickOpenUrl
-        )
-        if (uiState.bookmark.articleContent != null) {
-            BookmarkDetailArticle(
+    val scope = rememberCoroutineScope()
+    Box(modifier = modifier.fillMaxSize()) {
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .verticalScroll(scrollState, enabled = !eInkMode),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            BookmarkDetailHeader(
                 modifier = Modifier,
-                uiState = uiState
+                uiState = uiState,
+                onClickOpenUrl = onClickOpenUrl,
+                eInkMode = eInkMode
             )
-        } else {
-            EmptyBookmarkDetailArticle(
-                modifier = Modifier
+            if (uiState.bookmark.articleContent != null) {
+                BookmarkDetailArticle(
+                    modifier = Modifier,
+                    uiState = uiState
+                )
+            } else {
+                EmptyBookmarkDetailArticle(
+                    modifier = Modifier
+                )
+            }
+        }
+        if (eInkMode) {
+            Box(
+                Modifier
+                    .matchParentSize()
+                    .pointerInput(scrollState) {
+                        detectTapGestures { offset ->
+                            val viewport = size.height
+                            val delta = if (offset.y > viewport / 2) viewport else -viewport
+                            val target = (scrollState.value + delta).coerceIn(0, scrollState.maxValue)
+                            scope.launch { scrollState.scrollTo(target) }
+                        }
+                    }
             )
         }
     }
@@ -393,7 +420,8 @@ suspend fun getTemplate(uiState: BookmarkDetailViewModel.UiState.Success, isSyst
 fun BookmarkDetailHeader(
     modifier: Modifier,
     uiState: BookmarkDetailViewModel.UiState.Success,
-    onClickOpenUrl: (String) -> Unit
+    onClickOpenUrl: (String) -> Unit,
+    eInkMode: Boolean = false,
 ) {
     val msg = stringResource(R.string.authors)
     val author = MessageFormat.format(
@@ -409,7 +437,7 @@ fun BookmarkDetailHeader(
         // Header Section Start
         SubcomposeAsyncImage(
             model = ImageRequest.Builder(LocalContext.current).data(uiState.bookmark.imgSrc)
-                .crossfade(true).build(),
+                .crossfade(!eInkMode).build(),
             contentDescription = stringResource(R.string.common_bookmark_image_content_description),
             contentScale = ContentScale.FillWidth,
             error = {
@@ -603,6 +631,7 @@ fun BookmarkDetailScreenPreview() {
         onProgressUpdate = {},
         readProgress = 0,
         scrollToProgressEnabled = true,
+        eInkMode = false,
     )
 }
 
@@ -619,7 +648,8 @@ private fun BookmarkDetailContentPreview() {
                 zoomFactor = 100
             ),
             onClickOpenUrl = {},
-            scrollState = rememberScrollState()
+            scrollState = rememberScrollState(),
+            eInkMode = false,
         )
     }
 }

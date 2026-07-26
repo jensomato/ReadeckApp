@@ -51,27 +51,32 @@ class BookmarkDetailViewModel @Inject constructor(
     val shareIntent: StateFlow<Intent?> = _shareIntent.asStateFlow()
 
     private val bookmarkId: String? = savedStateHandle["bookmarkId"]
-    private val template: Flow<Template?> = settingsDataStore.themeFlow.map {
-        it?.let {
-            Theme.valueOf(it)
-        } ?: Theme.SYSTEM
-    }.map {
-        when (it) {
-            Theme.DARK -> assetLoader.loadAsset(Template.DARK_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
-            Theme.LIGHT -> assetLoader.loadAsset(Template.LIGHT_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
-            Theme.SEPIA -> assetLoader.loadAsset(Template.SEPIA_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
-            Theme.SYSTEM -> {
-                val light = assetLoader.loadAsset(Template.LIGHT_TEMPLATE_FILE)
-                val dark = assetLoader.loadAsset(Template.DARK_TEMPLATE_FILE)
-                if (!light.isNullOrBlank() && !dark.isNullOrBlank()) {
-                    Template.DynamicTemplate(light = light, dark = dark)
-                } else null
+    private val template: Flow<Template?> = combine(
+        settingsDataStore.themeFlow,
+        settingsDataStore.eInkModeFlow
+    ) { themeStr, eInkMode ->
+        if (eInkMode) {
+            assetLoader.loadAsset(Template.EINK_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
+        } else {
+            val theme = themeStr?.let { Theme.valueOf(it) } ?: Theme.SYSTEM
+            when (theme) {
+                Theme.DARK -> assetLoader.loadAsset(Template.DARK_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
+                Theme.LIGHT -> assetLoader.loadAsset(Template.LIGHT_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
+                Theme.SEPIA -> assetLoader.loadAsset(Template.SEPIA_TEMPLATE_FILE)?.let { Template.SimpleTemplate(it) }
+                Theme.SYSTEM -> {
+                    val light = assetLoader.loadAsset(Template.LIGHT_TEMPLATE_FILE)
+                    val dark = assetLoader.loadAsset(Template.DARK_TEMPLATE_FILE)
+                    if (!light.isNullOrBlank() && !dark.isNullOrBlank()) {
+                        Template.DynamicTemplate(light = light, dark = dark)
+                    } else null
+                }
             }
         }
     }
     private val zoomFactor: Flow<Int> = settingsDataStore.zoomFactorFlow
     private var syncReadProgressEnabled: Boolean = true
     private var scrollToProgressEnabled: Boolean = true
+    private var eInkMode: Boolean = false
     private val updateState = MutableStateFlow<UpdateBookmarkState?>(null)
 
     private val _readProgress = MutableStateFlow<Int>(0)
@@ -80,11 +85,16 @@ class BookmarkDetailViewModel @Inject constructor(
     private val _scrollToProgressEnabledFlow = MutableStateFlow(true)
     val scrollToProgressEnabledFlow: StateFlow<Boolean> = _scrollToProgressEnabledFlow.asStateFlow()
 
+    private val _eInkModeFlow = MutableStateFlow(false)
+    val eInkModeFlow: StateFlow<Boolean> = _eInkModeFlow.asStateFlow()
+
     init {
         viewModelScope.launch {
             syncReadProgressEnabled = settingsDataStore.isSyncReadProgressEnabled()
             scrollToProgressEnabled = settingsDataStore.isScrollToProgressEnabled()
             _scrollToProgressEnabledFlow.value = scrollToProgressEnabled
+            eInkMode = settingsDataStore.isEInkModeEnabled()
+            _eInkModeFlow.value = eInkMode
         }
     }
 

@@ -33,6 +33,7 @@ class UiSettingsViewModel @Inject constructor(
     val navigationEvent: StateFlow<NavigationEvent?> = _navigationEvent.asStateFlow()
     private val theme = MutableStateFlow(Theme.SYSTEM)
     private val scrollToProgressEnabled = MutableStateFlow(true)
+    private val eInkMode = MutableStateFlow(false)
     private val showDialog = MutableStateFlow(false)
     private val defaultFilter = MutableStateFlow(DefaultFilter.ALL)
     private val showDefaultFilterDialog = MutableStateFlow(false)
@@ -41,15 +42,23 @@ class UiSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             theme.value = settingsDataStore.getTheme()
             scrollToProgressEnabled.value = settingsDataStore.isScrollToProgressEnabled()
+            eInkMode.value = settingsDataStore.isEInkModeEnabled()
             defaultFilter.value = settingsDataStore.getDefaultFilter()
         }
     }
 
 
-    val uiState = combine(theme, scrollToProgressEnabled, showDialog, defaultFilter, showDefaultFilterDialog) { theme, scrollToProgressEnabled, showDialog, defaultFilter, showDefaultFilterDialog ->
+    val uiState = combine(
+        theme,
+        combine(scrollToProgressEnabled, eInkMode) { scroll, eink -> scroll to eink },
+        showDialog,
+        defaultFilter,
+        showDefaultFilterDialog
+    ) { theme, toggles, showDialog, defaultFilter, showDefaultFilterDialog ->
         UiSettingsUiState(
             theme = theme,
-            scrollToProgressEnabled = scrollToProgressEnabled,
+            scrollToProgressEnabled = toggles.first,
+            eInkMode = toggles.second,
             themeOptions = getThemeOptionList(theme),
             showDialog = showDialog,
             themeLabel = theme.toLabelResource(),
@@ -66,6 +75,7 @@ class UiSettingsViewModel @Inject constructor(
                 UiSettingsUiState(
                     theme = Theme.SYSTEM,
                     scrollToProgressEnabled = true,
+                    eInkMode = false,
                     themeOptions = getThemeOptionList(Theme.SYSTEM),
                     showDialog = false,
                     themeLabel = Theme.SYSTEM.toLabelResource(),
@@ -80,6 +90,13 @@ class UiSettingsViewModel @Inject constructor(
         viewModelScope.launch {
             settingsDataStore.setScrollToProgressEnabled(enabled)
             scrollToProgressEnabled.value = settingsDataStore.isScrollToProgressEnabled()
+        }
+    }
+
+    fun onEInkModeToggle(enabled: Boolean) {
+        viewModelScope.launch {
+            settingsDataStore.setEInkModeEnabled(enabled)
+            eInkMode.value = settingsDataStore.isEInkModeEnabled()
         }
     }
 
@@ -160,6 +177,7 @@ class UiSettingsViewModel @Inject constructor(
 data class UiSettingsUiState(
     val theme: Theme,
     val scrollToProgressEnabled: Boolean,
+    val eInkMode: Boolean,
     val themeOptions: List<SelectableOption<Theme>>,
     val showDialog: Boolean,
     @StringRes
