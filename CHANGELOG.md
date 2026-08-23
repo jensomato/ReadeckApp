@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Fixed an issue with logging in for readeck version 0.23 or later. "readerSettings" property is now optional.
+
 ### Changed
 
 - Changed the way unread bookmarks are determined. The behavior now matches that of the Readeck web app. This means that unread bookmarks are bookmarks that have not been archived. Closes #166 and #169.
