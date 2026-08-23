@@ -96,7 +96,7 @@ class AccountSettingsViewModel @Inject constructor(
                 // Save URL early so it's persisted and the DataStore flows get updated
                 settingsDataStore.saveUrl(url)
 
-                val baseUri = url.removeSuffix("/api")
+                val baseUri = url.trimEnd('/').removeSuffix("/api")
                 val authEndpoint = "$baseUri/authorize".toUri()
                 val tokenEndpoint = "$baseUri/api/oauth/token".toUri()
                 val registrationEndpoint = "$baseUri/api/oauth/client".toUri()
