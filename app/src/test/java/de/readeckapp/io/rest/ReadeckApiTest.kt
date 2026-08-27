@@ -172,6 +172,23 @@ class ReadeckApiTest {
         assertEquals("Unauthorized", statusMessage.message)
     }
 
+    @Test
+    fun testGetBookmarksWithOverflowImageDimensions() = runTest {
+        mockWebServer.enqueue(MockResponse()
+            .setResponseCode(HttpURLConnection.HTTP_OK)
+            .addHeader("Content-Type", "application/json")
+            .setBody(loadJsonFromClasspath("api/bookmarks-overflow-image.json"))
+        )
+
+        val response = readeckApi.getBookmarks(10, 0, null, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
+
+        assertTrue(response.isSuccessful)
+        assertEquals(1, response.body()?.size)
+        val bookmark = response.body()!![0]
+        assertEquals(Long.MIN_VALUE, bookmark.resources.image?.width)
+        assertEquals(Long.MIN_VALUE, bookmark.resources.image?.height)
+    }
+
     private fun loadJsonFromClasspath(resourcePath: String): String {
         val inputStream = this.javaClass.classLoader?.getResourceAsStream(resourcePath)
             ?: throw IllegalArgumentException("Resource not found: $resourcePath")

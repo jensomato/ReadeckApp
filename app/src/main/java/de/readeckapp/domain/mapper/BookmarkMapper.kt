@@ -169,6 +169,6 @@ fun ResourceDto?.toDomain(): Bookmark.Resource = Bookmark.Resource(
 
 fun ImageResourceDto?.toDomain(): Bookmark.ImageResource = Bookmark.ImageResource(
     src = this?.src ?: "",
-    width = this?.width ?: 0,
-    height = this?.height ?: 0
+    width = this?.width?.coerceIn(0, Int.MAX_VALUE.toLong())?.toInt() ?: 0,
+    height = this?.height?.coerceIn(0, Int.MAX_VALUE.toLong())?.toInt() ?: 0
 )
