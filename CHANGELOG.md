@@ -9,6 +9,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Fixed
 
+- Fixed an issue with snapshot builds not able to login because of wrong appRedirectScheme for OAuth authorization.
 - Fixed an issue with logging in for readeck version 0.23 or later. "readerSettings" property is now optional.
 
 ### Changed
