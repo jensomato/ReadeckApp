@@ -26,8 +26,8 @@ android {
         applicationId = "de.readeckapp"
         minSdk = 24
         targetSdk = 35
-        versionCode = 1100
-        versionName = "0.11.0"
+        versionCode = 1200
+        versionName = "0.12.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
         buildConfigField("String", "APP_URL", "\"https://github.com/jensomato/ReadeckApp\"")
