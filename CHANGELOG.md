@@ -7,6 +7,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [0.12.0] - 2026-09-02
+
+### Fixed
+
+- Fixed an issue with snapshot builds not able to login because of wrong appRedirectScheme for OAuth authorization.
+- Fixed an issue with logging in for readeck version 0.23 or later. "readerSettings" property is now optional.
+
+### Changed
+
+- Changed the way unread bookmarks are determined. The behavior now matches that of the Readeck web app. This means that unread bookmarks are bookmarks that have not been archived. Closes #166 and #169.
+
+### Removed
+
+- Removed the menu options for marking bookmarks as read. Now, all not archived bookmarks are displayed as unread.
+
 ## [0.11.0] - 2026-05-03
 
 ### Added

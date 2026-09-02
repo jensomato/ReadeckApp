@@ -54,7 +54,6 @@ other{}
     <!-- Bookmark Card Actions -->
     <string name="action_favorite">Favorecer</string>
     <string name="action_archive">Arquivar</string>
-    <string name="action_mark_read">Lido</string>
     <string name="action_delete">Eliminar</string>
     <string name="error_no_article_content">Erro, o contido do artigo non está dispoñible</string>
     <string name="update_successful">Actualización correcta</string>

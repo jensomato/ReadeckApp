@@ -22,14 +22,12 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.automirrored.filled.OpenInNew
-import androidx.compose.material.icons.filled.CheckBox
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Grade
 import androidx.compose.material.icons.filled.Inventory2
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.TextDecrease
 import androidx.compose.material.icons.filled.TextIncrease
-import androidx.compose.material.icons.outlined.CheckBoxOutlineBlank
 import androidx.compose.material.icons.outlined.Grade
 import androidx.compose.material.icons.outlined.Inventory2
 import androidx.compose.material.icons.outlined.Share
@@ -96,8 +94,6 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
         { id, isFavorite -> viewModel.onToggleFavorite(id, isFavorite) }
     val onClickToggleArchive: (String, Boolean) -> Unit =
         { id, isArchived -> viewModel.onToggleArchive(id, isArchived) }
-    val onMarkRead: (String, Boolean) -> Unit =
-        { id, isRead -> viewModel.onToggleMarkRead(id, isRead) }
     val onClickIncreaseZoomFactor: () -> Unit =
         { viewModel.onClickChangeZoomFactor(25) }
     val onClickDecreaseZoomFactor: () -> Unit =
@@ -160,7 +156,6 @@ fun BookmarkDetailScreen(navHostController: NavController, bookmarkId: String?) 
                 onClickBack = onClickBack,
                 onClickToggleFavorite = onClickToggleFavorite,
                 onClickToggleArchive = onClickToggleArchive,
-                onMarkRead = onMarkRead,
                 onClickShareBookmark = onClickShareBookmark,
                 onClickDeleteBookmark = onClickDeleteBookmark,
                 uiState = uiState,
@@ -204,7 +199,6 @@ fun BookmarkDetailScreen(
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
-    onMarkRead: (String, Boolean) -> Unit,
     onClickDeleteBookmark: (String) -> Unit,
     onClickOpenUrl: (String) -> Unit,
     onClickShareBookmark: (String) -> Unit,
@@ -248,7 +242,6 @@ fun BookmarkDetailScreen(
                 uiState = uiState,
                 onClickToggleFavorite = onClickToggleFavorite,
                 onClickToggleArchive = onClickToggleArchive,
-                onMarkRead = onMarkRead,
                 onClickShareBookmark = onClickShareBookmark,
                 onClickDeleteBookmark = onClickDeleteBookmark,
                 onClickIncreaseZoomFactor = onClickIncreaseZoomFactor,
@@ -479,7 +472,6 @@ fun BookmarkDetailMenu(
     uiState: BookmarkDetailViewModel.UiState.Success,
     onClickToggleFavorite: (String, Boolean) -> Unit,
     onClickToggleArchive: (String, Boolean) -> Unit,
-    onMarkRead: (String, Boolean) -> Unit,
     onClickShareBookmark: (String) -> Unit,
     onClickDeleteBookmark: (String) -> Unit,
     onClickIncreaseZoomFactor: () -> Unit,
@@ -548,19 +540,6 @@ fun BookmarkDetailMenu(
                 }
             )
             DropdownMenuItem(
-                text = { Text(stringResource(R.string.action_mark_read)) },
-                onClick = {
-                    onMarkRead(uiState.bookmark.bookmarkId, !uiState.bookmark.isRead)
-                    expanded = false
-                },
-                leadingIcon = {
-                    Icon(
-                        imageVector = if (uiState.bookmark.isRead) Icons.Filled.CheckBox else Icons.Outlined.CheckBoxOutlineBlank,
-                        contentDescription = stringResource(R.string.action_mark_read)
-                    )
-                }
-            )
-            DropdownMenuItem(
                 text = { Text(stringResource(R.string.action_share)) },
                 onClick = {
                     onClickShareBookmark(uiState.bookmark.url)
@@ -610,7 +589,6 @@ fun BookmarkDetailScreenPreview() {
         onClickBack = {},
         onClickDeleteBookmark = {},
         onClickToggleFavorite = { _, _ -> },
-        onMarkRead = { _, _ -> },
         onClickShareBookmark = {_ -> },
         onClickIncreaseZoomFactor = { },
         onClickDecreaseZoomFactor = { },

@@ -118,6 +118,27 @@ class UserRepositoryImplTest {
     }
 
     @Test
+    fun `login with token returns Success on successful response for readeck version greater 0 dot 23`() = runTest {
+        val url = "https://example.com"
+        val token = "testtoken"
+        val authState = "{}"
+        val username = "testuser"
+
+        val userProfileDto = UserProfileDto(
+            provider = ProviderDto("test", "test", "test", emptyList(), emptyList()),
+            user = UserDto(username, "test@test.com", Clock.System.now(), Clock.System.now(),
+                SettingsDto(false, "en"))
+        )
+
+        coEvery { readeckApi.userprofile() } returns Response.success(userProfileDto)
+
+        val result = userRepository.login(url, token, authState)
+
+        assertEquals(UserRepository.LoginResult.Success, result)
+        coVerify { settingsDataStore.saveCredentials(url, username, token, authState) }
+    }
+
+    @Test
     fun `login returns Error on unsuccessful response with error body`() = runTest {
         val url = "https://example.com"
         val token = "testtoken"

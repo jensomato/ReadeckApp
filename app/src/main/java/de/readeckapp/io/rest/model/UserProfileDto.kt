@@ -34,7 +34,8 @@ data class SettingsDto(
     val debugInfo: Boolean,
     val lang: String,
     @SerialName("reader_settings")
-    val readerSettings: ReaderSettingsDto
+    @Deprecated("removed in readeck v23.0")
+    val readerSettings: ReaderSettingsDto? = null
 )
 
 @Serializable

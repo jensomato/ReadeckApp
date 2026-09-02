@@ -66,7 +66,7 @@ class BookmarkListViewModelTest {
         // Default Mocking Behavior
         coEvery { settingsDataStore.isInitialSyncPerformed() } returns true // Assume sync is done
         coEvery { settingsDataStore.getDefaultFilter() } returns DefaultFilter.ALL
-        every { bookmarkRepository.observeBookmarkListItems(any(), any(), any(), any(), any()) } returns flowOf(
+        every { bookmarkRepository.observeBookmarkListItems(any(), any(), any(), any()) } returns flowOf(
             emptyList()
         ) // No bookmarks initially
         every { savedStateHandle.get<String>(any()) } returns null // no sharedUrl initially
@@ -123,24 +123,6 @@ class BookmarkListViewModelTest {
         )
         viewModel.onClickAll()
         assertEquals(BookmarkListViewModel.FilterState(), viewModel.filterState.first())
-    }
-
-    @Test
-    fun `onClickUnread sets unread filter`() = runTest {
-        coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-        viewModel = BookmarkListViewModel(
-            updateBookmarkUseCase,
-            workManager,
-            bookmarkRepository,
-            context,
-            settingsDataStore,
-            savedStateHandle
-        )
-        viewModel.onClickUnread()
-        assertEquals(
-            BookmarkListViewModel.FilterState(unread = true),
-            viewModel.filterState.first()
-        )
     }
 
     @Test
@@ -299,7 +281,6 @@ class BookmarkListViewModelTest {
                 isMarked = false,
                 isArchived = false,
                 labels = emptyList(),
-                isRead = false,
                 thumbnailSrc = "",
                 iconSrc = "",
                 imageSrc = ""
@@ -309,8 +290,7 @@ class BookmarkListViewModelTest {
         coEvery {
             bookmarkRepository.observeBookmarkListItems(
                 type = Bookmark.Type.Article,
-                unread = true,
-                archived = null,
+                archived = false,
                 favorite = null,
                 state = Bookmark.State.LOADED
             )
@@ -553,7 +533,6 @@ class BookmarkListViewModelTest {
             coEvery {
                 bookmarkRepository.observeBookmarkListItems(
                     type = null,
-                    unread = null,
                     archived = null,
                     favorite = null,
                     state = Bookmark.State.LOADED
@@ -620,7 +599,6 @@ class BookmarkListViewModelTest {
             coEvery {
             bookmarkRepository.observeBookmarkListItems(
                     type = null,
-                    unread = null,
                     archived = null,
                     favorite = null,
                     state = Bookmark.State.LOADED
@@ -673,7 +651,6 @@ class BookmarkListViewModelTest {
             coEvery {
                 bookmarkRepository.observeBookmarkListItems(
                     type = null,
-                    unread = null,
                     archived = null,
                     favorite = null,
                     state = Bookmark.State.LOADED
@@ -732,7 +709,6 @@ class BookmarkListViewModelTest {
             coEvery {
                 bookmarkRepository.observeBookmarkListItems(
                     type = null,
-                    unread = null,
                     archived = null,
                     favorite = null,
                     state = Bookmark.State.LOADED
@@ -799,7 +775,6 @@ class BookmarkListViewModelTest {
             coEvery {
                 bookmarkRepository.observeBookmarkListItems(
                     type = null,
-                    unread = null,
                     archived = null,
                     favorite = null,
                     state = Bookmark.State.LOADED
@@ -852,7 +827,6 @@ class BookmarkListViewModelTest {
             coEvery {
                 bookmarkRepository.observeBookmarkListItems(
                     type = null,
-                    unread = null,
                     archived = null,
                     favorite = null,
                     state = Bookmark.State.LOADED
@@ -900,185 +874,6 @@ class BookmarkListViewModelTest {
             coVerify { updateBookmarkUseCase.updateIsArchived(bookmarkId, isArchived) }
         }
 
-
-    @Test
-    fun `onToggleMarkReadBookmark updates UiState with UpdateBookmarkState Success`() =
-        runTest {
-            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-            val bookmarkId = "123"
-            val isRead = true
-
-            val bookmarkFlow = MutableStateFlow(bookmarks)
-            coEvery {
-                bookmarkRepository.observeBookmarkListItems(
-                    type = null,
-                    unread = null,
-                    archived = null,
-                    favorite = null,
-                    state = Bookmark.State.LOADED
-                )
-            } returns bookmarkFlow
-
-            coEvery {
-                updateBookmarkUseCase.updateIsRead(
-                    bookmarkId,
-                    isRead
-                )
-            } returns UpdateBookmarkUseCase.Result.Success
-
-            viewModel = BookmarkListViewModel(
-                updateBookmarkUseCase,
-                workManager,
-                bookmarkRepository,
-                context,
-                settingsDataStore,
-                savedStateHandle
-            )
-
-            advanceUntilIdle()
-            assertEquals(
-                BookmarkListViewModel.UiState.Success(
-                    bookmarks,
-                    null
-                ),
-                viewModel.uiState.value
-            )
-
-            viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
-            advanceUntilIdle()
-
-            val updateState = viewModel.uiState.value
-
-            assertEquals(
-                BookmarkListViewModel.UiState.Success(
-                    bookmarks,
-                    BookmarkListViewModel.UpdateBookmarkState.Success
-                ),
-                updateState
-            )
-
-            coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
-        }
-
-    @Test
-    fun `onToggleMarkReadBookmark updates UiState with UpdateBookmarkState Error on GenericError`() =
-        runTest {
-            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-            val bookmarkId = "123"
-            val isRead = true
-            val errorMessage = "Generic Error"
-
-            coEvery {
-                updateBookmarkUseCase.updateIsRead(
-                    bookmarkId,
-                    isRead
-                )
-            } returns UpdateBookmarkUseCase.Result.GenericError(errorMessage)
-
-            val bookmarkFlow = MutableStateFlow(bookmarks)
-            coEvery {
-                bookmarkRepository.observeBookmarkListItems(
-                    type = null,
-                    unread = null,
-                    archived = null,
-                    favorite = null,
-                    state = Bookmark.State.LOADED
-                )
-            } returns bookmarkFlow
-
-            viewModel = BookmarkListViewModel(
-                updateBookmarkUseCase,
-                workManager,
-                bookmarkRepository,
-                context,
-                settingsDataStore,
-                savedStateHandle
-            )
-
-            advanceUntilIdle()
-            assertEquals(
-                BookmarkListViewModel.UiState.Success(
-                    bookmarks,
-                    null
-                ),
-                viewModel.uiState.value
-            )
-
-            viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
-            advanceUntilIdle()
-
-            val errorState = viewModel.uiState.value
-
-            assertEquals(
-                BookmarkListViewModel.UiState.Success(
-                    bookmarks,
-                    BookmarkListViewModel.UpdateBookmarkState.Error(errorMessage)
-                ),
-                errorState
-            )
-
-            coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
-        }
-
-    @Test
-    fun `onToggleMarkReadBookmark updates UiState with UpdateBookmarkState Error on NetworkError`() =
-        runTest {
-            coEvery { settingsDataStore.isInitialSyncPerformed() } returns false
-            val bookmarkId = "123"
-            val isRead = true
-            val errorMessage = "Network Error"
-
-            val bookmarkFlow = MutableStateFlow(bookmarks)
-            coEvery {
-                bookmarkRepository.observeBookmarkListItems(
-                    type = null,
-                    unread = null,
-                    archived = null,
-                    favorite = null,
-                    state = Bookmark.State.LOADED
-                )
-            } returns bookmarkFlow
-
-            coEvery {
-                updateBookmarkUseCase.updateIsRead(
-                    bookmarkId,
-                    isRead
-                )
-            } returns UpdateBookmarkUseCase.Result.NetworkError(errorMessage)
-
-            viewModel = BookmarkListViewModel(
-                updateBookmarkUseCase,
-                workManager,
-                bookmarkRepository,
-                context,
-                settingsDataStore,
-                savedStateHandle
-            )
-
-            advanceUntilIdle()
-            assertEquals(
-                BookmarkListViewModel.UiState.Success(
-                    bookmarks,
-                    null
-                ),
-                viewModel.uiState.value
-            )
-
-            viewModel.onToggleMarkReadBookmark(bookmarkId, isRead)
-            advanceUntilIdle()
-
-            val errorState = viewModel.uiState.value
-
-            assertEquals(
-                BookmarkListViewModel.UiState.Success(
-                    bookmarks,
-                    BookmarkListViewModel.UpdateBookmarkState.Error(errorMessage)
-                ),
-                errorState
-            )
-
-            coVerify { updateBookmarkUseCase.updateIsRead(bookmarkId, isRead) }
-        }
     private val bookmarks = listOf(
         BookmarkListItem(
             id = "1",
@@ -1089,7 +884,6 @@ class BookmarkListViewModelTest {
             isMarked = false,
             isArchived = false,
             labels = emptyList(),
-            isRead = false,
             thumbnailSrc = "",
             iconSrc = "",
             imageSrc = ""

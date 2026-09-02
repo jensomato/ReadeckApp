@@ -7,7 +7,6 @@ data class BookmarkListItem(
     val siteName: String,
     val isMarked: Boolean,
     val isArchived: Boolean,
-    val isRead: Boolean,
     val thumbnailSrc: String,
     val iconSrc: String,
     val imageSrc: String,

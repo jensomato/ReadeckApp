@@ -64,7 +64,6 @@
     <string name="ui_settings_theme_dialog_support_text">使用哪种主题？</string>
     <string name="action_favorite">收藏</string>
     <string name="action_archive">存档</string>
-    <string name="action_mark_read">已读</string>
     <string name="action_share">分享链接</string>
     <string name="action_delete">删除</string>
     <string name="action_open_in_browser">在浏览器中打开</string>
