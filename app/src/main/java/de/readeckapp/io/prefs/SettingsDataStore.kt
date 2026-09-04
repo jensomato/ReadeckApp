@@ -3,6 +3,7 @@ package de.readeckapp.io.prefs
 import de.readeckapp.domain.model.AutoSyncTimeframe
 import de.readeckapp.domain.model.DefaultFilter
 import de.readeckapp.domain.model.Theme
+import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.datetime.Instant
 
@@ -40,4 +41,6 @@ interface SettingsDataStore {
     suspend fun  saveZoomFactor(zoomFactor: Int)
     suspend fun getDefaultFilter(): DefaultFilter
     suspend fun saveDefaultFilter(defaultFilter: DefaultFilter)
+    suspend fun setClientCertificateAlias(alias: String?)
+    fun getClientCertificateAlias(): Flow<String?>
 }

@@ -4,6 +4,8 @@ import android.app.Application
 import de.readeckapp.R
 import de.readeckapp.domain.usecase.AuthenticateUseCase
 import de.readeckapp.io.prefs.SettingsDataStore
+import de.readeckapp.io.rest.ssl.CertificateSelectionHelper
+import de.readeckapp.io.rest.ssl.SSLConfigurationProvider
 import io.mockk.coEvery
 import io.mockk.mockk
 import kotlinx.coroutines.Dispatchers
@@ -33,6 +35,8 @@ class AccountSettingsViewModelTest {
     private lateinit var application: Application
     private lateinit var settingsDataStore: SettingsDataStore
     private lateinit var authenticateUseCase: AuthenticateUseCase
+    private lateinit var certificateSelectionHelper: CertificateSelectionHelper
+    private lateinit var sslConfigurationProvider: SSLConfigurationProvider
     private lateinit var viewModel: AccountSettingsViewModel
 
     @Before
@@ -40,9 +44,11 @@ class AccountSettingsViewModelTest {
         Dispatchers.setMain(testDispatcher)
         settingsDataStore = mockk(relaxed = true)
         authenticateUseCase = mockk(relaxed = true)
+        certificateSelectionHelper = mockk(relaxed = true)
+        sslConfigurationProvider = mockk(relaxed = true)
         application = mockk(relaxed = true)
         coEvery { settingsDataStore.urlFlow } returns MutableStateFlow("")
-        viewModel = AccountSettingsViewModel(application, settingsDataStore, authenticateUseCase)
+        viewModel = AccountSettingsViewModel(application, settingsDataStore, authenticateUseCase, certificateSelectionHelper, sslConfigurationProvider)
     }
 
     @After
@@ -53,7 +59,7 @@ class AccountSettingsViewModelTest {
     @Test
     fun `initial uiState should reflect data store values`() = runTest {
         coEvery { settingsDataStore.urlFlow } returns MutableStateFlow("https://example.com")
-        viewModel = AccountSettingsViewModel(application, settingsDataStore, authenticateUseCase)
+        viewModel = AccountSettingsViewModel(application, settingsDataStore, authenticateUseCase, certificateSelectionHelper, sslConfigurationProvider)
 
         val uiStateList = viewModel.uiState.take(2).toList()
         assertInitialUiState(uiStateList[0])
