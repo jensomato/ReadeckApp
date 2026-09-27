@@ -43,7 +43,7 @@ This project uses the following technologies:
 *   [Jetpack Navigation](https://developer.android.com/jetpack/compose/navigation)
 *   [Timber](https://github.com/JakeWharton/timber)
 *   [Hilt](https://dagger.dev/hilt/) for dependency injection
-*   [Retrofit](https://square.github.com/retrofit/) for network requests
+*   [Retrofit](https://lysine.dev/retrofit/) for network requests
 *   [Room](https://developer.android.com/training/data-storage/room) for local data persistence
 *   ...
 
