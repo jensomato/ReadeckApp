@@ -63,7 +63,9 @@ class SyncBookmarksUseCase @Inject constructor(
                         val totalPages = response.headers()[ReadeckApi.Header.TOTAL_PAGES]?.toInt() ?: 1
                         val currentPage = response.headers()[ReadeckApi.Header.CURRENT_PAGE]?.toInt() ?: 1
                         
-                        if (currentPage < totalPages) {
+                        // We asked for exactly `updates.size` bookmarks, so once we have paged past
+                        // that there is nothing more to fetch, whatever the headers say.
+                        if (currentPage < totalPages && bookmarks.isNotEmpty() && offset + pageSize < updates.size) {
                             offset += pageSize
                         } else {
                             hasMore = false

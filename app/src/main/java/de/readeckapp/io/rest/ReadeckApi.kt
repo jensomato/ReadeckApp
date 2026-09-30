@@ -84,4 +84,16 @@ interface ReadeckApi {
             const val BOOKMARK_ID = "bookmark-id"
         }
     }
+
+    interface Pagination {
+        companion object {
+            /**
+             * Safety net for sync loops that page through `/api/bookmarks`. They follow the
+             * pagination headers sent by the server, so a server that keeps claiming there is
+             * another page would keep the app fetching forever. With 50 bookmarks per page
+             * this still covers libraries of 100,000 bookmarks.
+             */
+            const val MAX_PAGES = 2_000
+        }
+    }
 }

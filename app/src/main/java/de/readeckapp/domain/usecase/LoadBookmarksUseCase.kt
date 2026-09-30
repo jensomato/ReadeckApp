@@ -31,6 +31,7 @@ class LoadBookmarksUseCase @Inject constructor(
             val lastLoadedTimestamp = settingsDataStore.getLastBookmarkTimestamp()
             Timber.i("Loaded last bookmark timestamp: [utc=$lastLoadedTimestamp]")
 
+            var pagesFetched = 0
             var hasMorePages = true
             while (hasMorePages) {
                 val response = readeckApi.getBookmarks(pageSize, offset, lastLoadedTimestamp, ReadeckApi.SortOrder(ReadeckApi.Sort.Created))
@@ -70,7 +71,16 @@ class LoadBookmarksUseCase @Inject constructor(
                         Timber.i("Saved last bookmark timestamp: [local=${it.created}, utc=$timestamp]")
                     }
 
-                    if (currentPage < totalPages) {
+                    pagesFetched++
+
+                    // An empty page means there is nothing left, whatever the headers say.
+                    if (currentPage < totalPages && bookmarks.isNotEmpty()) {
+                        if (pagesFetched >= ReadeckApi.Pagination.MAX_PAGES) {
+                            Timber.e("Giving up after $pagesFetched pages, server keeps reporting more")
+                            return UseCaseResult.Error(
+                                Exception("Server reported more than ${ReadeckApi.Pagination.MAX_PAGES} pages")
+                            )
+                        }
                         offset += pageSize
                     } else {
                         hasMorePages = false

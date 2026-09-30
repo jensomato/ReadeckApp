@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+
+- Syncing no longer keeps requesting pages forever when the server keeps reporting more pages than it delivers. Paging now stops at an empty page, and gives up after 2,000 pages (a full sync aborts without deleting any local bookmarks).
+
 ## [0.12.0] - 2026-09-02
 
 ### Fixed

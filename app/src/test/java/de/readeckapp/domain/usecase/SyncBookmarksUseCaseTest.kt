@@ -14,6 +14,7 @@ import io.mockk.coVerify
 import io.mockk.mockk
 import kotlinx.coroutines.runBlocking
 import kotlinx.datetime.Clock
+import okhttp3.Headers
 import org.junit.Assert.assertTrue
 import org.junit.Before
 import org.junit.Test
@@ -57,6 +58,28 @@ class SyncBookmarksUseCaseTest {
         assertTrue(result is UseCaseResult.Success)
         coVerify { bookmarkRepository.deleteBookmarkLocal("2") }
         coVerify { bookmarkRepository.insertBookmarks(match { param -> param[0].id == "1" } ) }
+    }
+
+    @Test
+    fun `execute stops paging once all updated bookmarks were fetched`() = runBlocking {
+        val lastSync = Clock.System.now()
+        coEvery { settingsDataStore.getLastSyncTimestamp() } returns lastSync
+        coEvery { readeckApi.getBookmarkSyncList(lastSync) } returns Response.success(
+            listOf(SyncInfoDto("1", Clock.System.now(), SyncInfoType.update))
+        )
+        // The server keeps claiming there is another page
+        coEvery { readeckApi.getBookmarks(any(), any(), any(), any(), listOf("1")) } returns Response.success(
+            listOf(bookmark1),
+            Headers.headersOf(
+                ReadeckApi.Header.TOTAL_PAGES, "2",
+                ReadeckApi.Header.CURRENT_PAGE, "1"
+            )
+        )
+
+        val result = syncBookmarksUseCase.execute()
+
+        assertTrue(result is UseCaseResult.Success)
+        coVerify(exactly = 1) { readeckApi.getBookmarks(any(), any(), any(), any(), listOf("1")) }
     }
 
     val bookmark1 = BookmarkDto(
