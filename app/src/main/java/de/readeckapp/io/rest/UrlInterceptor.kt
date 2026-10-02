@@ -24,9 +24,11 @@ class UrlInterceptor @Inject constructor(
             throw IOException("baseUrl is not set")
         } else {
             // Modify the request's URL to use the current baseUrl
+            val cleanBaseUrl = baseUrl.trimEnd('/')
+
             val newUrl = originalUrl.replace(
                 "http://readeck.invalid",
-                baseUrl
+                cleanBaseUrl
             )
             val newRequest: Request = request.newBuilder()
                 .url(newUrl)
