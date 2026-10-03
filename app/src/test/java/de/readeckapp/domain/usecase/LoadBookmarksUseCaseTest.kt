@@ -130,6 +130,43 @@ class LoadBookmarksUseCaseTest {
         coVerify { bookmarkRepository.insertBookmarks(sampleBookmarks.map { it.toDomain() }) }
     }
 
+    @Test
+    fun `execute gives up when server never reports the last page`() = runBlocking {
+        // Every page claims there is another one
+        coEvery { readeckApi.getBookmarks(any(), any(), any(), any()) } returns Response.success(
+            sampleBookmarks,
+            Headers.headersOf(
+                ReadeckApi.Header.TOTAL_COUNT, "100",
+                ReadeckApi.Header.TOTAL_PAGES, "2",
+                ReadeckApi.Header.CURRENT_PAGE, "1"
+            )
+        )
+        coEvery { settingsDataStore.getLastBookmarkTimestamp() } returns null
+
+        val result = loadBookmarksUseCase.execute(10, 0)
+
+        assertTrue(result is UseCaseResult.Error)
+        coVerify(exactly = ReadeckApi.Pagination.MAX_PAGES) { readeckApi.getBookmarks(any(), any(), any(), any()) }
+    }
+
+    @Test
+    fun `execute stops at an empty page even if more pages are reported`() = runBlocking {
+        coEvery { readeckApi.getBookmarks(any(), any(), any(), any()) } returns Response.success(
+            emptyList(),
+            Headers.headersOf(
+                ReadeckApi.Header.TOTAL_COUNT, "100",
+                ReadeckApi.Header.TOTAL_PAGES, "2",
+                ReadeckApi.Header.CURRENT_PAGE, "1"
+            )
+        )
+        coEvery { settingsDataStore.getLastBookmarkTimestamp() } returns null
+
+        val result = loadBookmarksUseCase.execute(10, 0)
+
+        assertTrue(result is UseCaseResult.Success<*>)
+        coVerify(exactly = 1) { readeckApi.getBookmarks(any(), any(), any(), any()) }
+    }
+
     val bookmark2 = BookmarkDto(
         id = "2",
         href = "https://example.com",

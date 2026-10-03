@@ -408,6 +408,47 @@ class BookmarkRepositoryImplTest {
         assertTrue((result as BookmarkRepository.SyncResult.NetworkError).ex is IOException)
     }
 
+    @Test
+    fun `performFullSync aborts without deleting anything when server never reports the last page`() = runTest {
+        // Arrange: every page claims there is another one
+        coEvery { readeckApi.getBookmarks(any(), any(), any(), any()) } returns Response.success(
+            listOf(bookmarkDto),
+            Headers.headersOf(
+                ReadeckApi.Header.TOTAL_COUNT, "100",
+                ReadeckApi.Header.TOTAL_PAGES, "2",
+                ReadeckApi.Header.CURRENT_PAGE, "1"
+            )
+        )
+
+        // Act
+        val result = bookmarkRepositoryImpl.performFullSync()
+
+        // Assert
+        assertTrue(result is BookmarkRepository.SyncResult.Error)
+        coVerify(exactly = ReadeckApi.Pagination.MAX_PAGES) { readeckApi.getBookmarks(any(), any(), any(), any()) }
+        coVerify(exactly = 0) { bookmarkDao.removeDeletedBookmars() }
+    }
+
+    @Test
+    fun `performFullSync stops at an empty page even if more pages are reported`() = runTest {
+        // Arrange
+        coEvery { readeckApi.getBookmarks(any(), any(), any(), any()) } returns Response.success(
+            emptyList(),
+            Headers.headersOf(
+                ReadeckApi.Header.TOTAL_COUNT, "100",
+                ReadeckApi.Header.TOTAL_PAGES, "2",
+                ReadeckApi.Header.CURRENT_PAGE, "1"
+            )
+        )
+
+        // Act
+        val result = bookmarkRepositoryImpl.performFullSync()
+
+        // Assert
+        assertTrue(result is BookmarkRepository.SyncResult.Success)
+        coVerify(exactly = 1) { readeckApi.getBookmarks(any(), any(), any(), any()) }
+    }
+
     private val editBookmarkResponseDto = EditBookmarkResponseDto(
         href = "http://example.com",
         id = "123",

@@ -285,6 +285,7 @@ class BookmarkRepositoryImpl @Inject constructor(
 
             val pageSize = 50
             var offset = 0
+            var pagesFetched = 0
             var hasMore = true
 
             while (hasMore) {
@@ -313,8 +314,18 @@ class BookmarkRepositoryImpl @Inject constructor(
                     // Save remote bookmark IDs to the temporary table
                     val remoteBookmarkIdEntities = remoteBookmarks.map { RemoteBookmarkIdEntity(it.id) }
                     bookmarkDao.insertRemoteBookmarkIds(remoteBookmarkIdEntities)
+                    pagesFetched++
 
-                    if (currentPage < totalPages) {
+                    // An empty page means there is nothing left, whatever the headers say.
+                    if (currentPage < totalPages && remoteBookmarks.isNotEmpty()) {
+                        if (pagesFetched >= ReadeckApi.Pagination.MAX_PAGES) {
+                            // Bail out before removeDeletedBookmars(): with an incomplete list of
+                            // remote IDs it would delete bookmarks that still exist on the server.
+                            Timber.e("Full sync aborted after $pagesFetched pages, server keeps reporting more")
+                            return@withContext BookmarkRepository.SyncResult.Error(
+                                "Full sync aborted: server reported more than ${ReadeckApi.Pagination.MAX_PAGES} pages"
+                            )
+                        }
                         offset += pageSize
                     } else {
                         hasMore = false
